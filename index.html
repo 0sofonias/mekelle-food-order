@@ -213,80 +213,114 @@ footer {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://vkrnonhmyeblmpkgkllo.supabase.co";
-const SUPABASE_KEY = "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
+const SUPABASE_KEY = "sb_publishable_KaJTzLho3184lRCIPDQc8A_JcCZ3JBb";
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
 
-const restaurants = [
-  
-  {
-    name: "Traditional Food",
-    category: "Traditional",
-    description: "Traditional Ethiopian and Tigrayan meals",
-    icon: "🥘"
-  },
-  {
-    name: "Burger & Fast Food",
-    category: "Fast Food",
-    description: "Burgers, sandwiches and quick meals",
-    icon: "🍔"
-  },
-  {
-    name: "Juice & Drinks",
-    category: "Drinks",
-    description: "Fresh juice and refreshing drinks",
-    icon: "🥤"
-  },
-  {
-    name: "Grocery Delivery",
-    category: "Groceries",
-    description: "Everyday groceries and household essentials",
-    icon: "🛒"
-  }
-];
-
+let restaurants = [];
 let selectedCategory = "All";
 let cart = [];
+
+async function loadRestaurants() {
+  const container = document.getElementById("restaurants");
+  container.textContent = "Loading restaurants...";
+
+  const { data, error } = await supabaseClient
+    .from("restaurants")
+    .select("id, name, description, address, image_url, is_open")
+    .eq("is_approved", true)
+    .order("name");
+
+  if (error) {
+    container.textContent =
+      "Could not load restaurants. Please try again later.";
+    console.error("Restaurant loading error:", error.message);
+    return;
+  }
+
+  restaurants = data || [];
+  renderRestaurants();
+}
 
 function renderRestaurants() {
   const search = document
     .getElementById("search")
     .value.trim().toLowerCase();
 
-  const list = restaurants.filter(r => {
-    const matchesCategory =
-      selectedCategory === "All" ||
-      r.category === selectedCategory;
-
-    const matchesSearch =
-      r.name.toLowerCase().includes(search) ||
-      r.description.toLowerCase().includes(search) ||
-      r.category.toLowerCase().includes(search);
-
-    return matchesCategory && matchesSearch;
-  });
-
   const container = document.getElementById("restaurants");
+  container.replaceChildren();
 
-  if (list.length === 0) {
-    container.innerHTML =
-      '<div class="empty">No matching results found.</div>';
+  const list = restaurants.filter(r =>
+    [r.name, r.description, r.address]
+      .some(value => (value || "").toLowerCase().includes(search))
+  );
+
+  if (selectedCategory !== "All") {
+    const message = document.createElement("div");
+    message.className = "empty";
+    message.textContent =
+      "Cuisine filters will be available after restaurant categories are added.";
+    container.appendChild(message);
     return;
   }
 
-  container.innerHTML = list.map(r => `
-    <article class="restaurant">
-      <div class="restaurant-image">${r.icon}</div>
-      <div class="restaurant-info">
-        <h3>${r.name}</h3>
-        <p>${r.description}</p>
-        <span class="badge">Demo category</span>
-      </div>
-    </article>
-  `).join("");
+  if (list.length === 0) {
+    const message = document.createElement("div");
+    message.className = "empty";
+    message.textContent =
+      "No approved restaurants yet. Check back soon!";
+    container.appendChild(message);
+    return;
+  }
+
+  list.forEach(r => {
+    const card = document.createElement("article");
+    card.className = "restaurant";
+
+    const picture = document.createElement("div");
+    picture.className = "restaurant-image";
+
+    if (r.image_url) {
+      const img = document.createElement("img");
+      img.src = r.image_url;
+      img.alt = r.name;
+      img.style.width = "100%";
+      img.style.height = "100%";
+      img.style.objectFit = "cover";
+
+      img.onerror = () => {
+        img.remove();
+        picture.textContent = "🍽️";
+      };
+
+      picture.appendChild(img);
+    } else {
+      picture.textContent = "🍽️";
+    }
+
+    const info = document.createElement("div");
+    info.className = "restaurant-info";
+
+    const name = document.createElement("h3");
+    name.textContent = r.name;
+
+    const description = document.createElement("p");
+    description.textContent = r.description || "Restaurant in Mekelle";
+
+    const address = document.createElement("p");
+    address.textContent = r.address || "Location to be confirmed";
+
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = r.is_open ? "Open" : "Currently closed";
+
+    info.append(name, description, address, badge);
+    card.append(picture, info);
+    container.appendChild(card);
+  });
 }
 
 document.querySelectorAll(".category").forEach(button => {
@@ -308,14 +342,12 @@ document.getElementById("search").addEventListener(
 
 function showCart() {
   alert(
-    "Your cart contains " + cart.length +
-    " item(s).\n\nReal ordering and digital payments " +
-    "will be connected in a later development step."
+    "Online ordering and payment are still being developed."
   );
 }
 
-renderRestaurants();
+loadRestaurants();
 </script>
-
+  
 </body>
 </html>
