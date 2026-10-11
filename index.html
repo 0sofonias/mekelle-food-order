@@ -769,17 +769,164 @@ quantity.style.fontWeight = "bold";
   checkoutButton.textContent = "Continue to Checkout";
 
   checkoutButton.addEventListener("click", () => {
-    alert(
-      "Your food total is " + total.toLocaleString() + " ETB.\n\n" +
-      "Customer addresses, order creation, and payment " +
-      "will be added in the next development step."
-    );
+  showDeliveryForm();
   });
-
+  
   summaryContainer.className = "cart-total";
   summaryContainer.append(restaurant, totalHeading, checkoutButton);
 }
 
+// SHOW DELIVERY ADDRESS FORM
+function showDeliveryForm() {
+  const summary = document.getElementById("cart-summary");
+
+  if (!cart.length) {
+    alert("Your cart is empty.");
+    return;
+  }
+
+  summary.replaceChildren();
+
+  const heading = document.createElement("h3");
+  heading.textContent = "Delivery Details";
+
+  const form = document.createElement("form");
+
+  const label = document.createElement("label");
+  label.textContent = "Delivery address in Mekelle";
+
+  const address = document.createElement("textarea");
+  address.required = true;
+  address.rows = 3;
+  address.maxLength = 500;
+  address.placeholder =
+    "Enter your area, neighborhood, and detailed location";
+
+  address.style.display = "block";
+  address.style.width = "100%";
+  address.style.boxSizing = "border-box";
+  address.style.padding = "12px";
+  address.style.marginTop = "8px";
+  address.style.marginBottom = "16px";
+  address.style.borderRadius = "8px";
+  address.style.border = "1px solid #ccc";
+  address.style.fontSize = "16px";
+
+  label.appendChild(address);
+
+  const submit = document.createElement("button");
+  submit.type = "submit";
+  submit.className = "cart-checkout";
+  submit.textContent = "Place Order";
+
+  const back = document.createElement("button");
+  back.type = "button";
+  back.className = "cart-checkout";
+  back.style.background = "#555";
+  back.textContent = "Back to Cart";
+
+  back.addEventListener("click", () => {
+    renderCart();
+  });
+
+  form.append(label, submit, back);
+  summary.append(heading, form);
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const deliveryAddress = address.value.trim();
+
+    if (!deliveryAddress) {
+      alert("Please enter your delivery address.");
+      return;
+    }
+
+    if (!cart.length) {
+      alert("Your cart is empty.");
+      return;
+    }
+
+    const restaurantId = cart[0].restaurantId;
+
+    const multipleRestaurants = cart.some(
+      item => item.restaurantId !== restaurantId
+    );
+
+    if (multipleRestaurants) {
+      alert("Please order from one restaurant at a time.");
+      return;
+    }
+
+    submit.disabled = true;
+    submit.textContent = "Placing Order...";
+
+    try {
+      const orderItems = cart.map(item => ({
+        menu_item_id: item.id,
+        quantity: item.quantity
+      }));
+
+      const { data, error } = await supabaseClient.rpc(
+        "create_food_order",
+        {
+          p_restaurant_id: restaurantId,
+          p_delivery_address: deliveryAddress,
+          p_items: orderItems
+        }
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const orderId = Array.isArray(data) ? data[0] : data;
+
+      cart = [];
+      updateCartDisplay();
+
+      const summary = document.getElementById("cart-summary");
+      const itemsContainer = document.getElementById("cart-items");
+
+      itemsContainer.replaceChildren();
+      summary.replaceChildren();
+
+      const success = document.createElement("h3");
+      success.textContent = "Order Placed Successfully!";
+
+      const message = document.createElement("p");
+      message.textContent =
+        "Your order has been saved. Payment is still pending.";
+
+      const reference = document.createElement("p");
+      reference.textContent = "Order reference: " + orderId;
+
+      const closeButton = document.createElement("button");
+      closeButton.className = "cart-checkout";
+      closeButton.textContent = "Continue Browsing";
+      closeButton.addEventListener("click", closeCart);
+
+      summary.append(
+        success,
+        message,
+        reference,
+        closeButton
+      );
+
+    } catch (error) {
+      console.error("Order creation failed:", error);
+
+      alert(
+        "We could not place your order.\n\n" +
+        (error.message || "Please try again.")
+      );
+
+      submit.disabled = false;
+      submit.textContent = "Place Order";
+    }
+  });
+}
+  
 // INCREASE OR DECREASE QUANTITY
 function changeCartQuantity(index, amount) {
   if (!cart[index]) return;
