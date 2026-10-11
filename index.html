@@ -562,18 +562,18 @@ function renderMenu() {
     addButton.textContent = "Add to Cart";
 
     addButton.addEventListener("click", () => {
-      addToCart(item);
+    addToCart(item, addButton);
     });
 
     info.append(name, description, price, addButton);
     card.appendChild(info);
     container.appendChild(card);
-  });
-}
+    });
+    }
 
 
-// ADD FOOD TO CART
-function addToCart(item) {
+// ADD FOOD TO CART WITH ANIMATION
+function addToCart(item, sourceButton) {
   if (!selectedRestaurant) {
     alert("Please open a restaurant first.");
     return;
@@ -596,6 +596,9 @@ function addToCart(item) {
     cart = [];
   }
 
+  // Animate the food toward the cart.
+  animateFoodToCart(sourceButton);
+
   const existing = cart.find(
     entry =>
       entry.id === item.id &&
@@ -616,10 +619,70 @@ function addToCart(item) {
   }
 
   updateCartDisplay();
-
-  alert(item.name + " added to your cart!");
 }
 
+// FOOD FLYING ANIMATION
+function animateFoodToCart(sourceButton) {
+  if (!sourceButton) return;
+
+  const cartButton = document.getElementById("view-cart");
+
+  if (!cartButton) return;
+
+  const start = sourceButton.getBoundingClientRect();
+  const end = cartButton.getBoundingClientRect();
+
+  const flyer = document.createElement("div");
+
+  flyer.textContent = "🍔";
+  flyer.setAttribute("aria-hidden", "true");
+
+  Object.assign(flyer.style, {
+    position: "fixed",
+    left: (start.left + start.width / 2 - 15) + "px",
+    top: (start.top + start.height / 2 - 15) + "px",
+    width: "30px",
+    height: "30px",
+    fontSize: "26px",
+    lineHeight: "30px",
+    textAlign: "center",
+    pointerEvents: "none",
+    zIndex: "99999",
+    transition: "transform 650ms cubic-bezier(.2,.8,.3,1), opacity 650ms ease"
+  });
+
+  document.body.appendChild(flyer);
+
+  // Allow the browser to display the starting position.
+  flyer.getBoundingClientRect();
+
+  const moveX =
+    end.left + end.width / 2 - (start.left + start.width / 2);
+
+  const moveY =
+    end.top + end.height / 2 - (start.top + start.height / 2);
+
+  flyer.style.transform =
+    `translate(${moveX}px, ${moveY}px) scale(0.25)`;
+
+  flyer.style.opacity = "0";
+
+  cartButton.animate(
+    [
+      { transform: "scale(1)" },
+      { transform: "scale(1.18)" },
+      { transform: "scale(1)" }
+    ],
+    {
+      duration: 350,
+      easing: "ease-out"
+    }
+  );
+
+  setTimeout(() => {
+    flyer.remove();
+  }, 700);
+}
 
 // CART DISPLAY FIX
 function updateCartDisplay() {
