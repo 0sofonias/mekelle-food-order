@@ -930,14 +930,27 @@ function showDeliveryForm() {
         quantity: item.quantity
       }));
 
-      const { data, error } = await supabaseClient.rpc(
-        "create_food_order",
-        {
-          p_restaurant_id: restaurantId,
-          p_delivery_address: deliveryAddress,
-          p_items: orderItems
-        }
-      );
+      const { data: sessionCheck, error: sessionError } =
+  await supabaseClient.auth.getSession();
+
+if (sessionError) {
+  throw sessionError;
+}
+
+if (!sessionCheck.session) {
+  throw new Error(
+    "Your login session has expired. Please sign in again before placing your order."
+  );
+}
+
+const { data, error } = await supabaseClient.rpc(
+  "create_food_order",
+  {
+    p_restaurant_id: restaurantId,
+    p_delivery_address: deliveryAddress,
+    p_items: orderItems
+  }
+);
 
       if (error) {
         throw error;
