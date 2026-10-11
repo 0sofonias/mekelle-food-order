@@ -210,8 +210,18 @@ footer {
   Built for Mekelle, Ethiopia 🇪🇹
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = "https://vkrnonhmyeblmpkgkllo.supabase.co";
+const SUPABASE_KEY = "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
 const restaurants = [
+  
   {
     name: "Traditional Food",
     category: "Traditional",
