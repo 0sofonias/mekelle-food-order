@@ -223,6 +223,322 @@ const supabaseClient = window.supabase.createClient(
 let restaurants = [];
 let selectedCategory = "All";
 let cart = [];
+let selectedRestaurant = null;
+let menuItems = [];
+let menuCategories = [];
+
+async function loadRestaurants() {
+  const container = document.getElementById("restaurants");
+  container.textContent = "Loading restaurants...";
+
+  const { data, error } = await supabaseClient
+    .from("restaurants")
+    .select("id, name, description, address, image_url, is_open")
+    .eq("is_approved", true)
+    .order("name");
+
+  if (error) {
+    console.error(error);
+    container.textContent = "Could not load restaurants.";
+    return;
+  }
+
+  restaurants = data || [];
+  renderRestaurants();
+}
+
+function renderRestaurants() {
+  const container = document.getElementById("restaurants");
+  container.replaceChildren();
+
+  if (selectedRestaurant) {
+    renderMenu();
+    return;
+  }
+
+  const search = document
+    .getElementById("search")
+    .value.trim().toLowerCase();
+
+  const list = restaurants.filter(r =>
+    [r.name, r.description, r.address]
+      .some(value =>
+        (value || "").toLowerCase().includes(search)
+      )
+  );
+
+  if (list.length === 0) {
+    container.textContent = "No approved restaurants found.";
+    return;
+  }
+
+  list.forEach(r => {
+    const card = document.createElement("article");
+    card.className = "restaurant";
+
+    const info = document.createElement("div");
+    info.className = "restaurant-info";
+
+    const name = document.createElement("h3");
+    name.textContent = r.name;
+
+    const description = document.createElement("p");
+    description.textContent =
+      r.description || "Restaurant in Mekelle";
+
+    const address = document.createElement("p");
+    address.textContent =
+      r.address || "Location to be confirmed";
+
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = r.is_open ? "Open" : "Currently closed";
+
+    const button = document.createElement("button");
+    button.textContent = "View Menu";
+    button.disabled = !r.is_open;
+    button.addEventListener("click", () => openMenu(r));
+
+    info.append(name, description, address, badge, button);
+    card.appendChild(info);
+    container.appendChild(card);
+  });
+}
+
+async function openMenu(restaurant) {
+  selectedRestaurant = restaurant;
+  selectedCategory = "All";
+
+  const container = document.getElementById("restaurants");
+  container.textContent = "Loading menu...";
+
+  const [categoriesResult, itemsResult] = await Promise.all([
+    supabaseClient
+      .from("menu_categories")
+      .select("id, name")
+      .eq("restaurant_id", restaurant.id)
+      .order("name"),
+
+    supabaseClient
+      .from("menu_items")
+      .select("id, category_id, name, description, price, image_url")
+      .eq("restaurant_id", restaurant.id)
+      .eq("is_available", true)
+      .order("name")
+  ]);
+
+  if (categoriesResult.error || itemsResult.error) {
+    console.error(
+      categoriesResult.error || itemsResult.error
+    );
+
+    container.textContent =
+      "Could not load the menu. Please try again.";
+
+    return;
+  }
+
+  menuCategories = categoriesResult.data || [];
+  menuItems = itemsResult.data || [];
+
+  renderMenu();
+}
+
+function renderMenu() {
+  const container = document.getElementById("restaurants");
+  container.replaceChildren();
+
+  const heading = document.createElement("h2");
+  heading.textContent = selectedRestaurant.name + " — Menu";
+  container.appendChild(heading);
+
+  const backButton = document.createElement("button");
+  backButton.textContent = "← Back to Restaurants";
+  backButton.addEventListener("click", () => {
+    selectedRestaurant = null;
+    selectedCategory = "All";
+    renderRestaurants();
+  });
+
+  container.appendChild(backButton);
+
+  const categories = document.createElement("div");
+  categories.className = "categories";
+
+  ["All", ...menuCategories.map(c => c.name)].forEach(name => {
+    const button = document.createElement("button");
+    button.className = "category";
+    button.textContent = name;
+
+    if (name === selectedCategory) {
+      button.classList.add("active");
+    }
+
+    button.addEventListener("click", () => {
+      selectedCategory = name;
+      renderMenu();
+    });
+
+    categories.appendChild(button);
+  });
+
+  container.appendChild(categories);
+
+  const filteredItems = menuItems.filter(item => {
+    if (selectedCategory === "All") return true;
+
+    const category = menuCategories.find(
+      c => c.id === item.category_id
+    );
+
+    return category && category.name === selectedCategory;
+  });
+
+  if (filteredItems.length === 0) {
+    const message = document.createElement("p");
+    message.textContent =
+      "No food items in this category yet.";
+    container.appendChild(message);
+    return;
+  }
+
+  filteredItems.forEach(item => {
+    const card = document.createElement("article");
+    card.className = "restaurant";
+
+    const info = document.createElement("div");
+    info.className = "restaurant-info";
+
+    const name = document.createElement("h3");
+    name.textContent = item.name;
+
+    const description = document.createElement("p");
+    description.textContent =
+      item.description || "Delicious food";
+
+    const price = document.createElement("p");
+    price.textContent =
+      Number(item.price).toLocaleString() + " ETB";
+
+    const addButton = document.createElement("button");
+    addButton.textContent = "Add to Cart";
+
+    addButton.addEventListener("click", () => {
+      addToCart(item);
+    });
+
+    info.append(name, description, price, addButton);
+    card.appendChild(info);
+    container.appendChild(card);
+  });
+}
+
+function addToCart(item) {
+  const existing = cart.find(
+    entry => entry.id === item.id
+  );
+
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({
+      id: item.id,
+      name: item.name,
+      price: Number(item.price),
+      quantity: 1,
+      restaurantId: selectedRestaurant.id,
+      restaurantName: selectedRestaurant.name
+    });
+  }
+
+  updateCartDisplay();
+  alert(item.name + " added to your cart!");
+}
+
+function updateCartDisplay() {
+  const count = cart.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
+
+  const cartHeading = [...document.querySelectorAll("h2, h3")]
+    .find(el => el.textContent.includes("My Cart"));
+
+  if (cartHeading) {
+    const next = cartHeading.nextElementSibling;
+
+    if (next) {
+      next.textContent =
+        count + (count === 1 ? " item" : " items");
+    }
+  }
+}
+
+function showCart() {
+  if (cart.length === 0) {
+    alert("Your cart is empty.");
+    return;
+  }
+
+  const restaurantIds = [...new Set(
+    cart.map(item => item.restaurantId)
+  )];
+
+  if (restaurantIds.length > 1) {
+    alert(
+      "Your cart contains items from multiple restaurants. " +
+      "Please order from one restaurant at a time."
+    );
+    return;
+  }
+
+  const lines = cart.map(item =>
+    `${item.name} × ${item.quantity} = ` +
+    `${(item.price * item.quantity).toLocaleString()} ETB`
+  );
+
+  const total = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  alert(
+    "YOUR CART\n\n" +
+    lines.join("\n") +
+    "\n\nFood total: " + total.toLocaleString() + " ETB" +
+    "\n\nCheckout and payment are coming next."
+  );
+}
+
+document.querySelectorAll(".category").forEach(button => {
+  button.addEventListener("click", () => {
+    if (selectedRestaurant) return;
+
+    selectedCategory = button.dataset.category;
+
+    document.querySelectorAll(".category").forEach(b => {
+      b.classList.toggle("active", b === button);
+    });
+
+    if (selectedCategory !== "All") {
+      alert(
+        "Open a restaurant first to browse its menu categories."
+      );
+      return;
+    }
+
+    renderRestaurants();
+  });
+});
+
+document.getElementById("search").addEventListener(
+  "input",
+  () => {
+    if (!selectedRestaurant) renderRestaurants();
+  }
+);
+
+loadRestaurants();
 
 async function loadRestaurants() {
   const container = document.getElementById("restaurants");
