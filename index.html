@@ -134,6 +134,7 @@ h2 {
   justify-content: space-between;
   align-items: center;
   margin-top: 20px;
+  gap: 12px;
 }
 
 .cart-bar button {
@@ -143,6 +144,12 @@ h2 {
   padding: 10px 15px;
   border-radius: 9px;
   font-weight: bold;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 footer {
@@ -200,7 +207,10 @@ footer {
       <div id="cart-count">0 items</div>
     </div>
 
-    <button onclick="showCart()">View Cart</button>
+    <button
+      id="view-cart"
+      onclick="showCart()"
+    >View Cart</button>
   </div>
 
 </main>
@@ -211,7 +221,9 @@ footer {
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
+// SUPABASE CONNECTION — KEEP THESE VALUES UNCHANGED
 const SUPABASE_URL = "https://vkrnonhmyeblmpkgkllo.supabase.co";
 const SUPABASE_KEY = "sb_publishable_KaJTzLho3184lRCIPDQc8A_JcCZ3JBb";
 
@@ -220,6 +232,7 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_KEY
 );
 
+// APP VARIABLES
 let restaurants = [];
 let selectedCategory = "All";
 let cart = [];
@@ -227,6 +240,8 @@ let selectedRestaurant = null;
 let menuItems = [];
 let menuCategories = [];
 
+
+// LOAD APPROVED RESTAURANTS
 async function loadRestaurants() {
   const container = document.getElementById("restaurants");
   container.textContent = "Loading restaurants...";
@@ -238,7 +253,7 @@ async function loadRestaurants() {
     .order("name");
 
   if (error) {
-    console.error(error);
+    console.error("Restaurant loading error:", error);
     container.textContent = "Could not load restaurants.";
     return;
   }
@@ -247,6 +262,8 @@ async function loadRestaurants() {
   renderRestaurants();
 }
 
+
+// DISPLAY RESTAURANTS AND SEARCH RESULTS
 function renderRestaurants() {
   const container = document.getElementById("restaurants");
   container.replaceChildren();
@@ -297,6 +314,7 @@ function renderRestaurants() {
     const button = document.createElement("button");
     button.textContent = "View Menu";
     button.disabled = !r.is_open;
+
     button.addEventListener("click", () => openMenu(r));
 
     info.append(name, description, address, badge, button);
@@ -305,6 +323,8 @@ function renderRestaurants() {
   });
 }
 
+
+// OPEN A RESTAURANT MENU
 async function openMenu(restaurant) {
   selectedRestaurant = restaurant;
   selectedCategory = "All";
@@ -344,6 +364,8 @@ async function openMenu(restaurant) {
   renderMenu();
 }
 
+
+// DISPLAY MENU ITEMS AND MENU CATEGORIES
 function renderMenu() {
   const container = document.getElementById("restaurants");
   container.replaceChildren();
@@ -354,6 +376,7 @@ function renderMenu() {
 
   const backButton = document.createElement("button");
   backButton.textContent = "← Back to Restaurants";
+
   backButton.addEventListener("click", () => {
     selectedRestaurant = null;
     selectedCategory = "All";
@@ -385,7 +408,9 @@ function renderMenu() {
   container.appendChild(categories);
 
   const filteredItems = menuItems.filter(item => {
-    if (selectedCategory === "All") return true;
+    if (selectedCategory === "All") {
+      return true;
+    }
 
     const category = menuCategories.find(
       c => c.id === item.category_id
@@ -396,8 +421,7 @@ function renderMenu() {
 
   if (filteredItems.length === 0) {
     const message = document.createElement("p");
-    message.textContent =
-      "No food items in this category yet.";
+    message.textContent = "No food items in this category yet.";
     container.appendChild(message);
     return;
   }
@@ -433,9 +457,35 @@ function renderMenu() {
   });
 }
 
+
+// ADD FOOD TO CART
 function addToCart(item) {
+  if (!selectedRestaurant) {
+    alert("Please open a restaurant first.");
+    return;
+  }
+
+  // Keep orders from different restaurants separate.
+  if (
+    cart.length > 0 &&
+    cart.some(entry => entry.restaurantId !== selectedRestaurant.id)
+  ) {
+    const continueOrder = confirm(
+      "Your cart contains food from another restaurant. " +
+      "Clear the existing cart and order from this restaurant instead?"
+    );
+
+    if (!continueOrder) {
+      return;
+    }
+
+    cart = [];
+  }
+
   const existing = cart.find(
-    entry => entry.id === item.id
+    entry =>
+      entry.id === item.id &&
+      entry.restaurantId === selectedRestaurant.id
   );
 
   if (existing) {
@@ -452,54 +502,34 @@ function addToCart(item) {
   }
 
   updateCartDisplay();
+
   alert(item.name + " added to your cart!");
 }
 
+
+// CART DISPLAY FIX
 function updateCartDisplay() {
-const cartButton = document.getElementById("view-cart");
-
-if (cartButton) {
-const totalItems = cart.reduce(
-(sum, item) => sum + item.quantity,
-0
-);
-
-cartButton.textContent = `View Cart (${totalItems} items)`;
-
-}
-
-const cartCount = document.getElementById("cart-count");
-
-if (cartCount) {
-cartCount.textContent = cart.reduce(
-(sum, item) => sum + item.quantity,
-0
-);
-}
-}
-  
-  function updateCartDisplay() {
-  const cartButton = document.getElementById("view-cart");
-
-  if (cartButton) {
-    const totalItems = cart.reduce(
-      (sum, item) => sum + item.quantity,
-      0
-    );
-
-    cartButton.textContent = `View Cart (${totalItems} items)`;
-  }
+  const totalItems = cart.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
 
   const cartCount = document.getElementById("cart-count");
 
   if (cartCount) {
-    cartCount.textContent = cart.reduce(
-      (sum, item) => sum + item.quantity,
-      0
-    );
+    cartCount.textContent =
+      totalItems + (totalItems === 1 ? " item" : " items");
+  }
+
+  const cartButton = document.getElementById("view-cart");
+
+  if (cartButton) {
+    cartButton.textContent = `View Cart (${totalItems})`;
   }
 }
 
+
+// VIEW CART TOTAL
 function showCart() {
   if (cart.length === 0) {
     alert("Your cart is empty.");
@@ -530,19 +560,24 @@ function showCart() {
 
   alert(
     "YOUR CART\n\n" +
+    "Restaurant: " + cart[0].restaurantName + "\n\n" +
     lines.join("\n") +
     "\n\nFood total: " + total.toLocaleString() + " ETB" +
     "\n\nCheckout and payment are coming next."
   );
 }
 
-document.querySelectorAll(".category").forEach(button => {
+
+// HOMEPAGE CATEGORY BUTTONS
+document.querySelectorAll(".categories > .category").forEach(button => {
   button.addEventListener("click", () => {
-    if (selectedRestaurant) return;
+    if (selectedRestaurant) {
+      return;
+    }
 
     selectedCategory = button.dataset.category;
 
-    document.querySelectorAll(".category").forEach(b => {
+    document.querySelectorAll(".categories > .category").forEach(b => {
       b.classList.toggle("active", b === button);
     });
 
@@ -557,15 +592,21 @@ document.querySelectorAll(".category").forEach(button => {
   });
 });
 
+
+// SEARCH RESTAURANTS
 document.getElementById("search").addEventListener(
   "input",
   () => {
-    if (!selectedRestaurant) renderRestaurants();
+    if (!selectedRestaurant) {
+      renderRestaurants();
+    }
   }
 );
 
+
+// START APP
 loadRestaurants();
 </script>
-  
+
 </body>
 </html>
