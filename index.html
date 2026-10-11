@@ -718,7 +718,10 @@ function renderCart() {
     });
 
     const quantity = document.createElement("strong");
-    quantity.textContent = "Quantity: " + item.quantity;
+    quantity.textContent = String(item.quantity);
+    quantity.style.display = "inline-block";
+    quantity.style.minWidth = "24px";
+    quantity.style.textAlign = "center";
 
     const increase = document.createElement("button");
     increase.textContent = "+";
