@@ -717,11 +717,21 @@ function renderCart() {
       changeCartQuantity(index, -1);
     });
 
-    const quantity = document.createElement("strong");
-    quantity.textContent = String(item.quantity);
-    quantity.style.display = "inline-block";
-    quantity.style.minWidth = "24px";
-    quantity.style.textAlign = "center";
+    const quantity = document.createElement("span");
+
+quantity.textContent = String(item.quantity);
+
+quantity.style.display = "inline-flex";
+quantity.style.alignItems = "center";
+quantity.style.justifyContent = "center";
+quantity.style.width = "32px";
+quantity.style.minHeight = "40px";
+quantity.style.color = "#222";
+quantity.style.backgroundColor = "#ffffff";
+quantity.style.border = "1px solid #cccccc";
+quantity.style.borderRadius = "6px";
+quantity.style.fontSize = "18px";
+quantity.style.fontWeight = "bold";
 
     const increase = document.createElement("button");
     increase.textContent = "+";
