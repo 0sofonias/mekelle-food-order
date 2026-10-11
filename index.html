@@ -456,21 +456,47 @@ function addToCart(item) {
 }
 
 function updateCartDisplay() {
-  const count = cart.reduce(
-    (total, item) => total + item.quantity,
-    0
-  );
+const cartButton = document.getElementById("view-cart");
 
-  const cartHeading = [...document.querySelectorAll("h2, h3")]
-    .find(el => el.textContent.includes("My Cart"));
+if (cartButton) {
+const totalItems = cart.reduce(
+(sum, item) => sum + item.quantity,
+0
+);
 
-  if (cartHeading) {
-    const next = cartHeading.nextElementSibling;
+cartButton.textContent = `View Cart (${totalItems} items)`;
 
-    if (next) {
-      next.textContent =
-        count + (count === 1 ? " item" : " items");
-    }
+}
+
+const cartCount = document.getElementById("cart-count");
+
+if (cartCount) {
+cartCount.textContent = cart.reduce(
+(sum, item) => sum + item.quantity,
+0
+);
+}
+}
+  
+  function updateCartDisplay() {
+  const cartButton = document.getElementById("view-cart");
+
+  if (cartButton) {
+    const totalItems = cart.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+
+    cartButton.textContent = `View Cart (${totalItems} items)`;
+  }
+
+  const cartCount = document.getElementById("cart-count");
+
+  if (cartCount) {
+    cartCount.textContent = cart.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
   }
 }
 
