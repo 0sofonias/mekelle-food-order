@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#e85d04">
+<title>Mekelle Food Order</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f8f8f8;
+  color: #222;
+}
+
+header {
+  background: #e85d04;
+  color: white;
+  padding: 22px 18px;
+  border-radius: 0 0 22px 22px;
+}
+
+header h1 {
+  margin: 0 0 8px;
+  font-size: 25px;
+}
+
+header p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.container {
+  padding: 18px;
+  max-width: 650px;
+  margin: auto;
+}
+
+.search {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  font-size: 16px;
+  margin-bottom: 22px;
+}
+
+h2 {
+  font-size: 20px;
+  margin-bottom: 14px;
+}
+
+.categories {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+}
+
+.category {
+  border: 1px solid #eee;
+  background: white;
+  border-radius: 12px;
+  padding: 12px 15px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.category.active {
+  background: #e85d04;
+  color: white;
+}
+
+.restaurant {
+  background: white;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px #0000000a;
+}
+
+.restaurant-image {
+  height: 130px;
+  background: #ffeadb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 55px;
+}
+
+.restaurant-info {
+  padding: 15px;
+}
+
+.restaurant-info h3 {
+  margin: 0 0 8px;
+}
+
+.restaurant-info p {
+  margin: 5px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.badge {
+  display: inline-block;
+  margin-top: 8px;
+  background: #e5f7e9;
+  color: #187438;
+  padding: 5px 9px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.empty {
+  padding: 25px;
+  text-align: center;
+  color: #777;
+}
+
+.cart-bar {
+  position: sticky;
+  bottom: 10px;
+  background: #222;
+  color: white;
+  padding: 15px;
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.cart-bar button {
+  background: #e85d04;
+  border: 0;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 9px;
+  font-weight: bold;
+}
+
+footer {
+  text-align: center;
+  padding: 25px;
+  color: #777;
+  font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🍽️ Mekelle Food Order</h1>
+  <p>Your food, your choice, delivered to you.</p>
+</header>
+
+<main class="container">
+
+  <input
+    class="search"
+    id="search"
+    type="search"
+    placeholder="Search restaurants or food..."
+    aria-label="Search restaurants or food"
+  >
+
+  <h2>Explore categories</h2>
+
+  <div class="categories">
+    <button class="category active"
+      data-category="All">🍽️ All</button>
+
+    <button class="category"
+      data-category="Traditional">🥘 Traditional</button>
+
+    <button class="category"
+      data-category="Fast Food">🍔 Fast Food</button>
+
+    <button class="category"
+      data-category="Drinks">🥤 Drinks</button>
+
+    <button class="category"
+      data-category="Groceries">🛒 Groceries</button>
+  </div>
+
+  <h2>Restaurants in Mekelle</h2>
+
+  <div id="restaurants"></div>
+
+  <div class="cart-bar">
+    <div>
+      <strong>🛒 My Cart</strong>
+      <div id="cart-count">0 items</div>
+    </div>
+
+    <button onclick="showCart()">View Cart</button>
+  </div>
+
+</main>
+
+<footer>
+  Mekelle Food Order<br>
+  Built for Mekelle, Ethiopia 🇪🇹
+</footer>
+
+<script>
+const restaurants = [
+  {
+    name: "Traditional Food",
+    category: "Traditional",
+    description: "Traditional Ethiopian and Tigrayan meals",
+    icon: "🥘"
+  },
+  {
+    name: "Burger & Fast Food",
+    category: "Fast Food",
+    description: "Burgers, sandwiches and quick meals",
+    icon: "🍔"
+  },
+  {
+    name: "Juice & Drinks",
+    category: "Drinks",
+    description: "Fresh juice and refreshing drinks",
+    icon: "🥤"
+  },
+  {
+    name: "Grocery Delivery",
+    category: "Groceries",
+    description: "Everyday groceries and household essentials",
+    icon: "🛒"
+  }
+];
+
+let selectedCategory = "All";
+let cart = [];
+
+function renderRestaurants() {
+  const search = document
+    .getElementById("search")
+    .value.trim().toLowerCase();
+
+  const list = restaurants.filter(r => {
+    const matchesCategory =
+      selectedCategory === "All" ||
+      r.category === selectedCategory;
+
+    const matchesSearch =
+      r.name.toLowerCase().includes(search) ||
+      r.description.toLowerCase().includes(search) ||
+      r.category.toLowerCase().includes(search);
+
+    return matchesCategory && matchesSearch;
+  });
+
+  const container = document.getElementById("restaurants");
+
+  if (list.length === 0) {
+    container.innerHTML =
+      '<div class="empty">No matching results found.</div>';
+    return;
+  }
+
+  container.innerHTML = list.map(r => `
+    <article class="restaurant">
+      <div class="restaurant-image">${r.icon}</div>
+      <div class="restaurant-info">
+        <h3>${r.name}</h3>
+        <p>${r.description}</p>
+        <span class="badge">Demo category</span>
+      </div>
+    </article>
+  `).join("");
+}
+
+document.querySelectorAll(".category").forEach(button => {
+  button.addEventListener("click", () => {
+    selectedCategory = button.dataset.category;
+
+    document.querySelectorAll(".category").forEach(b => {
+      b.classList.toggle("active", b === button);
+    });
+
+    renderRestaurants();
+  });
+});
+
+document.getElementById("search").addEventListener(
+  "input",
+  renderRestaurants
+);
+
+function showCart() {
+  alert(
+    "Your cart contains " + cart.length +
+    " item(s).\n\nReal ordering and digital payments " +
+    "will be connected in a later development step."
+  );
+}
+
+renderRestaurants();
+</script>
+
+</body>
+</html>
