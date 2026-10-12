@@ -1096,6 +1096,102 @@ document.querySelectorAll(".categories > .category").forEach(button => {
   });
 });
 
+  // CUSTOMER AUTHENTICATION
+let authMode = "signin";
+
+const authForm = document.getElementById("auth-form");
+const authEmail = document.getElementById("auth-email");
+const authPassword = document.getElementById("auth-password");
+const authSubmit = document.getElementById("auth-submit");
+const authToggle = document.getElementById("auth-toggle");
+const authMessage = document.getElementById("auth-message");
+const authPanel = document.getElementById("auth-panel");
+
+// Switch between sign-in and account creation
+authToggle.addEventListener("click", () => {
+  authMode = authMode === "signin" ? "signup" : "signin";
+
+  authSubmit.textContent =
+    authMode === "signin" ? "Sign In" : "Create Account";
+
+  authToggle.textContent =
+    authMode === "signin"
+      ? "Need an account? Create one"
+      : "Already have an account? Sign in";
+
+  authPassword.autocomplete =
+    authMode === "signin" ? "current-password" : "new-password";
+
+  authMessage.textContent = "";
+});
+
+// Sign in or create an account
+authForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+
+  authSubmit.disabled = true;
+  authSubmit.textContent = "Please wait...";
+  authMessage.textContent = "";
+
+  try {
+    if (authMode === "signin") {
+      const { error } =
+        await supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        });
+
+      if (error) throw error;
+
+      authMessage.textContent = "Signed in successfully.";
+    } else {
+      const { data, error } =
+        await supabaseClient.auth.signUp({
+          email,
+          password
+        });
+
+      if (error) throw error;
+
+      if (data.session) {
+        authMessage.textContent = "Account created successfully.";
+      } else {
+        authMessage.textContent =
+          "Account created. Check your email to confirm your account, then sign in.";
+      }
+    }
+  } catch (error) {
+    authMessage.textContent = error.message;
+  } finally {
+    authSubmit.disabled = false;
+    authSubmit.textContent =
+      authMode === "signin" ? "Sign In" : "Create Account";
+  }
+});
+
+// Restore the session when the page reloads
+async function updateAuthPanel() {
+  const { data, error } =
+    await supabaseClient.auth.getSession();
+
+  if (error) {
+    authMessage.textContent = error.message;
+    return;
+  }
+
+  authPanel.style.display =
+    data.session ? "none" : "block";
+}
+
+updateAuthPanel();
+
+// Keep the interface synchronized with login/logout
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  authPanel.style.display = session ? "none" : "block";
+});
 
 // SEARCH RESTAURANTS
 document.getElementById("search").addEventListener(
