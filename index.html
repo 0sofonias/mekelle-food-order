@@ -1012,33 +1012,29 @@ const { data, error } = await supabaseClient.rpc(
 
       const success = document.createElement("h3");
 success.textContent = "Order Placed Successfully!";
-success.style.color = "#15803d";
-success.style.backgroundColor = "#dcfce7";
-success.style.padding = "16px";
-success.style.borderRadius = "8px";
-success.style.margin = "16px 0";
-success.style.display = "block";
-success.style.visibility = "visible";
-success.style.opacity = "1";
+success.style.cssText = "color: #166534; background: #dcfce7; padding: 16px; border-radius: 8px; margin: 16px 0; display: block; visibility: visible; opacity: 1;";
 
-      const message = document.createElement("p");
-      message.textContent =
-        "Your order has been saved. Payment is still pending.";
+const message = document.createElement("p");
+message.textContent =
+"Your order has been saved. Payment is still pending.";
+message.style.cssText = "color: #1f2937; background: #f9fafb; padding: 12px; border-radius: 6px; display: block; visibility: visible; opacity: 1;";
 
-      const reference = document.createElement("p");
-      reference.textContent = "Order reference: " + orderId;
+const reference = document.createElement("p");
+reference.textContent = "Order reference: " + orderId;
+reference.style.cssText = "color: #1f2937; background: #f3f4f6; padding: 12px; border-radius: 6px; overflow-wrap: anywhere; display: block; visibility: visible; opacity: 1;";
 
-      const closeButton = document.createElement("button");
-      closeButton.className = "cart-checkout";
-      closeButton.textContent = "Continue Browsing";
-      closeButton.addEventListener("click", closeCart);
+const closeButton = document.createElement("button");
+closeButton.className = "cart-checkout";
+closeButton.textContent = "Continue Browsing";
+closeButton.style.cssText = "display: block; visibility: visible; opacity: 1; margin-top: 16px;";
+closeButton.addEventListener("click", closeCart);
 
-      summary.append(
-        success,
-        message,
-        reference,
-        closeButton
-      );
+summary.append(
+success,
+message,
+reference,
+closeButton
+);
 
     } catch (error) {
       console.error("Order creation failed:", error);
