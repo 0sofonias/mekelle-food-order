@@ -1011,7 +1011,15 @@ const { data, error } = await supabaseClient.rpc(
       summary.replaceChildren();
 
       const success = document.createElement("h3");
-      success.textContent = "Order Placed Successfully!";
+success.textContent = "Order Placed Successfully!";
+success.style.color = "#15803d";
+success.style.backgroundColor = "#dcfce7";
+success.style.padding = "16px";
+success.style.borderRadius = "8px";
+success.style.margin = "16px 0";
+success.style.display = "block";
+success.style.visibility = "visible";
+success.style.opacity = "1";
 
       const message = document.createElement("p");
       message.textContent =
