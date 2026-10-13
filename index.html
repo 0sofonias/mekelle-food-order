@@ -266,12 +266,19 @@ footer {
 <header>
   <h1>🍽️ Mekelle Food Order</h1>
   <p>Your food, your choice, delivered to you.</p>
+  
   <button id="my-orders-button" type="button">
     📦 My Orders
   </button>
+  
   <button id="restaurant-dashboard-button" type="button">
   🏪 Restaurant Dashboard
 </button>
+  
+  <button id="sign-out-button" type="button">
+  Sign Out
+</button>
+  
 </header>
 
 <!-- MY ORDERS PAGE -->
@@ -1448,6 +1455,20 @@ async function loadRestaurantDashboard() {
       "Could not load restaurant orders: " + error.message;
   }
 }
+
+// SIGN OUT
+document
+  .getElementById("sign-out-button")
+  .addEventListener("click", async () => {
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) {
+      alert("Could not sign out: " + error.message);
+      return;
+    }
+
+    alert("Signed out successfully. Please sign in again.");
+  });
   
 // START APP
 loadRestaurants();
