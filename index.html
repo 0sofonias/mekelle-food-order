@@ -269,6 +269,9 @@ footer {
   <button id="my-orders-button" type="button">
     📦 My Orders
   </button>
+  <button id="restaurant-dashboard-button" type="button">
+  🏪 Restaurant Dashboard
+</button>
 </header>
 
 <!-- MY ORDERS PAGE -->
@@ -277,6 +280,16 @@ footer {
   <p id="my-orders-message" role="status" aria-live="polite"></p>
   <div id="my-orders-list"></div>
   <button id="my-orders-back" type="button">
+    ← Back to Restaurants
+  </button>
+</section>
+
+<!-- RESTAURANT DASHBOARD -->
+<section id="restaurant-dashboard-panel" class="container" hidden>
+  <h2>🏪 Restaurant Dashboard</h2>
+  <p id="restaurant-dashboard-message" role="status" aria-live="polite"></p>
+  <div id="restaurant-orders-list"></div>
+  <button id="restaurant-dashboard-back" type="button">
     ← Back to Restaurants
   </button>
 </section>
@@ -1295,6 +1308,145 @@ card.append(title, total, payment, status, address, date);
 myOrdersList.appendChild(card);
 
 });
+}
+
+// RESTAURANT DASHBOARD
+const restaurantDashboardButton =
+  document.getElementById("restaurant-dashboard-button");
+
+const restaurantDashboardPanel =
+  document.getElementById("restaurant-dashboard-panel");
+
+const restaurantDashboardMessage =
+  document.getElementById("restaurant-dashboard-message");
+
+const restaurantOrdersList =
+  document.getElementById("restaurant-orders-list");
+
+const restaurantDashboardBack =
+  document.getElementById("restaurant-dashboard-back");
+
+restaurantDashboardButton.addEventListener(
+  "click",
+  loadRestaurantDashboard
+);
+
+restaurantDashboardBack.addEventListener("click", () => {
+  restaurantDashboardPanel.hidden = true;
+});
+
+async function loadRestaurantDashboard() {
+  restaurantDashboardPanel.hidden = false;
+  restaurantOrdersList.replaceChildren();
+  restaurantDashboardMessage.textContent = "Loading restaurant orders...";
+
+  try {
+    const { data: sessionData, error: sessionError } =
+      await supabaseClient.auth.getSession();
+
+    if (sessionError) throw sessionError;
+
+    if (!sessionData.session) {
+      restaurantDashboardMessage.textContent =
+        "Please sign in with your restaurant owner account.";
+      return;
+    }
+
+    const ownerId = sessionData.session.user.id;
+
+    const { data: restaurants, error: restaurantError } =
+      await supabaseClient
+        .from("restaurants")
+        .select("id, name, is_approved, is_open")
+        .eq("owner_id", ownerId);
+
+    if (restaurantError) throw restaurantError;
+
+    if (!restaurants || restaurants.length === 0) {
+      restaurantDashboardMessage.textContent =
+        "No restaurant is linked to this account. Please sign in with the restaurant owner's account.";
+      return;
+    }
+
+    const approvedRestaurants = restaurants.filter(
+      restaurant => restaurant.is_approved === true
+    );
+
+    if (approvedRestaurants.length === 0) {
+      restaurantDashboardMessage.textContent =
+        "Your restaurant is awaiting approval.";
+      return;
+    }
+
+    restaurantDashboardMessage.textContent =
+      "Your restaurant orders";
+
+    for (const restaurant of approvedRestaurants) {
+      const heading = document.createElement("h3");
+      heading.textContent =
+        restaurant.name +
+        (restaurant.is_open ? " — Open" : " — Closed");
+
+      restaurantOrdersList.appendChild(heading);
+
+      const { data: orders, error: ordersError } =
+        await supabaseClient
+          .from("orders")
+          .select(
+            "id, delivery_address, food_total, delivery_fee, service_fee, total_amount, payment_status, order_status, created_at"
+          )
+          .eq("restaurant_id", restaurant.id)
+          .order("created_at", { ascending: false });
+
+      if (ordersError) throw ordersError;
+
+      if (!orders || orders.length === 0) {
+        const empty = document.createElement("p");
+        empty.textContent = "No orders yet.";
+        restaurantOrdersList.appendChild(empty);
+        continue;
+      }
+
+      for (const order of orders) {
+        const card = document.createElement("article");
+        card.style.cssText =
+          "background:#fff;color:#222;padding:16px;margin:12px 0;border:1px solid #ddd;border-radius:8px;overflow-wrap:anywhere;";
+
+        const title = document.createElement("h4");
+        title.textContent =
+          "Order " + order.id.slice(0, 8).toUpperCase();
+
+        const total = document.createElement("p");
+        total.textContent =
+          "Total: " +
+          Number(order.total_amount).toLocaleString() +
+          " ETB";
+
+        const address = document.createElement("p");
+        address.textContent =
+          "Delivery address: " + order.delivery_address;
+
+        const payment = document.createElement("p");
+        payment.textContent =
+          "Payment: " + order.payment_status;
+
+        const status = document.createElement("p");
+        status.textContent =
+          "Order status: " + order.order_status;
+
+        const date = document.createElement("p");
+        date.textContent =
+          "Placed: " +
+          new Date(order.created_at).toLocaleString();
+
+        card.append(title, total, address, payment, status, date);
+        restaurantOrdersList.appendChild(card);
+      }
+    }
+  } catch (error) {
+    restaurantDashboardMessage.textContent =
+      "Could not load restaurant orders: " + error.message;
+  }
 }
   
 // START APP
