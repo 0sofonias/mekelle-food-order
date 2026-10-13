@@ -266,8 +266,21 @@ footer {
 <header>
   <h1>🍽️ Mekelle Food Order</h1>
   <p>Your food, your choice, delivered to you.</p>
+  <button id="my-orders-button" type="button">
+    📦 My Orders
+  </button>
 </header>
 
+<!-- MY ORDERS PAGE -->
+<section id="my-orders-panel" class="container" hidden>
+  <h2>📦 My Orders</h2>
+  <p id="my-orders-message" role="status" aria-live="polite"></p>
+  <div id="my-orders-list"></div>
+  <button id="my-orders-back" type="button">
+    ← Back to Restaurants
+  </button>
+</section>
+  
 <!-- CUSTOMER AUTHENTICATION -->
 <section id="auth-panel" class="container">
   <h2>Welcome to Mekelle Food Order</h2>
@@ -1207,7 +1220,83 @@ document.getElementById("search").addEventListener(
   }
 );
 
+const myOrdersButton = document.getElementById("my-orders-button");
+const myOrdersPanel = document.getElementById("my-orders-panel");
+const myOrdersList = document.getElementById("my-orders-list");
+const myOrdersMessage = document.getElementById("my-orders-message");
+const myOrdersBack = document.getElementById("my-orders-back");
 
+myOrdersButton.addEventListener("click", loadMyOrders);
+
+myOrdersBack.addEventListener("click", () => {
+myOrdersPanel.hidden = true;
+});
+
+async function loadMyOrders() {
+myOrdersPanel.hidden = false;
+myOrdersList.replaceChildren();
+myOrdersMessage.textContent = "Loading your orders...";
+
+const { data: sessionData, error: sessionError } =
+await supabaseClient.auth.getSession();
+
+if (sessionError || !sessionData.session) {
+myOrdersMessage.textContent = "Please sign in to view your orders.";
+return;
+}
+
+const { data: orders, error } = await supabaseClient
+.from("orders")
+.select(
+"id, delivery_address, food_total, delivery_fee, service_fee, total_amount, payment_status, order_status, created_at"
+)
+.eq("customer_id", sessionData.session.user.id)
+.order("created_at", { ascending: false });
+
+if (error) {
+myOrdersMessage.textContent =
+"Could not load your orders: " + error.message;
+return;
+}
+
+myOrdersMessage.textContent = "";
+
+if (!orders || orders.length === 0) {
+myOrdersMessage.textContent = "You have not placed any orders yet.";
+return;
+}
+
+orders.forEach((order) => {
+const card = document.createElement("article");
+card.style.cssText =
+"background:#fff;padding:16px;margin:12px 0;border-radius:8px;border:1px solid #ddd;color:#222;overflow-wrap:anywhere;";
+
+const title = document.createElement("h3");
+title.textContent = "Order " + order.id.slice(0, 8).toUpperCase();
+
+const total = document.createElement("p");
+total.textContent =
+  "Total: " + Number(order.total_amount).toLocaleString() + " ETB";
+
+const payment = document.createElement("p");
+payment.textContent = "Payment: " + order.payment_status;
+
+const status = document.createElement("p");
+status.textContent = "Order status: " + order.order_status;
+
+const address = document.createElement("p");
+address.textContent = "Delivery address: " + order.delivery_address;
+
+const date = document.createElement("p");
+date.textContent =
+  "Placed: " + new Date(order.created_at).toLocaleString();
+
+card.append(title, total, payment, status, address, date);
+myOrdersList.appendChild(card);
+
+});
+}
+  
 // START APP
 loadRestaurants();
 </script>
