@@ -1706,6 +1706,61 @@ document
     loadOrders();
   });
 })();
+
+// ===== SEPARATE LOGIN SCREEN FROM MARKETPLACE =====
+(function setupSeparateLoginAndMenu() {
+  const authPanel = document.getElementById("auth-panel");
+  const main = document.querySelector("main.container");
+  const myOrders = document.getElementById("my-orders-panel");
+  const restaurantDashboard =
+    document.getElementById("restaurant-dashboard-panel");
+
+  const menuButtons = [
+    document.getElementById("my-orders-button"),
+    document.getElementById("restaurant-dashboard-button"),
+    document.getElementById("sign-out-button")
+  ].filter(Boolean);
+
+  if (!authPanel || !main) return;
+
+  // Create a dedicated login-screen appearance.
+  authPanel.style.maxWidth = "480px";
+  authPanel.style.margin = "40px auto";
+  authPanel.style.padding = "28px";
+  authPanel.style.borderRadius = "16px";
+  authPanel.style.boxShadow = "0 4px 20px rgba(0,0,0,0.08)";
+
+  function showCorrectScreen(session) {
+    const signedIn = Boolean(session);
+
+    // Keep the marketplace separate from login.
+    authPanel.hidden = signedIn;
+    main.hidden = !signedIn;
+
+    if (myOrders) myOrders.hidden = true;
+    if (restaurantDashboard) restaurantDashboard.hidden = true;
+
+    menuButtons.forEach(button => {
+      button.hidden = !signedIn;
+    });
+  }
+
+  // Check whether the user is already signed in.
+  supabaseClient.auth.getSession().then(({ data, error }) => {
+    if (error) {
+      console.error("Session check failed:", error.message);
+      showCorrectScreen(null);
+      return;
+    }
+
+    showCorrectScreen(data.session);
+  });
+
+  // Switch screens whenever authentication changes.
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    showCorrectScreen(session);
+  });
+})();
   
 // START APP
 loadRestaurants();
