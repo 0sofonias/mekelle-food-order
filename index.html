@@ -1731,6 +1731,620 @@ async function loadRestaurantDashboard() {
     showCorrectScreen(session);
   });
 })();
+
+// ===== MEKELLE FOOD ORDER: EXPERIENCE UPGRADE =====
+(function mekelleExperienceUpgrade() {
+  if (document.getElementById("mekelle-experience-upgrade")) return;
+
+  const style = document.createElement("style");
+  style.id = "mekelle-experience-upgrade";
+  style.textContent = `
+    :root {
+      --mfo-orange: #e85d04;
+      --mfo-dark: #211b17;
+      --mfo-bg: #fffaf6;
+      --mfo-card: #ffffff;
+      --mfo-muted: #786f68;
+      --mfo-border: #eee4dc;
+    }
+
+    body {
+      background: var(--mfo-bg);
+      color: var(--mfo-dark);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+
+    header {
+      padding: 24px 18px;
+      border-radius: 0 0 24px 24px;
+      background: linear-gradient(135deg, #e85d04, #ff8b32);
+      box-shadow: 0 8px 25px #e85d0420;
+    }
+
+    header h1 {
+      font-size: clamp(23px, 5vw, 32px);
+      font-weight: 800;
+      letter-spacing: -.7px;
+    }
+
+    header button {
+      margin: 14px 6px 0 0;
+      padding: 11px 14px;
+      border: 1px solid #ffffff55;
+      border-radius: 12px;
+      background: #ffffff20;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      padding: 20px 16px;
+    }
+
+    #auth-panel {
+      max-width: 460px;
+      margin: 35px auto;
+      padding: 26px;
+      border: 1px solid var(--mfo-border);
+      border-radius: 22px;
+      background: white;
+      box-shadow: 0 12px 40px #40200b0c;
+    }
+
+    #auth-panel h2 {
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    #search {
+      width: 100%;
+      padding: 16px;
+      border: 1px solid var(--mfo-border);
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 5px 20px #40200b08;
+      font-size: 16px;
+    }
+
+    .mfo-hero {
+      position: relative;
+      overflow: hidden;
+      margin: 4px 0 24px;
+      padding: 24px 20px;
+      border-radius: 22px;
+      background: #fff0e3;
+    }
+
+    .mfo-hero h2 {
+      margin: 0 0 10px;
+      font-size: clamp(25px, 6vw, 36px);
+      line-height: 1.12;
+      font-weight: 850;
+      letter-spacing: -1px;
+    }
+
+    .mfo-hero p {
+      max-width: 450px;
+      color: #655044;
+      line-height: 1.6;
+    }
+
+    .mfo-hero-icon {
+      float: right;
+      margin: 0 0 8px 10px;
+      font-size: clamp(45px, 12vw, 78px);
+    }
+
+    .mfo-section-title {
+      margin: 26px 0 14px;
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    .mfo-services {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin: 14px 0 24px;
+    }
+
+    .mfo-service {
+      min-width: 0;
+      padding: 17px 14px;
+      border: 1px solid var(--mfo-border);
+      border-radius: 18px;
+      background: white;
+      text-align: left;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+    }
+
+    .mfo-service:active {
+      transform: scale(.98);
+    }
+
+    .mfo-service .icon {
+      display: block;
+      margin-bottom: 9px;
+      font-size: 30px;
+    }
+
+    .mfo-service strong {
+      display: block;
+      font-size: 16px;
+    }
+
+    .mfo-service small {
+      display: block;
+      margin-top: 5px;
+      color: var(--mfo-muted);
+      line-height: 1.4;
+    }
+
+    .mfo-service.active {
+      border-color: var(--mfo-orange);
+      background: #fff4e9;
+    }
+
+    .mfo-service:disabled {
+      cursor: default;
+      opacity: .72;
+    }
+
+    .mfo-notice {
+      margin: 12px 0;
+      padding: 14px;
+      border: 1px solid #f3d6bd;
+      border-radius: 14px;
+      background: #fff5eb;
+      color: #75401e;
+      line-height: 1.5;
+    }
+
+    .restaurant {
+      margin-bottom: 16px;
+      overflow: hidden;
+      border: 1px solid var(--mfo-border);
+      border-radius: 18px;
+      background: var(--mfo-card);
+      box-shadow: 0 5px 18px #40200b08;
+    }
+
+    .restaurant-info {
+      padding: 18px;
+    }
+
+    .restaurant-info h3 {
+      font-size: 19px;
+      font-weight: 800;
+    }
+
+    .restaurant-info p {
+      line-height: 1.5;
+    }
+
+    .badge {
+      margin: 8px 8px 8px 0;
+      border-radius: 30px;
+      background: #e6f7e9;
+      color: #176a35;
+    }
+
+    .restaurant-info button,
+    #auth-submit,
+    #view-cart,
+    .cart-checkout {
+      min-height: 44px;
+      padding: 12px 16px;
+      border: 0;
+      border-radius: 12px;
+      background: var(--mfo-orange);
+      color: white;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    .categories {
+      gap: 9px;
+      padding: 4px 0 12px;
+    }
+
+    .category {
+      border-color: var(--mfo-border);
+      border-radius: 30px;
+      background: white;
+      font-weight: 650;
+    }
+
+    .category.active {
+      border-color: var(--mfo-orange);
+      background: var(--mfo-orange);
+    }
+
+    .cart-bar {
+      z-index: 20;
+      border: 1px solid #ffffff18;
+      border-radius: 18px;
+      box-shadow: 0 8px 30px #0002;
+    }
+
+    #cart-panel {
+      z-index: 1000;
+      background: var(--mfo-bg);
+    }
+
+    #my-orders-panel,
+    #restaurant-dashboard-panel {
+      min-height: 55vh;
+    }
+
+    footer {
+      line-height: 1.8;
+    }
+
+    @media (min-width: 700px) {
+      .mfo-services {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      #restaurants {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      #restaurants > h2,
+      #restaurants > .categories,
+      #restaurants > .mfo-notice {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  const main = document.querySelector("main.container");
+  const search = document.getElementById("search");
+
+  if (!main || !search) return;
+
+  // Add a polished homepage without replacing the existing menu.
+  const hero = document.createElement("section");
+  hero.className = "mfo-hero";
+  hero.innerHTML = `
+    <span class="mfo-hero-icon" aria-hidden="true">🍲</span>
+    <h2>Good food.<br>Delivered in Mekelle.</h2>
+    <p>Discover local restaurants, choose your favorites,
+    and order from your phone.</p>
+  `;
+
+  const searchHeading = document.createElement("h2");
+  searchHeading.className = "mfo-section-title";
+  searchHeading.textContent = "What do you need today?";
+
+  const services = document.createElement("div");
+  services.className = "mfo-services";
+  services.innerHTML = `
+    <button type="button" class="mfo-service active" data-service="food">
+      <span class="icon">🍽️</span>
+      <strong>Food</strong>
+      <small>Explore restaurants</small>
+    </button>
+    <button type="button" class="mfo-service" data-service="groceries">
+      <span class="icon">🛒</span>
+      <strong>Groceries</strong>
+      <small>Coming soon</small>
+    </button>
+    <button type="button" class="mfo-service" data-service="parcels">
+      <span class="icon">📦</span>
+      <strong>Parcels</strong>
+      <small>Coming soon</small>
+    </button>
+    <button type="button" class="mfo-service" data-service="business">
+      <span class="icon">🏢</span>
+      <strong>Business</strong>
+      <small>Delivery services planned</small>
+    </button>
+  `;
+
+  const notice = document.createElement("p");
+  notice.className = "mfo-notice";
+  notice.id = "mfo-service-notice";
+  notice.hidden = true;
+  notice.setAttribute("role", "status");
+
+  main.insertBefore(hero, search);
+  main.insertBefore(searchHeading, search);
+  main.insertBefore(services, search);
+  main.insertBefore(notice, search);
+
+  // Keep upcoming services honest until their backend exists.
+  services.querySelectorAll("[data-service]").forEach(button => {
+    button.addEventListener("click", () => {
+      const service = button.dataset.service;
+
+      if (service !== "food") {
+        notice.textContent =
+          service === "groceries"
+            ? "Grocery ordering is planned for a future release. Food ordering remains available."
+            : service === "parcels"
+              ? "Parcel delivery is planned. We still need to build rider assignment, pickup confirmation, and delivery tracking."
+              : "Business delivery accounts and scheduled deliveries are planned for a future release.";
+
+        notice.hidden = false;
+        services.querySelectorAll("[data-service]").forEach(item => {
+          item.classList.toggle("active", item === button);
+        });
+        return;
+      }
+
+      notice.hidden = true;
+      services.querySelectorAll("[data-service]").forEach(item => {
+        item.classList.toggle("active", item === button);
+      });
+
+      if (selectedRestaurant) {
+        selectedRestaurant = null;
+        selectedCategory = "All";
+      }
+
+      search.value = "";
+      loadRestaurants();
+    });
+  });
+
+  // Replace the old homepage category click handlers so they don't
+  // show the previous "open a restaurant first" alert.
+  document.querySelectorAll(".categories > .category").forEach(oldButton => {
+    const button = oldButton.cloneNode(true);
+    oldButton.replaceWith(button);
+
+    button.addEventListener("click", async () => {
+      if (selectedRestaurant) {
+        selectedRestaurant = null;
+      }
+
+      selectedCategory = button.dataset.category || "All";
+      search.value = "";
+
+      document.querySelectorAll(".categories > .category").forEach(item => {
+        item.classList.toggle("active", item === button);
+      });
+
+      if (selectedCategory === "All") {
+        await loadRestaurants();
+        return;
+      }
+
+      if (selectedCategory === "Groceries") {
+        notice.textContent =
+          "Grocery shopping is planned for a future release. Browse restaurants for now.";
+        notice.hidden = false;
+        await loadRestaurants();
+        return;
+      }
+
+      notice.hidden = true;
+
+      const container = document.getElementById("restaurants");
+      container.textContent = "Finding matching menus...";
+
+      try {
+        const { data: categories, error } = await supabaseClient
+          .from("menu_categories")
+          .select("restaurant_id, name")
+          .ilike("name", "%" + selectedCategory + "%");
+
+        if (error) throw error;
+
+        const restaurantIds = [
+          ...new Set((categories || []).map(item => item.restaurant_id))
+        ];
+
+        const matches = restaurants.filter(item =>
+          restaurantIds.includes(item.id)
+        );
+
+        container.replaceChildren();
+
+        const heading = document.createElement("h2");
+        heading.textContent = selectedCategory + " restaurants";
+        container.appendChild(heading);
+
+        if (!matches.length) {
+          const empty = document.createElement("p");
+          empty.className = "mfo-notice";
+          empty.textContent =
+            "No matching category has been added by restaurants yet. Try All.";
+          container.appendChild(empty);
+          return;
+        }
+
+        matches.forEach(restaurant => {
+          const card = document.createElement("article");
+          card.className = "restaurant";
+
+          const info = document.createElement("div");
+          info.className = "restaurant-info";
+
+          const title = document.createElement("h3");
+          title.textContent = restaurant.name;
+
+          const description = document.createElement("p");
+          description.textContent =
+            restaurant.description || "Restaurant in Mekelle";
+
+          const open = document.createElement("span");
+          open.className = "badge";
+          open.textContent = restaurant.is_open ? "Open" : "Closed";
+
+          const view = document.createElement("button");
+          view.type = "button";
+          view.textContent = "View Menu";
+          view.disabled = !restaurant.is_open;
+          view.addEventListener("click", () => openMenu(restaurant));
+
+          info.append(title, description, open, view);
+          card.appendChild(info);
+          container.appendChild(card);
+        });
+      } catch (error) {
+        container.textContent =
+          "Could not filter categories. Please try All. " + error.message;
+      }
+    });
+  });
+
+  // Replace the previous search listener to avoid duplicate rendering.
+  const newSearch = search.cloneNode(true);
+  search.replaceWith(newSearch);
+
+  let searchTimer;
+  let searchRequest = 0;
+
+  newSearch.addEventListener("input", () => {
+    clearTimeout(searchTimer);
+
+    searchTimer = setTimeout(async () => {
+      const request = ++searchRequest;
+      const query = newSearch.value.trim();
+
+      if (selectedRestaurant) {
+        const allItems = menuItems;
+        const filtered = query
+          ? allItems.filter(item =>
+              [item.name, item.description]
+                .some(value =>
+                  (value || "").toLowerCase().includes(query.toLowerCase())
+                )
+            )
+          : allItems;
+
+        menuItems = filtered;
+        renderMenu();
+        menuItems = allItems;
+        return;
+      }
+
+      if (!query) {
+        renderRestaurants();
+        return;
+      }
+
+      const container = document.getElementById("restaurants");
+      container.textContent = "Searching restaurants and food...";
+
+      try {
+        const [nameResult, foodResult] = await Promise.all([
+          supabaseClient
+            .from("restaurants")
+            .select("id, name, description, address, image_url, is_open")
+            .eq("is_approved", true)
+            .or(
+              "name.ilike.%" + query + "%,description.ilike.%" +
+              query + "%,address.ilike.%" + query + "%"
+            ),
+          supabaseClient
+            .from("menu_items")
+            .select("restaurant_id")
+            .eq("is_available", true)
+            .or(
+              "name.ilike.%" + query + "%,description.ilike.%" + query + "%"
+            )
+        ]);
+
+        if (request !== searchRequest) return;
+        if (nameResult.error) throw nameResult.error;
+        if (foodResult.error) throw foodResult.error;
+
+        const ids = new Set([
+          ...(nameResult.data || []).map(item => item.id),
+          ...(foodResult.data || []).map(item => item.restaurant_id)
+        ]);
+
+        const matches = restaurants.filter(item => ids.has(item.id));
+
+        container.replaceChildren();
+
+        const heading = document.createElement("h2");
+        heading.textContent = "Search results";
+        container.appendChild(heading);
+
+        if (!matches.length) {
+          const empty = document.createElement("p");
+          empty.className = "mfo-notice";
+          empty.textContent =
+            "No matching restaurants or food found. Try another search.";
+          container.appendChild(empty);
+          return;
+        }
+
+        matches.forEach(restaurant => {
+          const card = document.createElement("article");
+          card.className = "restaurant";
+
+          const info = document.createElement("div");
+          info.className = "restaurant-info";
+
+          const title = document.createElement("h3");
+          title.textContent = restaurant.name;
+
+          const description = document.createElement("p");
+          description.textContent =
+            restaurant.description || "Restaurant in Mekelle";
+
+          const address = document.createElement("p");
+          address.textContent = restaurant.address || "Mekelle";
+
+          const view = document.createElement("button");
+          view.type = "button";
+          view.textContent = "View Menu";
+          view.disabled = !restaurant.is_open;
+          view.addEventListener("click", () => openMenu(restaurant));
+
+          info.append(title, description, address, view);
+          card.appendChild(info);
+          container.appendChild(card);
+        });
+      } catch (error) {
+        if (request !== searchRequest) return;
+        container.textContent =
+          "Search could not be completed: " + error.message;
+      }
+    }, 250);
+  });
+
+  // Sign-out action, if the existing button is present.
+  const signOutButton = document.getElementById("sign-out-button");
+
+  if (signOutButton) {
+    signOutButton.addEventListener("click", async () => {
+      signOutButton.disabled = true;
+
+      try {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) throw error;
+
+        window.location.reload();
+      } catch (error) {
+        alert("Could not sign out: " + error.message);
+      } finally {
+        signOutButton.disabled = false;
+      }
+    });
+  }
+})();
   
 // START APP
 loadRestaurants();
