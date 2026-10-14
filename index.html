@@ -1542,6 +1542,170 @@ document
 
     alert("Signed out successfully. Please sign in again.");
   });
+
+  // ===== RESTAURANT ORDER MANAGEMENT =====
+(function setupRestaurantOrderManagement() {
+  const dashboard = document.getElementById("restaurant-dashboard-panel");
+  const dashboardButton = document.getElementById("restaurant-dashboard-button");
+
+  if (!dashboard || !dashboardButton) return;
+
+  let panel = document.getElementById("restaurant-order-management");
+
+  if (!panel) {
+    panel = document.createElement("section");
+    panel.id = "restaurant-order-management";
+    panel.style.cssText = "margin:20px 0;padding:16px;border:1px solid #ddd;border-radius:12px;";
+
+    const heading = document.createElement("h3");
+    heading.textContent = "📋 Order Management";
+
+    const refresh = document.createElement("button");
+    refresh.type = "button";
+    refresh.textContent = "Refresh Orders";
+    refresh.style.cssText = "padding:10px 14px;margin-bottom:12px;cursor:pointer;";
+
+    const message = document.createElement("p");
+    message.id = "restaurant-order-management-message";
+    message.setAttribute("role", "status");
+    message.setAttribute("aria-live", "polite");
+
+    const list = document.createElement("div");
+    list.id = "restaurant-order-management-list";
+
+    panel.append(heading, refresh, message, list);
+    dashboard.appendChild(panel);
+
+    refresh.addEventListener("click", loadOrders);
+  }
+
+  const message = panel.querySelector("#restaurant-order-management-message");
+  const list = panel.querySelector("#restaurant-order-management-list");
+
+  async function loadOrders() {
+    message.textContent = "Loading orders...";
+    list.replaceChildren();
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await supabaseClient.auth.getSession();
+
+      if (sessionError) throw sessionError;
+
+      const user = sessionData.session?.user;
+
+      if (!user) {
+        message.textContent = "Please sign in to manage restaurant orders.";
+        return;
+      }
+
+      const { data: restaurants, error: restaurantError } =
+        await supabaseClient
+          .from("restaurants")
+          .select("id, name")
+          .eq("owner_id", user.id);
+
+      if (restaurantError) throw restaurantError;
+
+      if (!restaurants?.length) {
+        message.textContent = "No restaurant is linked to this account.";
+        return;
+      }
+
+      const restaurantIds = restaurants.map(r => r.id);
+      const restaurantNames = Object.fromEntries(
+        restaurants.map(r => [r.id, r.name])
+      );
+
+      const { data: orders, error: ordersError } = await supabaseClient
+        .from("orders")
+        .select("id, restaurant_id, delivery_address, food_total, delivery_fee, service_fee, total_amount, payment_status, order_status, created_at")
+        .in("restaurant_id", restaurantIds)
+        .order("created_at", { ascending: false })
+        .limit(100);
+
+      if (ordersError) throw ordersError;
+
+      if (!orders?.length) {
+        message.textContent = "No orders yet.";
+        return;
+      }
+
+      message.textContent = `${orders.length} order(s) found.`;
+
+      for (const order of orders) {
+        const card = document.createElement("article");
+        card.style.cssText = "padding:14px;margin:12px 0;border:1px solid #ddd;border-radius:10px;overflow-wrap:anywhere;";
+
+        const title = document.createElement("h4");
+        title.textContent = restaurantNames[order.restaurant_id] || "Restaurant";
+
+        const details = document.createElement("p");
+        details.textContent =
+          `Order: ${order.id}\n` +
+          `Address: ${order.delivery_address}\n` +
+          `Total: ${Number(order.total_amount).toFixed(2)} ETB\n` +
+          `Payment: ${order.payment_status}\n` +
+          `Status: ${order.order_status}\n` +
+          `Created: ${new Date(order.created_at).toLocaleString()}`;
+        details.style.whiteSpace = "pre-line";
+
+        card.append(title, details);
+
+        const nextStatus = {
+          paid: "accepted",
+          accepted: "preparing",
+          preparing: "ready"
+        }[order.order_status];
+
+        if (order.payment_status === "paid" && nextStatus) {
+          const updateButton = document.createElement("button");
+          updateButton.type = "button";
+          updateButton.textContent = `Mark ${nextStatus}`;
+          updateButton.style.cssText = "padding:10px 14px;cursor:pointer;";
+
+          updateButton.addEventListener("click", async () => {
+            updateButton.disabled = true;
+            updateButton.textContent = "Updating...";
+
+            try {
+              const { error } = await supabaseClient.rpc(
+                "update_restaurant_order_status",
+                {
+                  p_order_id: order.id,
+                  p_new_status: nextStatus
+                }
+              );
+
+              if (error) throw error;
+
+              message.textContent = `Order updated to ${nextStatus}.`;
+              await loadOrders();
+            } catch (error) {
+              message.textContent = error.message || "Could not update the order.";
+              updateButton.disabled = false;
+              updateButton.textContent = `Mark ${nextStatus}`;
+            }
+          });
+
+          card.appendChild(updateButton);
+        } else if (order.payment_status !== "paid") {
+          const note = document.createElement("p");
+          note.textContent = "Payment must be verified before this order can be processed.";
+          card.appendChild(note);
+        }
+
+        list.appendChild(card);
+      }
+    } catch (error) {
+      message.textContent = error.message || "Could not load restaurant orders.";
+    }
+  }
+
+  dashboardButton.addEventListener("click", () => {
+    loadOrders();
+  });
+})();
   
 // START APP
 loadRestaurants();
