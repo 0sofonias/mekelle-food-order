@@ -1456,6 +1456,79 @@ async function loadRestaurantDashboard() {
   }
 }
 
+// ===== ACCOUNT RECOVERY =====
+(function setupAccountRecovery() {
+  const authPanel = document.getElementById("auth-panel");
+  const authMessage = document.getElementById("auth-message")
+    || document.getElementById("authMessage");
+
+  if (!authPanel || document.getElementById("forgot-password-button")) {
+    return;
+  }
+
+  const button = document.createElement("button");
+  button.id = "forgot-password-button";
+  button.type = "button";
+  button.textContent = "Forgot password?";
+
+  button.style.cssText =
+    "display:block;margin:12px auto;padding:10px 16px;cursor:pointer;";
+
+  authPanel.appendChild(button);
+
+  button.addEventListener("click", async () => {
+    const emailInput = document.getElementById("auth-email")
+      || document.getElementById("authEmail");
+
+    const email = emailInput?.value?.trim();
+
+    if (!email) {
+      if (authMessage) {
+        authMessage.textContent =
+          "Enter your email address first, then tap Forgot password.";
+      } else {
+        alert("Enter your email address first.");
+      }
+      emailInput?.focus();
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Sending...";
+
+    try {
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(
+        email,
+        {
+          redirectTo: window.location.origin
+        }
+      );
+
+      if (error) throw error;
+
+      const message =
+        "If this email is registered, password-reset instructions will be sent.";
+
+      if (authMessage) {
+        authMessage.textContent = message;
+      } else {
+        alert(message);
+      }
+    } catch (error) {
+      const message = error.message || "Could not request a password reset.";
+
+      if (authMessage) {
+        authMessage.textContent = message;
+      } else {
+        alert(message);
+      }
+    } finally {
+      button.disabled = false;
+      button.textContent = "Forgot password?";
+    }
+  });
+})();
+  
 // SIGN OUT
 document
   .getElementById("sign-out-button")
