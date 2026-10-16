@@ -1038,7 +1038,7 @@ navigator.geolocation.getCurrentPosition(
     renderCart();
   });
 
-  form.append(label, submit, back);
+  form.append(label, locationButton, locationMessage, submit, back);
   summary.append(heading, form);
 
   form.addEventListener("submit", async (event) => {
