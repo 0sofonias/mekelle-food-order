@@ -2696,6 +2696,303 @@ async function loadRestaurantDashboard() {
 
   loadDeliveries();
 })();  
+
+// =====================================================
+// MEKELLE FOOD ORDER — RESTAURANT RIDER ASSIGNMENT
+// Insert immediately above: // START APP
+// =====================================================
+
+(function setupRestaurantRiderAssignment() {
+  if (document.getElementById("mfo-rider-assignment")) return;
+
+  const style = document.createElement("style");
+  style.textContent = `
+    #mfo-rider-assignment {
+      max-width: 850px;
+      margin: 20px auto;
+      padding: 18px;
+      background: #fff;
+      color: #222;
+      border: 1px solid #eee;
+      border-radius: 16px;
+    }
+
+    #mfo-rider-assignment .mfo-assignment-card {
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 14px;
+      margin: 12px 0;
+      overflow-wrap: anywhere;
+    }
+
+    #mfo-rider-assignment select,
+    #mfo-rider-assignment button {
+      min-height: 44px;
+      padding: 10px;
+      margin: 5px 5px 5px 0;
+      border-radius: 8px;
+    }
+
+    #mfo-rider-assignment select {
+      max-width: 100%;
+      border: 1px solid #ccc;
+      background: #fff;
+    }
+
+    #mfo-rider-assignment button {
+      border: none;
+      background: #e85d04;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    #mfo-rider-assignment button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    #mfo-rider-assignment .mfo-assignment-muted {
+      color: #666;
+      font-size: 14px;
+    }
+  `;
+  document.head.appendChild(style);
+
+  const panel = document.createElement("section");
+  panel.id = "mfo-rider-assignment";
+
+  panel.innerHTML = `
+    <h2>🚴 Restaurant Delivery Dispatch</h2>
+    <p class="mfo-assignment-muted">
+      Assign delivery workers to paid orders that are ready for pickup.
+    </p>
+    <button type="button" id="mfo-dispatch-refresh">
+      Refresh Orders
+    </button>
+    <p id="mfo-dispatch-message" aria-live="polite">
+      Sign in to load restaurant orders.
+    </p>
+    <div id="mfo-dispatch-orders"></div>
+  `;
+
+  document.body.appendChild(panel);
+
+  const client = () => window.supabaseClient;
+  const message = panel.querySelector("#mfo-dispatch-message");
+  const ordersBox = panel.querySelector("#mfo-dispatch-orders");
+  const refreshButton = panel.querySelector("#mfo-dispatch-refresh");
+
+  function setMessage(text) {
+    message.textContent = text;
+  }
+
+  function addText(parent, tag, text) {
+    const element = document.createElement(tag);
+    element.textContent = text;
+    parent.appendChild(element);
+    return element;
+  }
+
+  async function loadDispatchOrders() {
+    ordersBox.replaceChildren();
+
+    try {
+      if (!client()) {
+        throw new Error("The Supabase connection is unavailable.");
+      }
+
+      const { data: authData, error: authError } =
+        await client().auth.getUser();
+
+      if (authError) throw authError;
+      if (!authData.user) {
+        throw new Error("Please sign in first.");
+      }
+
+      setMessage("Loading your restaurant orders...");
+
+      const { data: restaurants, error: restaurantError } =
+        await client()
+          .from("restaurants")
+          .select("id, name")
+          .eq("owner_id", authData.user.id);
+
+      if (restaurantError) throw restaurantError;
+
+      if (!restaurants || restaurants.length === 0) {
+        setMessage(
+          "No restaurant is linked to this account. Sign in with the account that owns your restaurant."
+        );
+        return;
+      }
+
+      const restaurantIds = restaurants.map(r => r.id);
+
+      const { data: orders, error: ordersError } =
+        await client()
+          .from("orders")
+          .select(`
+            id,
+            restaurant_id,
+            delivery_address,
+            total_amount,
+            payment_status,
+            order_status,
+            created_at,
+            delivery_worker_id
+          `)
+          .in("restaurant_id", restaurantIds)
+          .in("order_status", ["ready"])
+          .eq("payment_status", "paid")
+          .order("created_at", { ascending: false });
+
+      if (ordersError) throw ordersError;
+
+      const { data: workers, error: workersError } =
+        await client().rpc("get_delivery_workers");
+
+      if (workersError) throw workersError;
+
+      const workerList = workers || [];
+      const orderList = orders || [];
+
+      if (!orderList.length) {
+        setMessage(
+          "No paid orders are currently ready for rider assignment."
+        );
+        return;
+      }
+
+      setMessage(
+        "Ready orders: " + orderList.length +
+        " · Delivery workers found: " + workerList.length
+      );
+
+      for (const order of orderList) {
+        const card = document.createElement("article");
+        card.className = "mfo-assignment-card";
+
+        const restaurant = restaurants.find(
+          r => r.id === order.restaurant_id
+        );
+
+        addText(card, "h3", "Order #" + order.id.slice(0, 8));
+        addText(card, "p", "Restaurant: " + (restaurant?.name || "Restaurant"));
+        addText(card, "p", "Payment: Paid");
+        addText(card, "p", "Order status: Ready");
+        addText(
+          card,
+          "p",
+          "Delivery address: " + (order.delivery_address || "Not provided")
+        );
+        addText(
+          card,
+          "p",
+          "Order total: " +
+            Number(order.total_amount || 0).toLocaleString() + " ETB"
+        );
+
+        if (order.delivery_worker_id) {
+          const assignedWorker = workerList.find(
+            w => w.worker_id === order.delivery_worker_id
+          );
+
+          addText(
+            card,
+            "p",
+            "Assigned rider: " +
+              (assignedWorker?.worker_name || "Already assigned")
+          );
+
+          ordersBox.appendChild(card);
+          continue;
+        }
+
+        if (workerList.length === 0) {
+          addText(
+            card,
+            "p",
+            "No delivery workers are registered with an eligible role."
+          );
+          ordersBox.appendChild(card);
+          continue;
+        }
+
+        const select = document.createElement("select");
+        select.setAttribute("aria-label", "Select delivery worker");
+
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Choose a delivery worker";
+        select.appendChild(placeholder);
+
+        workerList.forEach(worker => {
+          const option = document.createElement("option");
+          option.value = worker.worker_id;
+
+          option.textContent =
+            worker.worker_name +
+            (worker.worker_phone ? " · " + worker.worker_phone : "");
+
+          select.appendChild(option);
+        });
+
+        card.appendChild(select);
+
+        const assignButton = document.createElement("button");
+        assignButton.type = "button";
+        assignButton.textContent = "Assign Rider";
+
+        assignButton.addEventListener("click", async () => {
+          if (!select.value) {
+            setMessage("Choose a delivery worker first.");
+            return;
+          }
+
+          assignButton.disabled = true;
+          setMessage("Assigning delivery worker...");
+
+          try {
+            const { error } = await client().rpc(
+              "assign_delivery_worker",
+              {
+                p_order_id: order.id,
+                p_worker_id: select.value
+              }
+            );
+
+            if (error) throw error;
+
+            setMessage("Rider assigned successfully.");
+            await loadDispatchOrders();
+          } catch (error) {
+            setMessage("Assignment failed: " + error.message);
+            assignButton.disabled = false;
+          }
+        });
+
+        card.appendChild(assignButton);
+        ordersBox.appendChild(card);
+      }
+    } catch (error) {
+      setMessage(
+        "Could not load dispatch orders: " +
+        (error.message || "Unknown error")
+      );
+    }
+  }
+
+  refreshButton.addEventListener("click", loadDispatchOrders);
+
+  if (client()) {
+    client().auth.onAuthStateChange(() => {
+      window.setTimeout(loadDispatchOrders, 0);
+    });
+  }
+
+  loadDispatchOrders();
+})();  
   
 // START APP
 loadRestaurants();
