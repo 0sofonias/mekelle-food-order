@@ -1674,8 +1674,11 @@ async function loadRestaurantDashboard() {
   }
 
   dashboardButton.addEventListener("click", () => {
-    loadOrders();
-  });
+loadOrders();
+});
+
+// Load orders when this dashboard panel is first set up.
+loadOrders();
 })();
 
 // ===== SEPARATE LOGIN SCREEN FROM MARKETPLACE =====
