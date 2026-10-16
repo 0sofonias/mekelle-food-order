@@ -1649,7 +1649,9 @@ updateAuthPanel();
 
 // Keep the interface synchronized with login/logout
 supabaseClient.auth.onAuthStateChange((event, session) => {
-  authPanel.style.display = session ? "none" : "block";
+  setTimeout(() => {
+    applyRoleVisibility(session?.user ?? null);
+  }, 0);
 });
 
 // SEARCH RESTAURANTS
