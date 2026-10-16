@@ -421,7 +421,8 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
-
+window.supabaseClient = 
+supabaseClient;
 // APP VARIABLES
 let restaurants = [];
 let selectedCategory = "All";
