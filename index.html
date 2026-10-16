@@ -3931,6 +3931,79 @@ async function applyRoleVisibility(user) {
   }
 }
 // END ROLE-BASED DASHBOARD CONTROL
+
+// KEEP DASHBOARDS SEPARATED WHEN NEW PANELS ARE ADDED
+(function enforceDashboardSeparation() {
+  let lastUserId = null;
+  let lastRole = null;
+
+  async function refreshRoleScreens() {
+    const { data } = await supabaseClient.auth.getSession();
+    const user = data?.session?.user;
+
+    if (!user) {
+      lastUserId = null;
+      lastRole = null;
+      await applyRoleVisibility(null);
+      return;
+    }
+
+    const { data: profile, error } = await supabaseClient
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (error || !profile?.role) {
+      lastRole = null;
+      await applyRoleVisibility(user);
+      return;
+    }
+
+    const role = String(profile.role).toLowerCase().trim();
+
+    if (user.id !== lastUserId || role !== lastRole) {
+      lastUserId = user.id;
+      lastRole = role;
+    }
+
+    const customer = ["customer", "buyer"].includes(role);
+    const restaurant = role === "restaurant";
+    const rider = [
+      "rider",
+      "delivery",
+      "delivery_worker",
+      "delivery-worker"
+    ].includes(role);
+
+    const setHidden = (id, shouldHide) => {
+      const element = document.getElementById(id);
+      if (element) element.hidden = shouldHide;
+    };
+
+    setHidden("auth-panel", true);
+    setHidden("my-orders-button", !customer);
+    setHidden("restaurant-dashboard-button", !restaurant);
+    setHidden("my-orders-panel", !customer);
+    setHidden("restaurant-dashboard-panel", !restaurant);
+    setHidden("mfo-rider-dashboard", !rider);
+    setHidden("mfo-rider-assignment", !restaurant);
+
+    const main = document.querySelector("main.container");
+    if (main) main.hidden = !customer;
+  }
+
+  const observer = new MutationObserver(() => {
+    refreshRoleScreens();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  refreshRoleScreens();
+})();
   
 // START APP
 loadRestaurants();
