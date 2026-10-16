@@ -3845,6 +3845,90 @@ document.head.appendChild(style);
 
   document.body.appendChild(button);
 })();  
+
+// START ROLE-BASED DASHBOARD CONTROL
+async function applyRoleVisibility(user) {
+  const authPanel = document.getElementById("auth-panel");
+  const main = document.querySelector("main.container");
+
+  const restaurantPanel =
+    document.getElementById("restaurant-dashboard-panel");
+
+  const riderPanel =
+    document.getElementById("mfo-rider-dashboard");
+
+  const riderAssignmentPanel =
+    document.getElementById("mfo-rider-assignment");
+
+  const ordersPanel =
+    document.getElementById("my-orders-panel");
+
+  // Signed-out users should see the login screen.
+  if (!user) {
+    if (authPanel) authPanel.hidden = false;
+    if (main) main.hidden = true;
+    if (restaurantPanel) restaurantPanel.hidden = true;
+    if (riderPanel) riderPanel.hidden = true;
+    if (riderAssignmentPanel) riderAssignmentPanel.hidden = true;
+    if (ordersPanel) ordersPanel.hidden = true;
+    return;
+  }
+
+  // Read the authenticated user's role from Supabase.
+  const { data: profile, error } = await supabaseClient
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (error || !profile || !profile.role) {
+    console.error("Could not verify account role:", error);
+    alert("Your account role could not be verified. Please contact support.");
+    if (authPanel) authPanel.hidden = true;
+    if (main) main.hidden = true;
+    if (restaurantPanel) restaurantPanel.hidden = true;
+    if (riderPanel) riderPanel.hidden = true;
+    if (riderAssignmentPanel) riderAssignmentPanel.hidden = true;
+    if (ordersPanel) ordersPanel.hidden = true;
+    return;
+  }
+
+  const role = String(profile.role).toLowerCase().trim();
+
+  const isCustomer = role === "customer" || role === "buyer";
+  const isRestaurant = role === "restaurant";
+  const isRider = [
+    "rider",
+    "delivery",
+    "delivery_worker",
+    "delivery-worker"
+  ].includes(role);
+
+  if (authPanel) authPanel.hidden = true;
+  if (main) main.hidden = !isCustomer;
+
+  if (restaurantPanel) {
+    restaurantPanel.hidden = !isRestaurant;
+  }
+
+  if (riderAssignmentPanel) {
+    riderAssignmentPanel.hidden = !isRestaurant;
+  }
+
+  if (riderPanel) {
+    riderPanel.hidden = !isRider;
+  }
+
+  if (ordersPanel) {
+    ordersPanel.hidden = !isCustomer;
+  }
+
+  if (!isCustomer && !isRestaurant && !isRider) {
+    console.error("Unsupported account role:", role);
+    alert("This account has no supported dashboard role.");
+  }
+}
+// END ROLE-BASED DASHBOARD CONTROL
   
 // START APP
 loadRestaurants();
