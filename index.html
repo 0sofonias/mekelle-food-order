@@ -2993,6 +2993,71 @@ async function loadRestaurantDashboard() {
 
   loadDispatchOrders();
 })();  
+
+// TEMPORARY DEVELOPMENT TEST PAYMENT BUTTON
+(function setupTestPaymentButton() {
+  const testOrderId =
+    "aa7bb534-8849-402f-bf0a-83eb57c654de";
+
+  const authorizedTesterId =
+    "713ab2a5-3721-49cb-8bb1-11e3584f1cb5";
+
+  const button = document.createElement("button");
+
+  button.type = "button";
+  button.textContent = "Simulate Successful Payment";
+  button.style.cssText = `
+    display: block;
+    margin: 20px auto;
+    padding: 14px 20px;
+    background: #e85d04;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+  `;
+
+  button.addEventListener("click", async function () {
+    button.disabled = true;
+    button.textContent = "Processing test payment...";
+
+    try {
+      const {
+        data: { user },
+        error: authError
+      } = await supabaseClient.auth.getUser();
+
+      if (authError || !user || user.id !== authorizedTesterId) {
+        throw new Error(
+          "Sign in with your authorized testing account."
+        );
+      }
+
+      const { data, error } =
+        await supabaseClient.rpc("simulate_test_payment", {
+          p_order_id: testOrderId
+        });
+
+      if (error) throw error;
+
+      alert(
+        "TEST PAYMENT SUCCESSFUL\n\n" +
+        "No real money was transferred.\n" +
+        "Order ID: " + data.order_id
+      );
+
+      button.textContent = "Test Payment Completed";
+    } catch (error) {
+      alert("Test payment failed: " + error.message);
+      button.disabled = false;
+      button.textContent = "Simulate Successful Payment";
+    }
+  });
+
+  document.body.appendChild(button);
+})();  
   
 // START APP
 loadRestaurants();
