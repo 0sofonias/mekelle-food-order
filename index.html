@@ -963,6 +963,66 @@ function showDeliveryForm() {
 
   label.appendChild(address);
 
+  // USE GPS TO GET THE CUSTOMER'S DELIVERY LOCATION
+const locationButton = document.createElement("button");
+locationButton.type = "button";
+locationButton.textContent = "📍 Use My Location";
+locationButton.className = "cart-checkout";
+locationButton.style.marginBottom = "12px";
+
+const locationMessage = document.createElement("p");
+locationMessage.setAttribute("role", "status");
+
+locationButton.addEventListener("click", () => {
+if (!navigator.geolocation) {
+locationMessage.textContent =
+"Your browser does not support GPS location.";
+return;
+}
+
+locationButton.disabled = true;
+locationButton.textContent = "Getting your location...";
+locationMessage.textContent =
+  "Please allow location access when your phone asks.";
+
+navigator.geolocation.getCurrentPosition(
+  (position) => {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+
+    address.value =
+      "GPS coordinates: " +
+      latitude.toFixed(6) + ", " +
+      longitude.toFixed(6);
+
+    locationMessage.textContent =
+      "Location captured! Please add your area or a nearby landmark to help the rider find you.";
+
+    locationButton.disabled = false;
+    locationButton.textContent = "📍 Update My Location";
+  },
+  (error) => {
+    const messages = {
+      1: "Location permission denied. Allow location access in your browser settings.",
+      2: "Your location is unavailable. Try again or type your address.",
+      3: "Getting your location took too long. Please try again."
+    };
+
+    locationMessage.textContent =
+      messages[error.code] || "Could not get your location.";
+
+    locationButton.disabled = false;
+    locationButton.textContent = "📍 Try Again";
+  },
+  {
+    enableHighAccuracy: true,
+    timeout: 15000,
+    maximumAge: 0
+  }
+);
+
+});
+  
   const submit = document.createElement("button");
   submit.type = "submit";
   submit.className = "cart-checkout";
