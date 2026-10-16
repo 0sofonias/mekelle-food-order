@@ -2345,6 +2345,356 @@ async function loadRestaurantDashboard() {
     });
   }
 })();
+
+// =====================================================
+// MEKELLE FOOD ORDER — RIDER DASHBOARD
+// Insert immediately above: // START APP
+// =====================================================
+
+(function setupMekelleRiderDashboard() {
+  if (document.getElementById("mfo-rider-dashboard")) return;
+
+  const style = document.createElement("style");
+
+  style.textContent = `
+    #mfo-rider-dashboard {
+      margin: 20px auto;
+      max-width: 850px;
+      padding: 18px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 16px;
+      color: #222;
+    }
+
+    #mfo-rider-dashboard button {
+      background: #e85d04;
+      color: white;
+      border: none;
+      padding: 11px 15px;
+      margin: 5px 5px 5px 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    #mfo-rider-dashboard button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    #mfo-rider-dashboard .mfo-rider-order {
+      border: 1px solid #eee;
+      padding: 14px;
+      margin: 12px 0;
+      border-radius: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    #mfo-rider-dashboard .mfo-muted {
+      color: #666;
+      font-size: 14px;
+    }
+
+    #mfo-rider-dashboard [aria-live] {
+      overflow-wrap: anywhere;
+    }
+  `;
+
+  document.head.appendChild(style);
+
+  const panel = document.createElement("section");
+  panel.id = "mfo-rider-dashboard";
+
+  panel.innerHTML = `
+    <h2>🚴 Delivery Worker Dashboard</h2>
+    <p class="mfo-muted">
+      Manage assigned deliveries and update their progress.
+    </p>
+
+    <button type="button" id="mfo-rider-refresh">
+      Refresh Deliveries
+    </button>
+
+    <button type="button" id="mfo-rider-location">
+      Share My GPS Location
+    </button>
+
+    <p id="mfo-rider-message" aria-live="polite">
+      Sign in to view your deliveries.
+    </p>
+
+    <div id="mfo-rider-orders"></div>
+  `;
+
+  document.body.appendChild(panel);
+
+  const message = document.getElementById("mfo-rider-message");
+  const ordersContainer = document.getElementById("mfo-rider-orders");
+  const refreshButton = document.getElementById("mfo-rider-refresh");
+  const locationButton = document.getElementById("mfo-rider-location");
+
+  function say(text) {
+    message.textContent = text;
+  }
+
+  function addText(parent, tag, text, className) {
+    const element = document.createElement(tag);
+    element.textContent = text;
+
+    if (className) element.className = className;
+
+    parent.appendChild(element);
+    return element;
+  }
+
+  async function getUser() {
+    if (!window.supabaseClient) {
+      throw new Error("The Supabase connection is not available.");
+    }
+
+    const { data, error } =
+      await window.supabaseClient.auth.getUser();
+
+    if (error) throw error;
+
+    if (!data.user) {
+      throw new Error("Please sign in before opening the rider dashboard.");
+    }
+
+    return data.user;
+  }
+
+  async function loadDeliveries() {
+    ordersContainer.replaceChildren();
+
+    try {
+      const user = await getUser();
+
+      say("Loading your assigned deliveries...");
+
+      const { data, error } = await window.supabaseClient
+        .from("delivery_assignments")
+        .select(`
+          id,
+          order_id,
+          worker_id,
+          status,
+          created_at,
+          orders (
+            id,
+            delivery_address,
+            food_total,
+            delivery_fee,
+            total_amount,
+            payment_status,
+            order_status,
+            restaurants (
+              name,
+              address,
+              phone
+            )
+          )
+        `)
+        .eq("worker_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      const assignments = data || [];
+
+      if (!assignments.length) {
+        say("No deliveries are assigned to your account yet.");
+        return;
+      }
+
+      say("Your assigned deliveries: " + assignments.length);
+
+      assignments.forEach(function (assignment) {
+        const order = assignment.orders;
+
+        if (!order) return;
+
+        const card = document.createElement("article");
+        card.className = "mfo-rider-order";
+
+        addText(card, "h3", "Order #" + order.id.slice(0, 8));
+
+        addText(
+          card,
+          "p",
+          "Delivery status: " + assignment.status
+        );
+
+        addText(
+          card,
+          "p",
+          "Payment: " + order.payment_status
+        );
+
+        addText(
+          card,
+          "p",
+          "Order status: " + order.order_status
+        );
+
+        addText(
+          card,
+          "p",
+          "Restaurant: " +
+            (order.restaurants?.name || "Restaurant")
+        );
+
+        addText(
+          card,
+          "p",
+          "Pickup address: " +
+            (order.restaurants?.address || "Not provided")
+        );
+
+        addText(
+          card,
+          "p",
+          "Delivery address: " +
+            (order.delivery_address || "Not provided")
+        );
+
+        addText(
+          card,
+          "p",
+          "Order total: " +
+            Number(order.total_amount || 0).toLocaleString() +
+            " ETB"
+        );
+
+        const action = document.createElement("button");
+        action.type = "button";
+
+        if (order.payment_status !== "paid") {
+          action.textContent = "Waiting for payment";
+          action.disabled = true;
+        } else if (
+          assignment.status === "assigned" &&
+          order.order_status === "ready"
+        ) {
+          action.textContent = "Accept Delivery";
+          action.dataset.nextStatus = "accepted";
+        } else if (
+          assignment.status === "accepted" &&
+          order.order_status === "ready"
+        ) {
+          action.textContent = "Confirm Pickup";
+          action.dataset.nextStatus = "picked_up";
+        } else if (
+          assignment.status === "picked_up" &&
+          order.order_status === "picked_up"
+        ) {
+          action.textContent = "Mark Delivered";
+          action.dataset.nextStatus = "delivered";
+        } else if (assignment.status === "delivered") {
+          action.textContent = "Delivery Completed";
+          action.disabled = true;
+        } else {
+          action.textContent = "Waiting for Restaurant";
+          action.disabled = true;
+        }
+
+        if (action.dataset.nextStatus) {
+          action.addEventListener("click", async function () {
+            action.disabled = true;
+            say("Updating delivery status...");
+
+            try {
+              const { error } = await window.supabaseClient.rpc(
+                "update_delivery_status",
+                {
+                  p_order_id: assignment.order_id,
+                  p_new_status: action.dataset.nextStatus
+                }
+              );
+
+              if (error) throw error;
+
+              say("Delivery status updated successfully.");
+              await loadDeliveries();
+            } catch (error) {
+              say("Could not update delivery: " + error.message);
+              action.disabled = false;
+            }
+          });
+        }
+
+        card.appendChild(action);
+        ordersContainer.appendChild(card);
+      });
+    } catch (error) {
+      say(error.message || "Could not load deliveries.");
+    }
+  }
+
+  async function shareLocation() {
+    if (!navigator.geolocation) {
+      say("GPS location is not supported by this browser.");
+      return;
+    }
+
+    locationButton.disabled = true;
+    say("Requesting your current location...");
+
+    navigator.geolocation.getCurrentPosition(
+      async function (position) {
+        try {
+          const user = await getUser();
+
+          const { error } = await window.supabaseClient
+            .from("rider_locations")
+            .upsert(
+              {
+                worker_id: user.id,
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                updated_at: new Date().toISOString()
+              },
+              { onConflict: "worker_id" }
+            );
+
+          if (error) throw error;
+
+          say("Your current GPS location was saved successfully.");
+        } catch (error) {
+          say("Could not save GPS location: " + error.message);
+        } finally {
+          locationButton.disabled = false;
+        }
+      },
+      function (error) {
+        say(
+          error.code === 1
+            ? "Location permission was denied. Allow location access to share GPS."
+            : "Could not get your location. Check GPS and try again."
+        );
+
+        locationButton.disabled = false;
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 10000
+      }
+    );
+  }
+
+  refreshButton.addEventListener("click", loadDeliveries);
+  locationButton.addEventListener("click", shareLocation);
+
+  if (window.supabaseClient) {
+    window.supabaseClient.auth.onAuthStateChange(function () {
+      window.setTimeout(loadDeliveries, 0);
+    });
+  }
+
+  loadDeliveries();
+})();  
   
 // START APP
 loadRestaurants();
