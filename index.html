@@ -1476,43 +1476,115 @@ async function loadRestaurantDashboard() {
   }
 }
 
-// ===== FIXED PASSWORD RECOVERY =====
+// ===== PASSWORD RECOVERY AND NEW PASSWORD =====
 (function setupPasswordRecovery() {
   const authPanel = document.getElementById("auth-panel");
-
   if (!authPanel) return;
 
-  let button = document.getElementById("forgot-password-button");
+  let message = document.getElementById("password-reset-message");
 
-  if (!button) {
-    button = document.createElement("button");
-    button.id = "forgot-password-button";
-    button.type = "button";
-    button.textContent = "Forgot password?";
-    authPanel.appendChild(button);
+  if (!message) {
+    message = document.createElement("p");
+    message.id = "password-reset-message";
+    message.setAttribute("role", "status");
+    message.setAttribute("aria-live", "polite");
+    authPanel.appendChild(message);
   }
 
-  button.onclick = async function () {
-    const emailInput = authPanel.querySelector('input[type="email"]');
-    const email = emailInput?.value.trim();
+  // Forgot password button
+  let forgotButton = document.getElementById("forgot-password-button");
 
-    let message = authPanel.querySelector("#password-reset-message");
+  if (!forgotButton) {
+    forgotButton = document.createElement("button");
+    forgotButton.id = "forgot-password-button";
+    forgotButton.type = "button";
+    forgotButton.textContent = "Forgot password?";
+    forgotButton.style.cssText =
+      "display:block;margin-top:12px;padding:12px;border:1px solid #ddd;border-radius:9px;background:white;cursor:pointer;";
+    authPanel.appendChild(forgotButton);
+  }
 
-    if (!message) {
-      message = document.createElement("p");
-      message.id = "password-reset-message";
-      message.setAttribute("role", "status");
-      authPanel.appendChild(message);
-    }
+  // Screen for setting a new password
+  let resetPanel = document.getElementById("new-password-panel");
+
+  if (!resetPanel) {
+    resetPanel = document.createElement("section");
+    resetPanel.id = "new-password-panel";
+    resetPanel.className = "container";
+    resetPanel.hidden = true;
+
+    resetPanel.innerHTML = `
+      <h2>Set a New Password</h2>
+      <form id="new-password-form">
+        <label for="new-password">New password</label>
+        <input
+          id="new-password"
+          type="password"
+          minlength="6"
+          required
+          autocomplete="new-password"
+          placeholder="At least 6 characters"
+          style="display:block;width:100%;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px;font-size:16px"
+        >
+
+        <label for="confirm-new-password">Confirm new password</label>
+        <input
+          id="confirm-new-password"
+          type="password"
+          minlength="6"
+          required
+          autocomplete="new-password"
+          placeholder="Enter the password again"
+          style="display:block;width:100%;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px;font-size:16px"
+        >
+
+        <button
+          type="button"
+          id="toggle-new-password"
+          style="padding:10px;margin-bottom:14px"
+        >Show passwords</button>
+
+        <button
+          type="submit"
+          id="save-new-password"
+          style="display:block;width:100%;padding:13px;background:#e85d04;color:white;border:0;border-radius:9px;font-weight:bold;font-size:16px"
+        >Save New Password</button>
+      </form>
+
+      <p id="new-password-message" role="status" aria-live="polite"></p>
+    `;
+
+    authPanel.parentNode.insertBefore(resetPanel, authPanel.nextSibling);
+  }
+
+  const resetForm = resetPanel.querySelector("#new-password-form");
+  const newPassword = resetPanel.querySelector("#new-password");
+  const confirmPassword =
+    resetPanel.querySelector("#confirm-new-password");
+  const saveButton = resetPanel.querySelector("#save-new-password");
+  const resetMessage =
+    resetPanel.querySelector("#new-password-message");
+
+  resetPanel.querySelector("#toggle-new-password")
+    .addEventListener("click", function () {
+      const show = newPassword.type === "password";
+      newPassword.type = show ? "text" : "password";
+      confirmPassword.type = show ? "text" : "password";
+      this.textContent = show ? "Hide passwords" : "Show passwords";
+    });
+
+  // Request the recovery email
+  forgotButton.addEventListener("click", async function () {
+    const email = document.getElementById("auth-email").value.trim();
 
     if (!email) {
       message.textContent = "Enter your email address first.";
-      emailInput?.focus();
+      document.getElementById("auth-email").focus();
       return;
     }
 
-    button.disabled = true;
-    message.textContent = "Requesting password reset...";
+    forgotButton.disabled = true;
+    message.textContent = "Requesting password-reset email...";
 
     try {
       const { error } =
@@ -1523,14 +1595,75 @@ async function loadRestaurantDashboard() {
       if (error) throw error;
 
       message.textContent =
-        "If this account exists, a password-reset email has been requested. Check your inbox and spam folder.";
+        "If the account exists, a reset email has been requested. Check your inbox and spam folder.";
     } catch (error) {
       message.textContent =
         "Password reset failed: " + error.message;
     } finally {
-      button.disabled = false;
+      forgotButton.disabled = false;
     }
-  };
+  });
+
+  // Save the new password after opening the recovery link
+  resetForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    if (newPassword.value.length < 6) {
+      resetMessage.textContent =
+        "Your password must contain at least 6 characters.";
+      return;
+    }
+
+    if (newPassword.value !== confirmPassword.value) {
+      resetMessage.textContent = "The passwords do not match.";
+      return;
+    }
+
+    saveButton.disabled = true;
+    saveButton.textContent = "Saving...";
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await supabaseClient.auth.getSession();
+
+      if (sessionError) throw sessionError;
+
+      if (!sessionData.session) {
+        throw new Error(
+          "Your recovery session is missing or expired. Request a new reset email and open its link again."
+        );
+      }
+
+      const { error } = await supabaseClient.auth.updateUser({
+        password: newPassword.value
+      });
+
+      if (error) throw error;
+
+      resetMessage.textContent =
+        "Your password has been changed successfully. You can now sign in with your new password.";
+
+      resetForm.reset();
+      resetPanel.hidden = true;
+      authPanel.hidden = false;
+    } catch (error) {
+      resetMessage.textContent =
+        "Could not change password: " + error.message;
+    } finally {
+      saveButton.disabled = false;
+      saveButton.textContent = "Save New Password";
+    }
+  });
+
+  // Display the new-password form when Supabase opens a recovery session
+  supabaseClient.auth.onAuthStateChange(function (event, session) {
+    if (event === "PASSWORD_RECOVERY") {
+      authPanel.hidden = true;
+      resetPanel.hidden = false;
+      resetMessage.textContent =
+        "Choose and confirm your new password.";
+    }
+  });
 })();
 
   // ===== RESTAURANT ORDER MANAGEMENT =====
