@@ -1219,6 +1219,16 @@ authForm.addEventListener("submit", async (event) => {
   }
 });
 
+// SHOW OR HIDE PASSWORD
+document.getElementById("toggle-password")
+  .addEventListener("click", function () {
+    const showing = authPassword.type === "password";
+
+    authPassword.type = showing ? "text" : "password";
+    this.textContent = showing ? "Hide password" : "Show password";
+    this.setAttribute("aria-pressed", String(showing));
+  });
+  
 // Restore the session when the page reloads
 async function updateAuthPanel() {
   const { data, error } =
