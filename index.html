@@ -493,6 +493,19 @@ function renderRestaurants() {
     const card = document.createElement("article");
     card.className = "restaurant";
 
+   if (r.image_url) {
+  const image = document.createElement("img");
+  image.src = r.image_url;
+  image.alt = r.name || "Restaurant";
+  image.loading = "lazy";
+  image.style.width = "100%";
+  image.style.height = "190px";
+  image.style.objectFit = "cover";
+  image.style.display = "block";
+  image.style.borderRadius = "20px 20px 0 0";
+  card.appendChild(image);
+} 
+    
     const info = document.createElement("div");
     info.className = "restaurant-info";
 
