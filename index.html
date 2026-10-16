@@ -2562,9 +2562,240 @@ loadOrders();
   }
 })();
 
+ // ===== MEKELLE FOOD ORDER: PREMIUM GRAPHICS =====
+(function premiumGraphicsUpgrade() {
+if (document.getElementById("mfo-premium-graphics")) return;
+
+const style = document.createElement("style");
+style.id = "mfo-premium-graphics";
+
+style.textContent = `
+:root {
+--mfo-orange: #e85d04;
+--mfo-orange-light: #fff0e5;
+--mfo-ink: #241b16;
+--mfo-muted: #756b64;
+--mfo-line: #f0e6df;
+--mfo-surface: #ffffff;
+}
+
+body {
+  background: #fffaf6;
+  color: var(--mfo-ink);
+}
+
+header {
+  position: relative;
+  padding: 28px 20px 30px;
+  background: linear-gradient(135deg, #c74700, #e85d04 58%, #ff9848);
+  border-radius: 0 0 28px 28px;
+  box-shadow: 0 8px 28px #b744001b;
+}
+
+header h1 {
+  max-width: 650px;
+  font-size: clamp(25px, 5vw, 34px);
+  line-height: 1.2;
+  letter-spacing: -0.8px;
+}
+
+header p {
+  margin-top: 8px;
+  line-height: 1.6;
+  color: #fff8f2;
+}
+
+.container {
+  max-width: 1000px;
+  padding: 22px 16px;
+}
+
+.mfo-hero {
+  padding: 28px 22px;
+  border: 1px solid #ffe1ca;
+  background: linear-gradient(120deg, #fff0e3, #fff9f2);
+}
+
+.mfo-hero h2 {
+  max-width: 440px;
+  color: #42210e;
+}
+
+.mfo-hero-icon {
+  filter: drop-shadow(0 7px 7px #9d4b2020);
+}
+
+.mfo-section-title,
+main.container > h2 {
+  color: #302119;
+  letter-spacing: -0.35px;
+}
+
+#search {
+  min-height: 52px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+#search:focus {
+  border-color: var(--mfo-orange);
+  box-shadow: 0 0 0 4px #e85d041c;
+}
+
+.mfo-services {
+  gap: 12px;
+}
+
+.mfo-service {
+  min-height: 125px;
+  border-color: var(--mfo-line);
+  box-shadow: 0 3px 12px #41200c06;
+}
+
+.restaurant {
+  border: 1px solid var(--mfo-line);
+  border-radius: 20px;
+  box-shadow: 0 5px 20px #45210d0a;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.restaurant-info {
+  padding: 19px;
+}
+
+.restaurant-info h3 {
+  font-size: 20px;
+  line-height: 1.35;
+  letter-spacing: -.3px;
+}
+
+.restaurant-info p {
+  color: var(--mfo-muted);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.restaurant-info button {
+  width: 100%;
+  margin-top: 12px;
+  min-height: 46px;
+}
+
+.restaurant-info button:focus-visible,
+button:focus-visible {
+  outline: 3px solid #ffb77f;
+  outline-offset: 3px;
+}
+
+.badge {
+  padding: 7px 11px;
+  font-weight: 700;
+}
+
+.categories {
+  padding-top: 5px;
+  padding-bottom: 14px;
+  scrollbar-width: thin;
+}
+
+.category {
+  min-height: 42px;
+  border-color: var(--mfo-line);
+}
+
+.cart-bar {
+  position: sticky;
+  bottom: 10px;
+  border: 1px solid #ffffff20;
+  background: #251b16;
+  box-shadow: 0 10px 30px #00000024;
+}
+
+.cart-bar button {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.cart-panel {
+  background: #fffaf6;
+}
+
+.cart-item,
+.cart-total {
+  border: 1px solid var(--mfo-line);
+  box-shadow: 0 4px 16px #40200b07;
+}
+
+.cart-checkout {
+  min-height: 46px;
+}
+
+#my-orders-panel,
+#restaurant-dashboard-panel,
+#mfo-rider-dashboard,
+#mfo-rider-assignment {
+  border-radius: 20px;
+}
+
+footer {
+  margin-top: 36px;
+  padding: 30px 18px;
+  border-top: 1px solid var(--mfo-line);
+  background: #fff5ed;
+  line-height: 1.8;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .restaurant:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px #45210d12;
+  }
+
+  .mfo-service:hover {
+    box-shadow: 0 8px 20px #45210d10;
+  }
+}
+
+@media (min-width: 700px) {
+  main.container {
+    padding-top: 30px;
+  }
+
+  #restaurants {
+    align-items: start;
+  }
+}
+
+@media (max-width: 380px) {
+  header {
+    padding: 22px 15px 25px;
+  }
+
+  .mfo-hero {
+    padding: 22px 16px;
+  }
+
+  .mfo-service {
+    padding: 14px 11px;
+  }
+
+  .cart-bar {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .cart-bar button {
+    padding: 10px;
+  }
+}
+
+`;
+
+document.head.appendChild(style);
+})(); 
+
 // =====================================================
 // MEKELLE FOOD ORDER — RIDER DASHBOARD
-// Insert immediately above: // START APP
 // =====================================================
 
 (function setupMekelleRiderDashboard() {
@@ -2914,7 +3145,6 @@ loadOrders();
 
 // =====================================================
 // MEKELLE FOOD ORDER — RESTAURANT RIDER ASSIGNMENT
-// Insert immediately above: // START APP
 // =====================================================
 
 (function setupRestaurantRiderAssignment() {
