@@ -643,6 +643,20 @@ function renderMenu() {
     const card = document.createElement("article");
     card.className = "restaurant";
 
+       if (item.image_url) {
+      const image = document.createElement("img");
+      image.src = item.image_url;
+      image.alt = item.name || "Food item";
+      image.loading = "lazy";
+      image.style.width = "100%";
+      image.style.height = "190px";
+      image.style.objectFit = "cover";
+      image.style.display = "block";
+      image.style.borderRadius = "20px 20px 0 0";
+
+      card.appendChild(image);
+    }
+    
     const info = document.createElement("div");
     info.className = "restaurant-info";
 
