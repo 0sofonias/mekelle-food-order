@@ -2168,8 +2168,10 @@ const authToggle = document.getElementById("auth-toggle");
 const authMessage = document.getElementById("auth-message");
 const authPanel = document.getElementById("auth-panel");
 
-// Switch between sign-in and account creation
-authToggle.addEventListener("click", () => {
+// FIX ACCOUNT MODE TOGGLE
+authToggle.onclick = function (event) {
+  event.preventDefault();
+
   authMode = authMode === "signin" ? "signup" : "signin";
 
   authSubmit.textContent =
@@ -2184,8 +2186,8 @@ authToggle.addEventListener("click", () => {
     authMode === "signin" ? "current-password" : "new-password";
 
   authMessage.textContent = "";
-});
-
+};
+  
 // Sign in or create an account
 authForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -2233,15 +2235,19 @@ authForm.addEventListener("submit", async (event) => {
   }
 });
 
-// SHOW OR HIDE PASSWORD
-document.getElementById("toggle-password")
-  .addEventListener("click", function () {
-    const showing = authPassword.type === "password";
+// FIX SHOW OR HIDE PASSWORD
+const passwordToggle = document.getElementById("toggle-password");
 
-    authPassword.type = showing ? "text" : "password";
-    this.textContent = showing ? "Hide password" : "Show password";
-    this.setAttribute("aria-pressed", String(showing));
-  });
+passwordToggle.onclick = function (event) {
+  event.preventDefault();
+
+  const showing = authPassword.type === "password";
+
+  authPassword.type = showing ? "text" : "password";
+  passwordToggle.textContent = showing ? "Hide password" : "Show password";
+
+  passwordToggle.setAttribute("aria-pressed", String(showing));
+};
   
 // Restore the session when the page reloads
 async function updateAuthPanel() {
