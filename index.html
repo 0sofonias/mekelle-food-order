@@ -1558,18 +1558,29 @@ function renderMenu() {
     const card = document.createElement("article");
     card.className = "restaurant";
 
-       if (item.image_url) {
-      const image = document.createElement("img");
-      image.src = item.image_url;
-      image.alt = item.name || "Food item";
-      image.loading = "lazy";
-      image.style.width = "100%";
-      image.style.height = "190px";
-      image.style.objectFit = "cover";
-      image.style.display = "block";
-      image.style.borderRadius = "20px 20px 0 0";
+        const image = document.createElement("div");
+    image.className = "restaurant-image";
 
-      card.appendChild(image);
+    if (item.image_url) {
+      const photo = document.createElement("img");
+      photo.src = item.image_url;
+      photo.alt = item.name || "Food item";
+      photo.loading = "lazy";
+
+      photo.onerror = () => {
+        image.replaceChildren();
+        image.classList.add("restaurant-image-fallback");
+        image.textContent = "🍽️";
+      };
+
+      image.appendChild(photo);
+    } else {
+      image.classList.add("restaurant-image-fallback");
+      image.textContent = "🍽️";
+    }
+
+    card.appendChild(image);
+    
     }
     
     const info = document.createElement("div");
