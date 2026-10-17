@@ -974,6 +974,170 @@ main.container .mfo-hero-cta:hover {
 background: #c74700;
 }
 }
+
+/* MEKELLE FOOD ORDER — PREMIUM CART DESIGN */
+
+.cart-panel {
+  background: #fffaf6;
+  padding: 18px;
+}
+
+.cart-content {
+  max-width: 620px;
+  margin: 0 auto;
+  padding-bottom: 36px;
+}
+
+.cart-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 14px 0;
+  background: #fffaf6;
+  border-bottom: 1px solid #f0e5dc;
+}
+
+.cart-header h2 {
+  color: #251b16;
+  font-size: 24px;
+  font-weight: 850;
+}
+
+.cart-header button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 12px;
+  font-weight: 750;
+}
+
+.cart-header .cart-back {
+  color: #ffffff;
+  background: #251b16;
+}
+
+.cart-item {
+  padding: 20px;
+  margin: 16px 0;
+  background: #ffffff;
+  border: 1px solid #f0e2d7;
+  border-radius: 20px;
+  box-shadow: 0 5px 18px rgba(65, 32, 12, 0.05);
+}
+
+.cart-item h3 {
+  margin: 0 0 12px;
+  color: #302119;
+  font-size: 19px;
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+.cart-item p {
+  margin: 8px 0;
+  color: #756b64;
+  line-height: 1.6;
+}
+
+.cart-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.cart-actions button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid #eaded4;
+  border-radius: 12px;
+  background: #fff5ed;
+  color: #40200e;
+  font-weight: 800;
+}
+
+.cart-actions .remove-item {
+  color: #a51d25;
+  background: #fff0f0;
+  border-color: #ffd1d1;
+}
+
+.cart-total {
+  padding: 22px;
+  margin-top: 20px;
+  background: #ffffff;
+  border: 1px solid #f0e2d7;
+  border-radius: 20px;
+  box-shadow: 0 6px 22px rgba(65, 32, 12, 0.06);
+}
+
+.cart-total h3 {
+  color: #d84e00;
+  font-size: 23px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.cart-total p {
+  color: #756b64;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.cart-checkout {
+  display: block;
+  width: 100%;
+  min-height: 50px;
+  margin-top: 14px;
+  padding: 14px 18px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(110deg, #e85d04, #f47721);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 850;
+  box-shadow: 0 5px 14px rgba(232, 93, 4, 0.16);
+}
+
+.cart-checkout:active {
+  transform: scale(0.99);
+}
+
+.cart-content input,
+.cart-content textarea,
+.cart-content select {
+  width: 100%;
+  max-width: 100%;
+  padding: 13px;
+  border: 1px solid #eaded4;
+  border-radius: 12px;
+  background: #ffffff;
+  font-size: 16px;
+}
+
+.cart-content input:focus,
+.cart-content textarea:focus,
+.cart-content select:focus {
+  border-color: #e85d04;
+  outline: 3px solid rgba(232, 93, 4, 0.12);
+}
+
+@media (max-width: 380px) {
+  .cart-panel {
+    padding: 12px;
+  }
+
+  .cart-item,
+  .cart-total {
+    padding: 16px;
+  }
+
+  .cart-header h2 {
+    font-size: 21px;
+  }
+}
   
 </style>
 </head>
