@@ -847,6 +847,133 @@ main.container #search:focus {
     transition: none;
   }
 }
+
+/* MEKELLE FOOD ORDER — PREMIUM MENU CARDS */
+
+#restaurants > .restaurant {
+position: relative;
+min-width: 0;
+overflow: hidden;
+background: #ffffff;
+border: 1px solid #f0e2d7;
+border-radius: 22px;
+box-shadow: 0 6px 22px rgba(74, 37, 12, 0.07);
+transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#restaurants > .restaurant > img {
+display: block;
+width: 100%;
+height: 210px;
+object-fit: cover;
+background: linear-gradient(135deg, #fff0e3, #ffd2a8);
+}
+
+#restaurants > .restaurant .restaurant-info {
+padding: 20px;
+}
+
+#restaurants > .restaurant .restaurant-info h3 {
+margin: 0 0 9px;
+color: #302119;
+font-size: 21px;
+font-weight: 850;
+line-height: 1.35;
+overflow-wrap: anywhere;
+}
+
+#restaurants > .restaurant .restaurant-info p {
+color: #756b64;
+font-size: 14px;
+line-height: 1.6;
+}
+
+#restaurants > .restaurant .restaurant-info .menu-price {
+margin: 14px 0;
+color: #d84e00;
+font-size: 23px;
+font-weight: 900;
+letter-spacing: -0.4px;
+}
+
+#restaurants > .restaurant .restaurant-info button {
+display: block;
+width: 100%;
+min-height: 49px;
+margin-top: 15px;
+padding: 13px 16px;
+color: #ffffff;
+background: linear-gradient(110deg, #e85d04, #f47721);
+border: none;
+border-radius: 14px;
+font-size: 15px;
+font-weight: 800;
+box-shadow: 0 5px 12px rgba(232, 93, 4, 0.16);
+}
+
+#restaurants > .restaurant .restaurant-info button:active {
+transform: scale(0.98);
+}
+
+@media (hover: hover) and (pointer: fine) {
+#restaurants > .restaurant:hover {
+transform: translateY(-3px);
+box-shadow: 0 12px 28px rgba(74, 37, 12, 0.12);
+}
+}
+
+@media (prefers-reduced-motion: reduce) {
+#restaurants > .restaurant {
+transition: none;
+}
+}
+
+/* HOMEPAGE HERO BUTTON AND DETAILS */
+main.container .mfo-hero-eyebrow {
+margin: 0 0 12px;
+color: #a54108;
+font-size: 11px;
+font-weight: 850;
+letter-spacing: 1.4px;
+}
+
+main.container .mfo-hero-cta {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+gap: 12px;
+min-height: 48px;
+margin-top: 20px;
+padding: 13px 20px;
+border-radius: 14px;
+background: #e85d04;
+color: #ffffff;
+text-decoration: none;
+font-size: 15px;
+font-weight: 800;
+box-shadow: 0 6px 16px rgba(232, 93, 4, 0.2);
+}
+
+main.container .mfo-hero-trust {
+display: flex;
+flex-wrap: wrap;
+gap: 10px 18px;
+margin-top: 20px;
+color: #70513e;
+font-size: 12px;
+font-weight: 650;
+}
+
+main.container .mfo-hero-cta:focus-visible {
+outline: 3px solid #a54108;
+outline-offset: 4px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+main.container .mfo-hero-cta:hover {
+background: #c74700;
+}
+}
   
 </style>
 </head>
@@ -945,6 +1072,30 @@ main.container #search:focus {
   
 <main class="container">
 
+<!-- HOMEPAGE HERO -->  <section class="mfo-hero" aria-labelledby="mfo-hero-title">
+    <div class="mfo-hero-icon" aria-hidden="true">🍔</div><p class="mfo-hero-eyebrow">GOOD FOOD, RIGHT HERE IN MEKELLE</p>
+
+<h2 id="mfo-hero-title">
+  Your next favourite meal is waiting.
+</h2>
+
+<p>
+  Discover local restaurants, explore delicious meals,
+  and order your food from one convenient place.
+</p>
+
+<a class="mfo-hero-cta" href="#restaurants">
+  Browse Restaurants <span aria-hidden="true">→</span>
+</a>
+
+<div class="mfo-hero-trust">
+  <span>🍽️ Local restaurants</span>
+  <span>📍 Made for Mekelle</span>
+</div>
+
+  </section>
+  <!-- END HOMEPAGE HERO -->
+  
   <input
     class="search"
     id="search"
@@ -1268,6 +1419,7 @@ function renderMenu() {
       item.description || "Delicious food";
 
     const price = document.createElement("p");
+    price.className = "menu-price";
     price.textContent =
       Number(item.price).toLocaleString() + " ETB";
 
