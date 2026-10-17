@@ -314,12 +314,27 @@ h2 {
   transition: transform .18s ease, box-shadow .18s ease;
 }
 
-.restaurant > img {
-  display: block;
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  background: #fff0e3;
+.restaurant-image {
+width: 100%;
+height: 200px;
+overflow: hidden;
+background: #fff0e3;
+border-radius: 20px 20px 0 0;
+}
+
+.restaurant-image img {
+display: block;
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+
+.restaurant-image-fallback {
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 56px;
+background: linear-gradient(135deg, #fff0e3, #ffd2a8);
 }
 
 .restaurant-info {
@@ -808,18 +823,28 @@ function renderRestaurants() {
     const card = document.createElement("article");
     card.className = "restaurant";
 
-   if (r.image_url) {
-  const image = document.createElement("img");
-  image.src = r.image_url;
-  image.alt = r.name || "Restaurant";
-  image.loading = "lazy";
-  image.style.width = "100%";
-  image.style.height = "190px";
-  image.style.objectFit = "cover";
-  image.style.display = "block";
-  image.style.borderRadius = "20px 20px 0 0";
-  card.appendChild(image);
-} 
+ const image = document.createElement("div");
+image.className = "restaurant-image";
+
+if (r.image_url) {
+  const photo = document.createElement("img");
+  photo.src = r.image_url;
+  photo.alt = (r.name || "Mekelle restaurant") + " food and restaurant";
+  photo.loading = "lazy";
+
+  photo.onerror = () => {
+    image.replaceChildren();
+    image.classList.add("restaurant-image-fallback");
+    image.textContent = "🍽️";
+  };
+
+  image.appendChild(photo);
+} else {
+  image.classList.add("restaurant-image-fallback");
+  image.textContent = "🍽️";
+}
+
+card.appendChild(image);
     
     const info = document.createElement("div");
     info.className = "restaurant-info";
