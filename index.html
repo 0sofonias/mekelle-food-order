@@ -1181,6 +1181,140 @@ background: #c74700;
     ← Back to Restaurants
   </button>
 </section>
+
+<!-- ADMIN DASHBOARD -->
+<section id="admin-dashboard-panel" class="container" hidden>
+
+  <div style="
+    background:linear-gradient(135deg,#14213d,#244b80);
+    color:white;
+    padding:28px 22px;
+    border-radius:18px;
+    margin-bottom:24px;
+  ">
+    <p style="margin:0;opacity:.8;">MEKELLE FOOD ORDER</p>
+
+    <h1 style="margin:10px 0;">
+      👑 Admin Dashboard
+    </h1>
+
+    <p style="margin:0;">
+      Manage your entire food delivery platform.
+    </p>
+  </div>
+
+  <!-- PLATFORM STATISTICS -->
+  <h2>📊 Platform Overview</h2>
+
+  <div style="
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:14px;
+    margin-bottom:28px;
+  ">
+
+    <div style="background:#eef5ff;padding:20px;border-radius:14px;">
+      <div>📦 Total Orders</div>
+      <h2 id="admin-total-orders">—</h2>
+    </div>
+
+    <div style="background:#eafaf0;padding:20px;border-radius:14px;">
+      <div>💰 Total Sales</div>
+      <h2 id="admin-total-sales">— ETB</h2>
+    </div>
+
+    <div style="background:#fff4df;padding:20px;border-radius:14px;">
+      <div>🏪 Restaurants</div>
+      <h2 id="admin-total-restaurants">—</h2>
+    </div>
+
+    <div style="background:#f2eaff;padding:20px;border-radius:14px;">
+      <div>🚴 Riders</div>
+      <h2 id="admin-total-riders">—</h2>
+    </div>
+
+    <div style="background:#ffecec;padding:20px;border-radius:14px;">
+      <div>👥 Customers</div>
+      <h2 id="admin-total-customers">—</h2>
+    </div>
+
+  </div>
+
+  <!-- ORDER MANAGEMENT -->
+  <div style="
+    background:white;
+    padding:20px;
+    border-radius:16px;
+    margin-bottom:20px;
+  ">
+
+    <h2>📦 All Orders</h2>
+
+    <p>View and monitor orders across the platform.</p>
+
+    <div id="admin-orders-list">
+      Orders will appear here when connected to Supabase.
+    </div>
+
+  </div>
+
+  <!-- RESTAURANT MANAGEMENT -->
+  <div style="
+    background:white;
+    padding:20px;
+    border-radius:16px;
+    margin-bottom:20px;
+  ">
+
+    <h2>🏪 Restaurant Management</h2>
+
+    <p>View and manage restaurants using the platform.</p>
+
+    <div id="admin-restaurants-list">
+      Restaurant information will appear here.
+    </div>
+
+  </div>
+
+  <!-- RIDER MANAGEMENT -->
+  <div style="
+    background:white;
+    padding:20px;
+    border-radius:16px;
+    margin-bottom:20px;
+  ">
+
+    <h2>🚴 Rider Management</h2>
+
+    <p>Monitor riders and their delivery activities.</p>
+
+    <div id="admin-riders-list">
+      Rider information will appear here.
+    </div>
+
+  </div>
+
+  <!-- PLATFORM REFRESH -->
+  <button
+    id="admin-refresh-button"
+    type="button"
+    style="
+      padding:13px 20px;
+      border:0;
+      border-radius:10px;
+      background:#173f73;
+      color:white;
+      font-weight:bold;
+      cursor:pointer;
+    "
+  >
+    🔄 Refresh Dashboard
+  </button>
+
+  <p id="admin-dashboard-message" role="status" aria-live="polite"></p>
+
+</section>
+<!-- END ADMIN DASHBOARD -->
   
 <!-- CUSTOMER AUTHENTICATION -->
 <section id="auth-panel" class="container">
