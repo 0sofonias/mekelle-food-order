@@ -4730,7 +4730,12 @@ if (restaurantsError) throw restaurantsError;
       order => order.is_test_order !== true
     );
 
-    const totalOrders = realOrders.length;
+    const totalRestaurants = (restaurants || []).filter(
+  restaurant => restaurant.is_approved === true
+).length;
+
+document.getElementById("admin-total-restaurants").textContent =
+  totalRestaurants.toLocaleString();
 
     const totalSales = realOrders.reduce(
       (sum, order) => {
