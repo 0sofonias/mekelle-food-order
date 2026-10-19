@@ -4797,10 +4797,16 @@ async function loadAdminDashboardStats() {
         return;
       }
 
-      lastUserId = user.id;
+    lastUserId = user.id;
       lastRole = role;
 
       await applyRoleVisibility(user);
+
+      // Load statistics only for the admin account.
+      if (role === "admin") {
+        await loadAdminDashboardStats();
+      }
+      
     } catch (error) {
       console.error("Dashboard refresh failed:", error);
     } finally {
