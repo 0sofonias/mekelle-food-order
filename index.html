@@ -4699,50 +4699,32 @@ async function loadAdminDashboardStats() {
   const salesCard =
     document.getElementById("admin-total-sales");
 
+  const restaurantsCard =
+    document.getElementById("admin-total-restaurants");
+
   if (!ordersCard || !salesCard) return;
 
   if (message) {
     message.textContent = "Loading platform statistics...";
   }
 
+  // Load orders independently.
   try {
+    const { data: orders, error } = await supabaseClient
+      .from("orders")
+      .select("id, total_amount, is_test_order");
 
-  const [
-  { data: orders, error: ordersError },
-  { data: restaurants, error: restaurantsError }
-] = await Promise.all([
-  supabaseClient
-    .from("orders")
-    .select("id, total_amount, is_test_order"),
-
-  supabaseClient
-    .from("restaurants")
-    .select("id, is_approved")
-]);
-
-if (ordersError) throw ordersError;
-if (restaurantsError) throw restaurantsError;
-    
     if (error) throw error;
 
-    // Exclude test orders from business statistics.
     const realOrders = (orders || []).filter(
       order => order.is_test_order !== true
     );
 
-    const totalRestaurants = (restaurants || []).filter(
-  restaurant => restaurant.is_approved === true
-).length;
-
-document.getElementById("admin-total-restaurants").textContent =
-  totalRestaurants.toLocaleString();
+    const totalOrders = realOrders.length;
 
     const totalSales = realOrders.reduce(
-      (sum, order) => {
-        return sum + (
-          Number(order.total_amount) || 0
-        );
-      },
+      (sum, order) =>
+        sum + (Number(order.total_amount) || 0),
       0
     );
 
@@ -4755,24 +4737,44 @@ document.getElementById("admin-total-restaurants").textContent =
         maximumFractionDigits: 2
       }) + " ETB";
 
-    if (message) {
-      message.textContent =
-        "Statistics updated successfully.";
+  } catch (error) {
+    console.error("Orders statistics failed:", error);
+
+    ordersCard.textContent = "Error";
+    salesCard.textContent = "Error";
+  }
+
+  // Load restaurants independently.
+  try {
+    const { data: restaurants, error } = await supabaseClient
+      .from("restaurants")
+      .select("id, is_approved");
+
+    if (error) throw error;
+
+    const totalRestaurants = (restaurants || []).filter(
+      restaurant => restaurant.is_approved === true
+    ).length;
+
+    if (restaurantsCard) {
+      restaurantsCard.textContent =
+        totalRestaurants.toLocaleString();
     }
 
   } catch (error) {
-    console.error(
-      "Admin statistics failed to load:",
-      error
-    );
+    console.error("Restaurant statistics failed:", error);
 
-    if (message) {
-      message.textContent =
-        "Could not load statistics. Check database permissions.";
+    if (restaurantsCard) {
+      restaurantsCard.textContent = "Error";
     }
   }
+
+  if (message) {
+    message.textContent =
+      "Statistics loaded. Check the console for any errors.";
+  }
 }
-// END ADMIN DASHBOARD STATISTICS  
+// END ADMIN DASHBOARD STATISTICS
 
 // KEEP DASHBOARDS SEPARATED
 (function enforceDashboardSeparation() {
