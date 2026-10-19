@@ -4780,41 +4780,6 @@ async function loadAdminDashboardStats() {
       "Statistics loaded. Check the console for any errors.";
   }
 }
-
-// Load rider and customer counts independently.
-  try {
-    const { data: profiles, error } = await supabaseClient
-      .from("profiles")
-      .select("id, role");
-
-    if (error) throw error;
-
-    const allProfiles = profiles || [];
-
-    const totalRiders = allProfiles.filter(
-      profile => profile.role === "delivery_worker"
-    ).length;
-
-    const totalCustomers = allProfiles.filter(
-      profile => profile.role === "customer"
-    ).length;
-
-    if (ridersCard) {
-      ridersCard.textContent =
-        totalRiders.toLocaleString();
-    }
-
-    if (customersCard) {
-      customersCard.textContent =
-        totalCustomers.toLocaleString();
-    }
-
-  } catch (error) {
-    console.error("Account statistics failed:", error);
-
-    if (ridersCard) ridersCard.textContent = "Error";
-    if (customersCard) customersCard.textContent = "Error";
-  }
   
 // END ADMIN DASHBOARD STATISTICS
 
