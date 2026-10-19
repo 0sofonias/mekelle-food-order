@@ -4685,9 +4685,76 @@ async function applyRoleVisibility(user) {
     adminPanel.hidden = !isAdmin;
   }
 }
-// END ROLE-BASED DASHBOARD CONTROL
   
 // END ROLE-BASED DASHBOARD CONTROL
+
+// START ADMIN DASHBOARD STATISTICS
+async function loadAdminDashboardStats() {
+  const message =
+    document.getElementById("admin-dashboard-message");
+
+  const ordersCard =
+    document.getElementById("admin-total-orders");
+
+  const salesCard =
+    document.getElementById("admin-total-sales");
+
+  if (!ordersCard || !salesCard) return;
+
+  if (message) {
+    message.textContent = "Loading platform statistics...";
+  }
+
+  try {
+    const { data: orders, error } = await supabaseClient
+      .from("orders")
+      .select("id, total_amount, is_test_order");
+
+    if (error) throw error;
+
+    // Exclude test orders from business statistics.
+    const realOrders = (orders || []).filter(
+      order => order.is_test_order !== true
+    );
+
+    const totalOrders = realOrders.length;
+
+    const totalSales = realOrders.reduce(
+      (sum, order) => {
+        return sum + (
+          Number(order.total_amount) || 0
+        );
+      },
+      0
+    );
+
+    ordersCard.textContent =
+      totalOrders.toLocaleString();
+
+    salesCard.textContent =
+      totalSales.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }) + " ETB";
+
+    if (message) {
+      message.textContent =
+        "Statistics updated successfully.";
+    }
+
+  } catch (error) {
+    console.error(
+      "Admin statistics failed to load:",
+      error
+    );
+
+    if (message) {
+      message.textContent =
+        "Could not load statistics. Check database permissions.";
+    }
+  }
+}
+// END ADMIN DASHBOARD STATISTICS  
 
 // KEEP DASHBOARDS SEPARATED
 (function enforceDashboardSeparation() {
