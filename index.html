@@ -4497,75 +4497,63 @@ async function applyRoleVisibility(user) {
 }
 // END ROLE-BASED DASHBOARD CONTROL
 
-// KEEP DASHBOARDS SEPARATED WHEN NEW PANELS ARE ADDED
+// KEEP DASHBOARDS SEPARATED
 (function enforceDashboardSeparation() {
   let lastUserId = null;
   let lastRole = null;
+  let refreshInProgress = false;
 
   async function refreshRoleScreens() {
-    const { data } = await supabaseClient.auth.getSession();
-    const user = data?.session?.user;
+    if (refreshInProgress) return;
+    refreshInProgress = true;
 
-    if (!user) {
-      lastUserId = null;
-      lastRole = null;
-      await applyRoleVisibility(null);
-      return;
-    }
+    try {
+      const { data, error } = await supabaseClient.auth.getSession();
 
-    const { data: profile, error } = await supabaseClient
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
+      if (error) throw error;
 
-    if (error || !profile?.role) {
-      lastRole = null;
-      await applyRoleVisibility(user);
-      return;
-    }
+      const user = data?.session?.user;
 
-    const role = String(profile.role).toLowerCase().trim();
+      if (!user) {
+        lastUserId = null;
+        lastRole = null;
+        await applyRoleVisibility(null);
+        return;
+      }
 
-    if (user.id !== lastUserId || role !== lastRole) {
+      const { data: profile, error: profileError } = await supabaseClient
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (profileError || !profile?.role) {
+        await applyRoleVisibility(user);
+        return;
+      }
+
+      const role = String(profile.role).toLowerCase().trim();
+
+      if (user.id === lastUserId && role === lastRole) {
+        return;
+      }
+
       lastUserId = user.id;
       lastRole = role;
+
+      await applyRoleVisibility(user);
+    } catch (error) {
+      console.error("Dashboard refresh failed:", error);
+    } finally {
+      refreshInProgress = false;
     }
-
-    const customer = ["customer", "buyer"].includes(role);
-    const restaurant = role === "restaurant";
-    const rider = [
-      "rider",
-      "delivery",
-      "delivery_worker",
-      "delivery-worker"
-    ].includes(role);
-
-    const setHidden = (id, shouldHide) => {
-      const element = document.getElementById(id);
-      if (element) element.hidden = shouldHide;
-    };
-
-    setHidden("auth-panel", true);
-    setHidden("my-orders-button", !customer);
-    setHidden("restaurant-dashboard-button", !restaurant);
-    setHidden("my-orders-panel", !customer);
-    setHidden("restaurant-dashboard-panel", !restaurant);
-    setHidden("mfo-rider-dashboard", !rider);
-    setHidden("mfo-rider-assignment", !restaurant);
-
-    const main = document.querySelector("main.container");
-    if (main) main.hidden = !customer;
   }
 
-  const observer = new MutationObserver(() => {
-    refreshRoleScreens();
-  });
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
+  if (window.supabaseClient) {
+    window.supabaseClient.auth.onAuthStateChange(() => {
+      window.setTimeout(refreshRoleScreens, 0);
+    });
+  }
 
   refreshRoleScreens();
 })();
