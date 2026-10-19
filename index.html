@@ -4430,40 +4430,54 @@ async function applyRoleVisibility(user) {
   const ordersPanel =
     document.getElementById("my-orders-panel");
 
-  // Signed-out users should see the login screen.
-  if (!user) {
-    if (authPanel) authPanel.hidden = false;
+  const myOrdersButton =
+    document.getElementById("my-orders-button");
+
+  const restaurantButton =
+    document.getElementById("restaurant-dashboard-button");
+
+  function hideAllProtectedPanels() {
     if (main) main.hidden = true;
     if (restaurantPanel) restaurantPanel.hidden = true;
     if (riderPanel) riderPanel.hidden = true;
     if (riderAssignmentPanel) riderAssignmentPanel.hidden = true;
     if (ordersPanel) ordersPanel.hidden = true;
+    if (myOrdersButton) myOrdersButton.hidden = true;
+    if (restaurantButton) restaurantButton.hidden = true;
+  }
+
+  // Signed-out users see authentication only.
+  if (!user) {
+    if (authPanel) authPanel.hidden = false;
+    hideAllProtectedPanels();
     return;
   }
 
-  // Read the authenticated user's role from Supabase.
+  // Verify the user's role using Supabase.
   const { data: profile, error } = await supabaseClient
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
 
-  if (error || !profile || !profile.role) {
+  if (error || !profile?.role) {
     console.error("Could not verify account role:", error);
-    alert("Your account role could not be verified. Please contact support.");
+
     if (authPanel) authPanel.hidden = true;
-    if (main) main.hidden = true;
-    if (restaurantPanel) restaurantPanel.hidden = true;
-    if (riderPanel) riderPanel.hidden = true;
-    if (riderAssignmentPanel) riderAssignmentPanel.hidden = true;
-    if (ordersPanel) ordersPanel.hidden = true;
+    hideAllProtectedPanels();
+
+    alert(
+      "Your account role could not be verified. Please contact support."
+    );
+
     return;
   }
 
   const role = String(profile.role).toLowerCase().trim();
 
-  const isCustomer = role === "customer" || role === "buyer";
+  const isCustomer = ["customer", "buyer"].includes(role);
   const isRestaurant = role === "restaurant";
+
   const isRider = [
     "rider",
     "delivery",
@@ -4471,30 +4485,46 @@ async function applyRoleVisibility(user) {
     "delivery-worker"
   ].includes(role);
 
+  if (!isCustomer && !isRestaurant && !isRider) {
+    if (authPanel) authPanel.hidden = true;
+    hideAllProtectedPanels();
+
+    console.error("Unsupported account role:", role);
+    alert("This account has no supported dashboard role.");
+
+    return;
+  }
+
+  // Hide the sign-in screen after successful role verification.
   if (authPanel) authPanel.hidden = true;
+
+  // Customer shopping interface.
   if (main) main.hidden = !isCustomer;
 
+  // Customer order history.
+  if (ordersPanel) ordersPanel.hidden = !isCustomer;
+  if (myOrdersButton) myOrdersButton.hidden = !isCustomer;
+
+  // Restaurant management interface.
   if (restaurantPanel) {
     restaurantPanel.hidden = !isRestaurant;
+  }
+
+  if (restaurantButton) {
+    restaurantButton.hidden = !isRestaurant;
   }
 
   if (riderAssignmentPanel) {
     riderAssignmentPanel.hidden = !isRestaurant;
   }
 
+  // Rider delivery interface.
   if (riderPanel) {
     riderPanel.hidden = !isRider;
   }
-
-  if (ordersPanel) {
-    ordersPanel.hidden = !isCustomer;
-  }
-
-  if (!isCustomer && !isRestaurant && !isRider) {
-    console.error("Unsupported account role:", role);
-    alert("This account has no supported dashboard role.");
-  }
 }
+// END ROLE-BASED DASHBOARD CONTROL
+  
 // END ROLE-BASED DASHBOARD CONTROL
 
 // KEEP DASHBOARDS SEPARATED
