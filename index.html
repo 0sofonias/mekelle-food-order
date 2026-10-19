@@ -4706,10 +4706,23 @@ async function loadAdminDashboardStats() {
   }
 
   try {
-    const { data: orders, error } = await supabaseClient
-      .from("orders")
-      .select("id, total_amount, is_test_order");
 
+  const [
+  { data: orders, error: ordersError },
+  { data: restaurants, error: restaurantsError }
+] = await Promise.all([
+  supabaseClient
+    .from("orders")
+    .select("id, total_amount, is_test_order"),
+
+  supabaseClient
+    .from("restaurants")
+    .select("id, is_approved")
+]);
+
+if (ordersError) throw ordersError;
+if (restaurantsError) throw restaurantsError;
+    
     if (error) throw error;
 
     // Exclude test orders from business statistics.
