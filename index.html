@@ -1246,17 +1246,83 @@ background: #c74700;
     padding:20px;
     border-radius:16px;
     margin-bottom:20px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.06);
   ">
 
     <h2>📦 All Orders</h2>
 
     <p>View and monitor orders across the platform.</p>
 
-    <div id="admin-orders-list">
-      Orders will appear here when connected to Supabase.
+    <div style="
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:15px 0;
+    ">
+      <input
+        id="admin-order-search"
+        type="search"
+        placeholder="Search order ID or status..."
+        style="
+          flex:1;
+          min-width:200px;
+          padding:12px;
+          border:1px solid #ddd;
+          border-radius:8px;
+        "
+      >
+
+      <button
+        type="button"
+        onclick="loadAdminOrders()"
+        style="
+          padding:12px 18px;
+          background:#e87522;
+          color:white;
+          border:none;
+          border-radius:8px;
+          cursor:pointer;
+        "
+      >
+        🔄 Refresh Orders
+      </button>
+    </div>
+
+    <p id="admin-orders-message" role="status">
+      Loading orders...
+    </p>
+
+    <div style="overflow-x:auto;">
+      <table style="
+        width:100%;
+        min-width:700px;
+        border-collapse:collapse;
+        text-align:left;
+      ">
+        <thead>
+          <tr style="background:#fff3e8;">
+            <th style="padding:12px;border-bottom:1px solid #eee;">Order ID</th>
+            <th style="padding:12px;border-bottom:1px solid #eee;">Customer</th>
+            <th style="padding:12px;border-bottom:1px solid #eee;">Restaurant</th>
+            <th style="padding:12px;border-bottom:1px solid #eee;">Total</th>
+            <th style="padding:12px;border-bottom:1px solid #eee;">Status</th>
+            <th style="padding:12px;border-bottom:1px solid #eee;">Date</th>
+          </tr>
+        </thead>
+
+        <tbody id="admin-orders-table-body">
+          <tr>
+            <td colspan="6" style="padding:18px;text-align:center;">
+              Loading orders...
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
   </div>
+
+  <!-- RESTAURANT MANAGEMENT -->
 
   <!-- RESTAURANT MANAGEMENT -->
   <div style="
