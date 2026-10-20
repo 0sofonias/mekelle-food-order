@@ -2689,7 +2689,69 @@ async function loadRestaurantDashboard() {
           "Placed: " +
           new Date(order.created_at).toLocaleString();
 
-        card.append(title, total, address, payment, status, date);
+        const actions = document.createElement("div");
+actions.style.cssText =
+  "display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;";
+
+const nextStatus = {
+  awaiting_payment: "confirmed",
+  confirmed: "preparing",
+  preparing: "ready_for_pickup"
+};
+
+const nextLabel = {
+  awaiting_payment: "Accept Order",
+  confirmed: "Start Preparing",
+  preparing: "Ready for Pickup"
+};
+
+const next = nextStatus[order.order_status];
+
+if (next) {
+  const button = document.createElement("button");
+
+  button.type = "button";
+  button.textContent = nextLabel[order.order_status];
+
+  button.disabled = order.payment_status !== "paid";
+
+  button.title = button.disabled
+    ? "Payment must be verified before accepting this order."
+    : "";
+
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    restaurantDashboardMessage.textContent =
+      "Updating order status...";
+
+    try {
+      const { error } = await supabaseClient.rpc(
+        "restaurant_update_order_status",
+        {
+          p_order_id: order.id,
+          p_new_status: next
+        }
+      );
+
+      if (error) throw error;
+
+      restaurantDashboardMessage.textContent =
+        "Order status updated successfully.";
+
+      await loadRestaurantDashboard();
+
+    } catch (error) {
+      restaurantDashboardMessage.textContent =
+        "Could not update order: " + error.message;
+
+      button.disabled = false;
+    }
+  });
+
+  actions.appendChild(button);
+}
+
+card.append(title, total, address, payment, status, date, actions);
         restaurantOrdersList.appendChild(card);
       }
     }
