@@ -4775,43 +4775,41 @@ async function loadAdminDashboardStats() {
     }
   }
 
-    // Load rider and customer counts independently.
-  try {
-    const { data: profiles, error } = await supabaseClient
-      .from("profiles")
-      .select("id, role");
+// Load rider and customer counts independently.
+try {
+const { data: counts, error } = await supabaseClient
+.rpc("get_admin_profile_counts");
 
-    if (error) throw error;
+if (error) throw error;
 
-    const totalRiders = (profiles || []).filter(
-      profile => profile.role === "delivery_worker"
-    ).length;
+const result = counts?.[0];
 
-    const totalCustomers = (profiles || []).filter(
-      profile => profile.role === "customer"
-    ).length;
+if (!result) {
+  throw new Error("No profile counts returned.");
+}
 
-    if (ridersCard) {
-      ridersCard.textContent =
-        totalRiders.toLocaleString();
-    }
+if (ridersCard) {
+  ridersCard.textContent =
+    Number(result.total_riders).toLocaleString();
+}
 
-    if (customersCard) {
-      customersCard.textContent =
-        totalCustomers.toLocaleString();
-    }
+if (customersCard) {
+  customersCard.textContent =
+    Number(result.total_customers).toLocaleString();
+}
 
-  } catch (error) {
-    console.error("Rider/customer statistics failed:", error);
+} catch (error) {
+console.error("Rider/customer statistics failed:", error);
 
-    if (ridersCard) {
-      ridersCard.textContent = "Error";
-    }
+if (ridersCard) {
+  ridersCard.textContent = "Error";
+}
 
-    if (customersCard) {
-      customersCard.textContent = "Error";
-    }
-  }
+if (customersCard) {
+  customersCard.textContent = "Error";
+}
+
+}
 
   if (message) {
     message.textContent =
