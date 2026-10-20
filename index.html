@@ -4754,37 +4754,40 @@ async function applyRoleVisibility(user) {
   
 // END ROLE-BASED DASHBOARD CONTROL
 
-// START ADMIN DASHBOARD STATISTICS
-async function loadAdminDashboardStats() {
-  const message =
-    document.getElementById("admin-dashboard-message");
+// START ADMIN ORDERS MANAGEMENT
 
-  const ordersCard =
-    document.getElementById("admin-total-orders");
+async function loadAdminOrders() {
+  const tableBody = document.getElementById("admin-orders-table-body");
+  const message = document.getElementById("admin-orders-message");
+  const searchInput = document.getElementById("admin-order-search");
 
-  const salesCard =
-    document.getElementById("admin-total-sales");
-
-  const restaurantsCard =
-    document.getElementById("admin-total-restaurants");
-
-  const ridersCard =
-  document.getElementById("admin-total-riders");
-
-  const customersCard =
-  document.getElementById("admin-total-customers");
-
-  if (!ordersCard || !salesCard) return;
+  if (!tableBody) return;
 
   if (message) {
-    message.textContent = "Loading platform statistics...";
+    message.textContent = "Loading orders...";
   }
 
-  // Load orders independently.
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="6" style="padding:18px;text-align:center;">
+        Loading orders...
+      </td>
+    </tr>
+  `;
+
   try {
     const { data: orders, error } = await supabaseClient
       .from("orders")
-      .select("id, total_amount, is_test_order");
+      .select(`
+        id,
+        customer_id,
+        restaurant_id,
+        total_amount,
+        order_status,
+        created_at,
+        is_test_order
+      `)
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
 
@@ -4792,110 +4795,197 @@ async function loadAdminDashboardStats() {
       order => order.is_test_order !== true
     );
 
-    const totalOrders = realOrders.length;
+    const customerIds = [
+      ...new Set(
+        realOrders
+          .map(order => order.customer_id)
+          .filter(Boolean)
+      )
+    ];
 
-    const totalSales = realOrders.reduce(
-      (sum, order) =>
-        sum + (Number(order.total_amount) || 0),
-      0
-    );
+    const restaurantIds = [
+      ...new Set(
+        realOrders
+          .map(order => order.restaurant_id)
+          .filter(Boolean)
+      )
+    ];
 
-    ordersCard.textContent =
-      totalOrders.toLocaleString();
+    let customerNames = {};
+    let restaurantNames = {};
 
-    salesCard.textContent =
-      totalSales.toLocaleString("en-US", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }) + " ETB";
+    if (customerIds.length > 0) {
+      const { data: customers, error: customerError } =
+        await supabaseClient
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", customerIds);
 
-  } catch (error) {
-    console.error("Orders statistics failed:", error);
-
-    ordersCard.textContent = "Error";
-    salesCard.textContent = "Error";
-  }
-
-  // Load restaurants independently.
-  try {
-    const { data: restaurants, error } = await supabaseClient
-      .from("restaurants")
-      .select("id, is_approved");
-
-    if (error) throw error;
-
-    const totalRestaurants = (restaurants || []).filter(
-      restaurant => restaurant.is_approved === true
-    ).length;
-
-    if (restaurantsCard) {
-      restaurantsCard.textContent =
-        totalRestaurants.toLocaleString();
+      if (customerError) {
+        console.error("Customer names could not be loaded:", customerError);
+      } else {
+        (customers || []).forEach(customer => {
+          customerNames[customer.id] =
+            customer.full_name || "Customer";
+        });
+      }
     }
 
-  } catch (error) {
-    console.error("Restaurant statistics failed:", error);
+    if (restaurantIds.length > 0) {
+      const { data: restaurants, error: restaurantError } =
+        await supabaseClient
+          .from("restaurants")
+          .select("id, name")
+          .in("id", restaurantIds);
 
-    if (restaurantsCard) {
-      restaurantsCard.textContent = "Error";
+      if (restaurantError) {
+        console.error("Restaurant names could not be loaded:", restaurantError);
+      } else {
+        (restaurants || []).forEach(restaurant => {
+          restaurantNames[restaurant.id] =
+            restaurant.name || "Restaurant";
+        });
+      }
+    }
+
+    function escapeOrderText(value) {
+      return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[character]);
+    }
+
+    function shortOrderId(id) {
+      return String(id || "").slice(0, 8).toUpperCase();
+    }
+
+    function formatOrderDate(date) {
+      if (!date) return "—";
+
+      const parsedDate = new Date(date);
+
+      if (Number.isNaN(parsedDate.getTime())) return "—";
+
+      return parsedDate.toLocaleString();
+    }
+
+    function renderOrders() {
+      const searchTerm =
+        (searchInput?.value || "").trim().toLowerCase();
+
+      const filteredOrders = realOrders.filter(order => {
+        const id = shortOrderId(order.id).toLowerCase();
+        const status = String(order.order_status || "pending").toLowerCase();
+        const customer = String(
+          customerNames[order.customer_id] || "Customer"
+        ).toLowerCase();
+        const restaurant = String(
+          restaurantNames[order.restaurant_id] || "Restaurant"
+        ).toLowerCase();
+
+        return (
+          id.includes(searchTerm) ||
+          status.includes(searchTerm) ||
+          customer.includes(searchTerm) ||
+          restaurant.includes(searchTerm)
+        );
+      });
+
+      if (filteredOrders.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="6" style="padding:18px;text-align:center;">
+              No matching orders found.
+            </td>
+          </tr>
+        `;
+
+        if (message) {
+          message.textContent =
+            `Showing 0 of ${realOrders.length} orders.`;
+        }
+
+        return;
+      }
+
+      tableBody.innerHTML = filteredOrders.map(order => {
+        const status = String(order.order_status || "pending");
+        const safeStatus = escapeOrderText(status);
+        const statusColor =
+          status.toLowerCase() === "delivered" ? "#15803d" :
+          status.toLowerCase() === "cancelled" ? "#b91c1c" :
+          "#9a5700";
+
+        return `
+          <tr>
+            <td style="padding:12px;border-bottom:1px solid #eee;">
+              #${escapeOrderText(shortOrderId(order.id))}
+            </td>
+            <td style="padding:12px;border-bottom:1px solid #eee;">
+              ${escapeOrderText(customerNames[order.customer_id] || "Customer")}
+            </td>
+            <td style="padding:12px;border-bottom:1px solid #eee;">
+              ${escapeOrderText(restaurantNames[order.restaurant_id] || "Restaurant")}
+            </td>
+            <td style="padding:12px;border-bottom:1px solid #eee;white-space:nowrap;">
+              ${(Number(order.total_amount) || 0).toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              })} ETB
+            </td>
+            <td style="padding:12px;border-bottom:1px solid #eee;">
+              <span style="
+                display:inline-block;
+                padding:5px 9px;
+                border-radius:20px;
+                background:#fff3e8;
+                color:${statusColor};
+                font-size:12px;
+                font-weight:600;
+              ">${safeStatus}</span>
+            </td>
+            <td style="padding:12px;border-bottom:1px solid #eee;white-space:nowrap;">
+              ${escapeOrderText(formatOrderDate(order.created_at))}
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      if (message) {
+        message.textContent =
+          `Showing ${filteredOrders.length} of ${realOrders.length} orders.`;
+      }
+    }
+
+    if (searchInput && !searchInput.dataset.ordersSearchAttached) {
+      searchInput.addEventListener("input", renderOrders);
+      searchInput.dataset.ordersSearchAttached = "true";
+    }
+
+    renderOrders();
+
+  } catch (error) {
+    console.error("Admin orders failed to load:", error);
+
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" style="padding:18px;text-align:center;color:#b91c1c;">
+          Unable to load orders. Please try refreshing.
+        </td>
+      </tr>
+    `;
+
+    if (message) {
+      message.textContent =
+        "Order loading error: " + (error?.message || "Unknown error");
     }
   }
-
-// Load rider and customer counts independently.
-try {
-const { data: counts, error } = await supabaseClient
-.rpc("get_admin_profile_counts");
-
-if (error) throw error;
-
-const result = counts?.[0];
-
-if (!result) {
-  throw new Error("No profile counts returned.");
 }
 
-if (ridersCard) {
-  ridersCard.textContent =
-    Number(result.total_riders).toLocaleString();
-}
-
-if (customersCard) {
-  customersCard.textContent =
-    Number(result.total_customers).toLocaleString();
-}
-
-} catch (error) {
-console.error("Rider/customer statistics failed:", error);
-
-if (ridersCard) {
-  ridersCard.textContent = "Error";
-}
-
-if (customersCard) {
-  customersCard.textContent = "Error";
-}
-
-if (message) {
-  message.textContent =
-    "Profile statistics error: " +
-    (error?.message || "Unknown error");
-}
-
-}
-
-if (message) {
-const hasProfileStatsError =
-(ridersCard && ridersCard.textContent === "Error") ||
-(customersCard && customersCard.textContent === "Error");
-
-if (!hasProfileStatsError) {
-  message.textContent =
-    "Statistics loaded. Check the console for any errors.";
-}
-}
-}
-  
-// END ADMIN DASHBOARD STATISTICS
+// END ADMIN ORDERS MANAGEMENT
 
 // KEEP DASHBOARDS SEPARATED
 (function enforceDashboardSeparation() {
