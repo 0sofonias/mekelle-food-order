@@ -4754,6 +4754,105 @@ async function applyRoleVisibility(user) {
   
 // END ROLE-BASED DASHBOARD CONTROL
 
+// START ADMIN DASHBOARD STATISTICS
+
+async function loadAdminDashboardStats() {
+  const ordersElement =
+    document.getElementById("admin-total-orders");
+
+  const salesElement =
+    document.getElementById("admin-total-sales");
+
+  const restaurantsElement =
+    document.getElementById("admin-total-restaurants");
+
+  const ridersElement =
+    document.getElementById("admin-total-riders");
+
+  const customersElement =
+    document.getElementById("admin-total-customers");
+
+  try {
+    // Load real orders, excluding test orders.
+    const { data: orders, error: ordersError } =
+      await supabaseClient
+        .from("orders")
+        .select("id, total_amount, is_test_order");
+
+    if (ordersError) throw ordersError;
+
+    const realOrders = (orders || []).filter(
+      order => order.is_test_order !== true
+    );
+
+    const totalOrders = realOrders.length;
+
+    const totalSales = realOrders.reduce(
+      (sum, order) => sum + (Number(order.total_amount) || 0),
+      0
+    );
+
+    if (ordersElement) {
+      ordersElement.textContent = totalOrders.toLocaleString();
+    }
+
+    if (salesElement) {
+      salesElement.textContent =
+        totalSales.toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }) + " ETB";
+    }
+
+    // Load restaurant count.
+    const { count: restaurantCount, error: restaurantError } =
+      await supabaseClient
+        .from("restaurants")
+        .select("id", {
+          count: "exact",
+          head: true
+        });
+
+    if (restaurantError) throw restaurantError;
+
+    if (restaurantsElement) {
+      restaurantsElement.textContent =
+        (restaurantCount ?? 0).toLocaleString();
+    }
+
+    // Load rider and customer counts using the existing secure RPC.
+    const { data: profileCounts, error: profileError } =
+      await supabaseClient.rpc("get_admin_profile_counts");
+
+    if (profileError) throw profileError;
+
+    const counts = Array.isArray(profileCounts)
+      ? profileCounts[0]
+      : profileCounts;
+
+    if (!counts) {
+      throw new Error("Admin profile counts were not returned.");
+    }
+
+    if (ridersElement) {
+      ridersElement.textContent =
+        Number(counts.total_riders ?? 0).toLocaleString();
+    }
+
+    if (customersElement) {
+      customersElement.textContent =
+        Number(counts.total_customers ?? 0).toLocaleString();
+    }
+
+    console.log("Admin dashboard statistics loaded successfully.");
+
+  } catch (error) {
+    console.error("Admin statistics failed to load:", error);
+  }
+}
+
+// END ADMIN DASHBOARD STATISTICS
+
 // START ADMIN ORDERS MANAGEMENT
 
 async function loadAdminOrders() {
