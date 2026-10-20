@@ -4799,7 +4799,25 @@ if (customersCard) {
 }
 
 } catch (error) {
-console.error("Rider/customer statistics failed:", error);
+  } catch (error) {
+    console.error("Rider/customer statistics failed:", error);
+
+    const errorMessage =
+      error?.message || "Unknown error";
+
+    if (ridersCard) {
+      ridersCard.textContent = "Error";
+    }
+
+    if (customersCard) {
+      customersCard.textContent = "Error";
+    }
+
+    if (message) {
+      message.textContent =
+        "Profile statistics error: " + errorMessage;
+    }
+  }
 
 if (ridersCard) {
   ridersCard.textContent = "Error";
