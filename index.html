@@ -4799,25 +4799,7 @@ if (customersCard) {
 }
 
 } catch (error) {
-  } catch (error) {
-    console.error("Rider/customer statistics failed:", error);
-
-    const errorMessage =
-      error?.message || "Unknown error";
-
-    if (ridersCard) {
-      ridersCard.textContent = "Error";
-    }
-
-    if (customersCard) {
-      customersCard.textContent = "Error";
-    }
-
-    if (message) {
-      message.textContent =
-        "Profile statistics error: " + errorMessage;
-    }
-  }
+console.error("Rider/customer statistics failed:", error);
 
 if (ridersCard) {
   ridersCard.textContent = "Error";
@@ -4825,6 +4807,12 @@ if (ridersCard) {
 
 if (customersCard) {
   customersCard.textContent = "Error";
+}
+
+if (message) {
+  message.textContent =
+    "Profile statistics error: " +
+    (error?.message || "Unknown error");
 }
 
 }
