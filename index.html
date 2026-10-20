@@ -4817,10 +4817,18 @@ if (message) {
 
 }
 
-  if (message) {
-    message.textContent =
-      "Statistics loaded. Check the console for any errors.";
-  }
+if (message) {
+const hasProfileStatsError =
+(ridersCard && ridersCard.textContent === "Error") ||
+(customersCard && customersCard.textContent === "Error");
+
+if (!hasProfileStatsError) {
+  message.textContent =
+    "Statistics loaded. Check the console for any errors.";
+}
+
+}
+}
 }
   
 // END ADMIN DASHBOARD STATISTICS
