@@ -5035,8 +5035,9 @@ async function loadAdminOrders() {
 
       // Load statistics only for the admin account.
       if (role === "admin") {
-        await loadAdminDashboardStats();
-      }
+      await loadAdminDashboardStats();
+      await loadAdminOrders();
+     }
       
     } catch (error) {
       console.error("Dashboard refresh failed:", error);
