@@ -4753,8 +4753,8 @@ async function applyRoleVisibility(user) {
   const isCustomer =
     ["customer", "buyer"].includes(role);
 
-  const isRestaurant =
-    role === "restaurant";
+    const isRestaurant =
+    role === "restaurant_owner";
 
   const isRider = [
     "rider",
