@@ -2274,13 +2274,7 @@ navigator.geolocation.getCurrentPosition(
   locationButton.disabled = false;
   locationButton.textContent = "📍 Update My Location";
 },
-
-    locationMessage.textContent =
-      "Location captured! Please add your area or a nearby landmark to help the rider find you.";
-
-    locationButton.disabled = false;
-    locationButton.textContent = "📍 Update My Location";
-  },
+  
   (error) => {
     const messages = {
       1: "Location permission denied. Allow location access in your browser settings.",
