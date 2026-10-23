@@ -2242,7 +2242,6 @@ locationMessage.textContent =
   "Please allow location access when your phone asks.";
 
 navigator.geolocation.getCurrentPosition(
-    () => {},
   (position) => {
   const latitude = position.coords.latitude;
   const longitude = position.coords.longitude;
@@ -2292,9 +2291,9 @@ navigator.geolocation.getCurrentPosition(
     locationButton.textContent = "📍 Try Again";
   },
   {
-    enableHighAccuracy: true,
-    timeout: 15000,
-    maximumAge: 0
+    enableHighAccuracy: false,
+    timeout: 10000,
+    maximumAge: 30000
   }
 );
 
