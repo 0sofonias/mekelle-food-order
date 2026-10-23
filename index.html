@@ -2118,6 +2118,20 @@ function showDeliveryForm() {
 
   label.appendChild(address);
 
+  // CUSTOMER PHONE NUMBER
+const phoneLabel = document.createElement("label");
+phoneLabel.textContent = "Your Phone Number";
+phoneLabel.style.display = "block";
+phoneLabel.style.marginBottom = "6px";
+
+const phoneInput = document.createElement("input");
+phoneInput.type = "tel";
+phoneInput.placeholder = "e.g. 0912345678";
+phoneInput.autocomplete = "tel";
+phoneInput.required = true;
+phoneInput.style.cssText =
+  "width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;";
+  
   // USE GPS TO GET THE CUSTOMER'S DELIVERY LOCATION
 const locationButton = document.createElement("button");
 locationButton.type = "button";
@@ -2193,14 +2207,28 @@ navigator.geolocation.getCurrentPosition(
     renderCart();
   });
 
-  form.append(label, locationButton, locationMessage, submit, back);
+  form.append(
+  label,
+  phoneLabel,
+  phoneInput,
+  locationButton,
+  locationMessage,
+  submit,
+  back
+);
   summary.append(heading, form);
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const deliveryAddress = address.value.trim();
+    const customerPhone = phoneInput.value.trim();
 
+if (!/^[0-9+\-\s()]{7,20}$/.test(customerPhone)) {
+  alert("Please enter a valid phone number.");
+  phoneInput.focus();
+  return;
+}
     if (!deliveryAddress) {
       alert("Please enter your delivery address.");
       return;
@@ -2244,14 +2272,15 @@ if (!sessionCheck.session) {
   );
 }
 
-const { data, error } = await supabaseClient.rpc(
-  "create_food_order",
-  {
+    const { data, error } = await supabaseClient.rpc(
+    "create_food_order",
+    {
     p_restaurant_id: restaurantId,
     p_delivery_address: deliveryAddress,
-    p_items: orderItems
-  }
-);
+    p_items: orderItems,
+    p_customer_phone: customerPhone
+   }
+   );
 
       if (error) {
         throw error;
