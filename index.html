@@ -2237,9 +2237,9 @@ return;
 }
 
 locationButton.disabled = true;
-locationButton.textContent = "Getting your location...";
+locationButton.textContent = "📍 Finding your location...";
 locationMessage.textContent =
-  "Please allow location access when your phone asks.";
+  "Requesting location access. Please allow permission if your phone asks, and keep location services turned on.";  
 
 navigator.geolocation.getCurrentPosition(
   (position) => {
