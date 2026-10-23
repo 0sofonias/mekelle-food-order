@@ -2118,6 +2118,29 @@ function showDeliveryForm() {
 
   label.appendChild(address);
 
+  // DELIVERY LOCATION MAP
+const mapLabel = document.createElement("p");
+mapLabel.textContent = "📍 Select Your Delivery Location";
+mapLabel.style.cssText =
+  "font-weight: bold; margin: 12px 0 8px;";
+
+const mapHelp = document.createElement("p");
+mapHelp.textContent =
+  "Use the map to find your location. You can also enter your address above.";
+mapHelp.style.cssText =
+  "font-size: 14px; color: #666; margin-bottom: 10px;";
+
+const mapContainer = document.createElement("div");
+mapContainer.id = "delivery-location-map";
+mapContainer.style.cssText =
+  "width: 100%; height: 300px; border-radius: 10px; border: 1px solid #ccc; margin-bottom: 10px; background: #eee;";
+
+const selectedLocation = document.createElement("p");
+selectedLocation.textContent =
+  "No map location selected yet.";
+selectedLocation.style.cssText =
+  "font-size: 14px; margin-bottom: 16px;";
+  
   // CUSTOMER PHONE NUMBER
 const phoneLabel = document.createElement("label");
 phoneLabel.textContent = "Your Phone Number";
@@ -2142,6 +2165,70 @@ locationButton.style.marginBottom = "12px";
 const locationMessage = document.createElement("p");
 locationMessage.setAttribute("role", "status");
 
+// SHARE MAP VARIABLES WITH THE GPS BUTTON
+let deliveryMap = null;
+let locationMarker = null;
+  
+// LOAD THE INTERACTIVE DELIVERY MAP
+const mapLibrary = document.createElement("link");
+mapLibrary.rel = "stylesheet";
+mapLibrary.href =
+  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+document.head.appendChild(mapLibrary);
+
+const mapScript = document.createElement("script");
+mapScript.src =
+  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+
+mapScript.onload = () => {
+  if (!document.getElementById("delivery-location-map")) {
+    return;
+  }
+
+  deliveryMap = L.map("delivery-location-map").setView(
+  [13.4967, 39.4753],
+  13
+);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors",
+    maxZoom: 19
+  }).addTo(deliveryMap);
+
+  deliveryMap.on("click", (event) => {
+    const latitude = event.latlng.lat;
+    const longitude = event.latlng.lng;
+
+    if (locationMarker) {
+      locationMarker.setLatLng(event.latlng);
+    } else {
+      locationMarker = L.marker(event.latlng).addTo(deliveryMap);
+    }
+
+    address.value =
+      "Map location: " +
+      latitude.toFixed(6) + ", " +
+      longitude.toFixed(6);
+
+    selectedLocation.textContent =
+      "Selected location: " +
+      latitude.toFixed(5) + ", " +
+      longitude.toFixed(5);
+
+    locationMessage.textContent =
+      "Map location selected. Please add your area or a nearby landmark to the address field.";
+  });
+
+  setTimeout(() => deliveryMap.invalidateSize(), 300);
+};
+
+mapScript.onerror = () => {
+  locationMessage.textContent =
+    "The map could not load. Please check your internet connection and try again.";
+};
+
+document.body.appendChild(mapScript);
+  
 locationButton.addEventListener("click", () => {
 if (!navigator.geolocation) {
 locationMessage.textContent =
@@ -2156,13 +2243,37 @@ locationMessage.textContent =
 
 navigator.geolocation.getCurrentPosition(
   (position) => {
-    const latitude = position.coords.latitude;
-    const longitude = position.coords.longitude;
+  const latitude = position.coords.latitude;
+  const longitude = position.coords.longitude;
 
-    address.value =
-      "GPS coordinates: " +
-      latitude.toFixed(6) + ", " +
-      longitude.toFixed(6);
+  const customerPosition = [latitude, longitude];
+
+  deliveryMap.setView(customerPosition, 17);
+
+  if (locationMarker) {
+    locationMarker.setLatLng(customerPosition);
+  } else {
+    locationMarker = L.marker(customerPosition).addTo(deliveryMap);
+  }
+
+  address.value =
+    "GPS location: " +
+    latitude.toFixed(6) + ", " +
+    longitude.toFixed(6);
+
+  selectedLocation.textContent =
+    "Your selected location: " +
+    latitude.toFixed(5) + ", " +
+    longitude.toFixed(5);
+
+  locationMessage.textContent =
+    "Your location is shown on the map. Please add your neighbourhood or a nearby landmark to the address field.";
+
+  setTimeout(() => deliveryMap.invalidateSize(), 200);
+
+  locationButton.disabled = false;
+  locationButton.textContent = "📍 Update My Location";
+},
 
     locationMessage.textContent =
       "Location captured! Please add your area or a nearby landmark to help the rider find you.";
@@ -2209,6 +2320,10 @@ navigator.geolocation.getCurrentPosition(
 
   form.append(
   label,
+  mapLabel,
+  mapHelp,
+  mapContainer,
+  selectedLocation,
   phoneLabel,
   phoneInput,
   locationButton,
