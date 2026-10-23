@@ -2242,9 +2242,12 @@ locationMessage.textContent =
   "Please allow location access when your phone asks.";
 
 navigator.geolocation.getCurrentPosition(
+    () => {},
   (position) => {
   const latitude = position.coords.latitude;
   const longitude = position.coords.longitude;
+  console.log("GPS coordinates received:", latitude, longitude);
+  console.log("GPS accuracy in metres:", position.coords.accuracy);
 
   const customerPosition = [latitude, longitude];
 
