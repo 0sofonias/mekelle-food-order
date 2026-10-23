@@ -2278,14 +2278,27 @@ navigator.geolocation.getCurrentPosition(
 },
   
   (error) => {
-    const messages = {
-      1: "Location permission denied. Allow location access in your browser settings.",
-      2: "Your location is unavailable. Try again or type your address.",
-      3: "Getting your location took too long. Please try again."
-    };
+    if (error.code === 1) {
+  locationMessage.textContent =
+    "📍 Location access is blocked. To use your location, tap the site settings icon beside the website address, open Permissions, and allow Location. Then tap Try Again.";
 
-    locationMessage.textContent =
-      messages[error.code] || "Could not get your location.";
+  locationButton.textContent = "📍 Try Again";
+} else if (error.code === 2) {
+  locationMessage.textContent =
+    "📍 We couldn't find your location. Please turn on Location on your phone and try again.";
+
+  locationButton.textContent = "📍 Try Again";
+} else if (error.code === 3) {
+  locationMessage.textContent =
+    "📍 Finding your location took too long. Please try again.";
+
+  locationButton.textContent = "📍 Try Again";
+} else {
+  locationMessage.textContent =
+    "📍 We couldn't access your location. Please check your browser permissions and try again.";
+
+  locationButton.textContent = "📍 Try Again";
+}
 
     locationButton.disabled = false;
     locationButton.textContent = "📍 Try Again";
