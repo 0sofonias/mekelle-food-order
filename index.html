@@ -2228,6 +2228,13 @@ mapScript.onerror = () => {
 };
 
 document.body.appendChild(mapScript);
+mapScript.addEventListener("load", () => {
+  setTimeout(() => {
+    if (deliveryMap) {
+      deliveryMap.invalidateSize();
+    }
+  }, 300);
+});
   
 locationButton.addEventListener("click", () => {
 if (!navigator.geolocation) {
