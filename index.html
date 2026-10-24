@@ -2426,7 +2426,29 @@ if (!sessionCheck.session) {
       }
 
       const orderId = Array.isArray(data) ? data[0] : data;
+      
+      // SAVE THE CUSTOMER'S MAP LOCATION WITH THE ORDER
+if (
+  Number.isFinite(customerLatitude) &&
+  Number.isFinite(customerLongitude)
+) {
+  const { error: locationSaveError } = await supabaseClient.rpc(
+    "save_order_location",
+    {
+      p_order_id: orderId,
+      p_latitude: customerLatitude,
+      p_longitude: customerLongitude
+    }
+  );
 
+  if (locationSaveError) {
+    console.error(
+      "Order created, but location saving failed:",
+      locationSaveError
+    );
+  }
+}
+      
       cart = [];
       updateCartDisplay();
 
