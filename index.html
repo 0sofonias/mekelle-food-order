@@ -2168,6 +2168,10 @@ locationMessage.setAttribute("role", "status");
 // SHARE MAP VARIABLES WITH THE GPS BUTTON
 let deliveryMap = null;
 let locationMarker = null;
+
+// SAVE THE CUSTOMER'S SELECTED COORDINATES
+let customerLatitude = null;
+let customerLongitude = null;
   
 // LOAD THE INTERACTIVE DELIVERY MAP
 const mapLibrary = document.createElement("link");
@@ -2198,6 +2202,8 @@ mapScript.onload = () => {
   deliveryMap.on("click", (event) => {
     const latitude = event.latlng.lat;
     const longitude = event.latlng.lng;
+    customerLatitude = latitude;
+    customerLongitude = longitude;
 
     if (locationMarker) {
       locationMarker.setLatLng(event.latlng);
@@ -2254,7 +2260,9 @@ navigator.geolocation.getCurrentPosition(
   const longitude = position.coords.longitude;
   console.log("GPS coordinates received:", latitude, longitude);
   console.log("GPS accuracy in metres:", position.coords.accuracy);
-
+    customerLatitude = latitude;
+  customerLongitude = longitude;
+    
   const customerPosition = [latitude, longitude];
 
   deliveryMap.setView(customerPosition, 17);
@@ -2404,14 +2412,14 @@ if (!sessionCheck.session) {
 }
 
     const { data, error } = await supabaseClient.rpc(
-    "create_food_order",
-    {
+  "create_food_order",
+  {
     p_restaurant_id: restaurantId,
     p_delivery_address: deliveryAddress,
     p_items: orderItems,
     p_customer_phone: customerPhone
-   }
-   );
+  }
+);
 
       if (error) {
         throw error;
