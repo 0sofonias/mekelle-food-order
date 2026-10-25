@@ -1556,7 +1556,7 @@ async function loadRestaurants() {
 
   const { data, error } = await supabaseClient
     .from("restaurants")
-    .select("id, name, description, address, image_url, is_open")
+    .select("id, name, description, address, image_url, is_open, latitude, longitude")
     .eq("is_approved", true)
     .order("name");
 
