@@ -119,9 +119,11 @@ export default {
 
       const distanceKm = longest.distance / 1000;
 
-      const rawFee = distanceKm < 1 ? 50 : distanceKm * 80;
-      const deliveryFee = Math.floor(rawFee / 10 + 0.5) * 10;
-
+      const deliveryFee =
+      distanceKm < 1
+      ? 50
+      : 50 + Math.ceil(distanceKm - 1) * 30;
+      
       return Response.json({
         distance_km: Number(distanceKm.toFixed(3)),
         delivery_fee: deliveryFee,
