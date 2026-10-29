@@ -1,8 +1,7 @@
-const PROFILES = [
-  "driving-car",
-  "cycling-regular",
-  "foot-walking"
-];
+const VEHICLE_PROFILES = {
+  bicycle: "cycling-regular",
+  motor: "driving-car"
+};
 
 export default {
   async fetch(request, env) {
@@ -50,7 +49,16 @@ export default {
 
     try {
       const body = await request.json();
-      const { start, end } = body;
+      const { start, end, vehicle_type } = body;
+
+const profile = VEHICLE_PROFILES[vehicle_type];
+
+if (!profile) {
+  return Response.json(
+    { error: "Vehicle type must be bicycle or motor." },
+    { status: 400, headers }
+  );
+}
 
       const validPoint = point =>
         Array.isArray(point) &&
@@ -68,67 +76,59 @@ export default {
         );
       }
 
-      const results = await Promise.all(
-        PROFILES.map(async profile => {
-          try {
-            const response = await fetch(
-              `https://api.heigit.org/openrouteservice/v2/directions/${profile}`,
-              {
-                method: "POST",
-                headers: {
-                  "Authorization": env.HEIGIT_API_KEY,
-                  "Content-Type": "application/json",
-                  "Accept": "application/json"
-                },
-                body: JSON.stringify({
-                  coordinates: [start, end],
-                  instructions: false
-                }),
-                signal: AbortSignal.timeout(12000)
-              }
-            );
+      let route = null;
 
-            if (!response.ok) return null;
+try {
+  const response = await fetch(
+    `https://api.heigit.org/openrouteservice/v2/directions/${profile}`,
+    {
+      method: "POST",
+      headers: {
+        "Authorization": env.HEIGIT_API_KEY,
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        coordinates: [start, end],
+        instructions: false
+      }),
+      signal: AbortSignal.timeout(12000)
+    }
+  );
 
-            const data = await response.json();
-            const distance = data.routes?.[0]?.summary?.distance;
+  if (response.ok) {
+    const data = await response.json();
+    const distance = data.routes?.[0]?.summary?.distance;
 
-            if (!Number.isFinite(distance) || distance <= 0) {
-              return null;
-            }
+    if (Number.isFinite(distance) && distance > 0) {
+      route = { profile, distance };
+    }
+  }
+} catch {
+  // Route calculation failed.
+}
 
-            return { profile, distance };
-          } catch {
-            return null;
-          }
-        })
-      );
+if (!route) {
+  return Response.json(
+    {
+      error: "Unable to calculate a route for the selected vehicle. Please try again."
+    },
+    { status: 502, headers }
+  );
+}
 
-      const validRoutes = results.filter(Boolean);
+const distanceKm = route.distance / 1000;
 
-      if (!validRoutes.length) {
-        return Response.json(
-          { error: "No valid road route is available. Please try again." },
-          { status: 502, headers }
-        );
-      }
+const deliveryFee =
+  distanceKm < 1
+    ? 50
+    : 50 + Math.ceil(distanceKm - 1) * 30;
 
-      const longest = validRoutes.reduce(
-        (a, b) => b.distance > a.distance ? b : a
-      );
-
-      const distanceKm = longest.distance / 1000;
-
-      const deliveryFee =
-      distanceKm < 1
-      ? 50
-      : 50 + Math.ceil(distanceKm - 1) * 30;
-      
-      return Response.json({
-        distance_km: Number(distanceKm.toFixed(3)),
-        delivery_fee: deliveryFee,
-        selected_profile: longest.profile,
-        valid_profiles: validRoutes.map(route => route.profile)
+return Response.json({
+  distance_km: Number(distanceKm.toFixed(3)),
+  delivery_fee: deliveryFee,
+  selected_profile: route.profile,
+  vehicle_type
       }, { headers });
 
     } catch {
