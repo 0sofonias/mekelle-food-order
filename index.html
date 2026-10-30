@@ -2176,7 +2176,9 @@ confirmMapButton.type = "button";
 confirmMapButton.textContent = "Confirm Location";
 confirmMapButton.className = "cart-checkout";
 confirmMapButton.disabled = true;
-
+confirmMapButton.style.display = "none";
+cancelMapButton.style.display = "none";
+  
 const cancelMapButton = document.createElement("button");
 cancelMapButton.type = "button";
 cancelMapButton.textContent = "Cancel Editing";
