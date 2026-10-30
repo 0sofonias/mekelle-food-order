@@ -2271,7 +2271,9 @@ editMapButton.addEventListener("click", () => {
   if (!deliveryMap) return;
 
   mapPinEditing = true;
-
+  confirmMapButton.style.display = "block";
+  cancelMapButton.style.display = "block";
+  
   confirmMapButton.disabled = false;
   cancelMapButton.disabled = false;
   editMapButton.disabled = true;
@@ -2296,7 +2298,9 @@ confirmMapButton.addEventListener("click", () => {
   confirmedLongitude = customerLongitude;
 
   mapPinEditing = false;
-
+  confirmMapButton.style.display = "none";
+  cancelMapButton.style.display = "none";
+  
   confirmMapButton.disabled = true;
   cancelMapButton.disabled = true;
   editMapButton.disabled = false;
