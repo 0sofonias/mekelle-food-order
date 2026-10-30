@@ -2140,6 +2140,46 @@ selectedLocation.textContent =
   "No map location selected yet.";
 selectedLocation.style.cssText =
   "font-size: 14px; margin-bottom: 16px;";
+
+// WHO IS RECEIVING THE ORDER?
+const recipientTitle = document.createElement("p");
+recipientTitle.textContent = "Who is receiving this order?";
+recipientTitle.style.cssText =
+  "font-weight: bold; margin: 16px 0 8px;";
+
+const recipientChoice = document.createElement("select");
+recipientChoice.style.cssText =
+  "width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;";
+
+recipientChoice.innerHTML = `
+  <option value="myself">📍 Order for Myself</option>
+  <option value="someone_else">🎁 Order for Someone Else</option>
+`;
+
+const recipientNameLabel = document.createElement("label");
+recipientNameLabel.textContent = "Recipient's Name";
+recipientNameLabel.style.cssText =
+  "display: none; margin-bottom: 6px;";
+
+const recipientNameInput = document.createElement("input");
+recipientNameInput.type = "text";
+recipientNameInput.placeholder = "Enter recipient's name";
+recipientNameInput.style.cssText =
+  "display: none; width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;";
+  
+  // SHOW RECIPIENT NAME WHEN ORDERING FOR SOMEONE ELSE
+recipientChoice.addEventListener("change", () => {
+  const orderingForSomeoneElse =
+    recipientChoice.value === "someone_else";
+
+  recipientNameLabel.style.display =
+    orderingForSomeoneElse ? "block" : "none";
+
+  recipientNameInput.style.display =
+    orderingForSomeoneElse ? "block" : "none";
+
+  recipientNameInput.required = orderingForSomeoneElse;
+});
   
   // CUSTOMER PHONE NUMBER
 const phoneLabel = document.createElement("label");
