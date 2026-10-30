@@ -2514,6 +2514,12 @@ navigator.geolocation.getCurrentPosition(
   mapHelp,
   mapContainer,
   selectedLocation,
+
+  recipientTitle,
+  recipientChoice,
+  recipientNameLabel,
+  recipientNameInput,
+
   phoneLabel,
   phoneInput,
   locationButton,
@@ -2524,7 +2530,7 @@ navigator.geolocation.getCurrentPosition(
   submit,
   back
 );
-  summary.append(heading, form);
+summary.append(heading, form);
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -2536,6 +2542,18 @@ navigator.geolocation.getCurrentPosition(
 }
     const customerPhone = phoneInput.value.trim();
 
+const recipientType = recipientChoice.value;
+const recipientName =
+  recipientType === "someone_else"
+    ? recipientNameInput.value.trim()
+    : null;
+
+if (recipientType === "someone_else" && !recipientName) {
+  alert("Please enter the recipient's name.");
+  recipientNameInput.focus();
+  return;
+}
+    
 if (!/^[0-9+\-\s()]{7,20}$/.test(customerPhone)) {
   alert("Please enter a valid phone number.");
   phoneInput.focus();
