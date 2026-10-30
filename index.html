@@ -1386,7 +1386,19 @@ background: #c74700;
   <p>Sign in or create an account to place your order.</p>
 
 <form id="auth-form">
-
+  
+<div id="auth-method-group" style="margin-bottom:16px;">
+  <label for="auth-method" style="display:block;margin-bottom:8px;font-weight:bold;">
+    Registration method
+  </label>
+  <select
+    id="auth-method"
+    style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:16px;"
+  >
+    <option value="email">Email and password</option>
+    <option value="phone">Phone and SMS code</option>
+  </select>
+</div>
   <div id="auth-name-group" style="display:none;">
     <label for="auth-name">Full name</label>
     <input
@@ -2772,6 +2784,10 @@ let authMode = "signin";
 
 const authForm = document.getElementById("auth-form");
 const authEmail = document.getElementById("auth-email");
+const authName = document.getElementById("auth-name");
+const authPhone = document.getElementById("auth-phone");
+const authNameGroup = document.getElementById("auth-name-group");
+const authPhoneGroup = document.getElementById("auth-phone-group");
 const authPassword = document.getElementById("auth-password");
 const authSubmit = document.getElementById("auth-submit");
 const authToggle = document.getElementById("auth-toggle");
