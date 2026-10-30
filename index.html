@@ -2100,12 +2100,12 @@ function showDeliveryForm() {
   label.textContent = "Delivery address in Mekelle";
 
   const address = document.createElement("textarea");
-  address.required = true;
+  address.required = false;
   address.rows = 3;
   address.maxLength = 500;
   address.placeholder =
-    "Enter your area, neighborhood, and detailed location";
-
+ "Optional: Add a nearby landmark, building, or delivery instructions";
+  
   address.style.display = "block";
   address.style.width = "100%";
   address.style.boxSizing = "border-box";
