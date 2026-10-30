@@ -2875,13 +2875,27 @@ authForm.addEventListener("submit", async (event) => {
 
   const email = authEmail.value.trim();
   const password = authPassword.value;
+  const fullName = authName.value.trim();
+  const phone = authPhone.value.trim();
+  const method = authMethod.value;
 
   authSubmit.disabled = true;
   authSubmit.textContent = "Please wait...";
   authMessage.textContent = "";
 
   try {
+    // SIGN IN
     if (authMode === "signin") {
+      if (method === "phone") {
+        throw new Error(
+          "Phone sign-in will be enabled after SMS verification is configured."
+        );
+      }
+
+      if (!email || !password) {
+        throw new Error("Enter your email and password.");
+      }
+
       const { error } =
         await supabaseClient.auth.signInWithPassword({
           email,
@@ -2891,28 +2905,75 @@ authForm.addEventListener("submit", async (event) => {
       if (error) throw error;
 
       authMessage.textContent = "Signed in successfully.";
-    } else {
+    }
+
+    // EMAIL REGISTRATION
+    else if (method === "email") {
+      if (!fullName || !phone || !email || !password) {
+        throw new Error(
+          "Please enter your full name, phone number, email and password."
+        );
+      }
+
       const { data, error } =
         await supabaseClient.auth.signUp({
           email,
-          password
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+              phone: phone
+            }
+          }
         });
 
       if (error) throw error;
 
-      if (data.session) {
-        authMessage.textContent = "Account created successfully.";
-      } else {
-        authMessage.textContent =
-          "Account created. Check your email to confirm your account, then sign in.";
-      }
+      authMessage.textContent = data.session
+        ? "Account created successfully."
+        : "Account created. Check your email to confirm your account.";
     }
+
+    // PHONE REGISTRATION
+    else {
+      if (!fullName || !phone) {
+        throw new Error(
+          "Please enter your full name and phone number."
+        );
+      }
+
+      const { error } =
+        await supabaseClient.auth.signInWithOtp({
+          phone,
+          options: {
+            data: {
+              full_name: fullName,
+              phone: phone
+            },
+            shouldCreateUser: true
+          }
+        });
+
+      if (error) throw error;
+
+      authOtpGroup.style.display = "block";
+      authOtp.required = true;
+
+      authMessage.textContent =
+        "SMS code requested. Enter the code sent to your phone.";
+    }
+
   } catch (error) {
     authMessage.textContent = error.message;
   } finally {
     authSubmit.disabled = false;
+
     authSubmit.textContent =
-      authMode === "signin" ? "Sign In" : "Create Account";
+      authMode === "signin"
+        ? "Sign In"
+        : method === "phone"
+          ? "Send SMS Code"
+          : "Create Account";
   }
 });
 
