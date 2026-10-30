@@ -1385,44 +1385,66 @@ background: #c74700;
   <h2>Welcome to Mekelle Food Order</h2>
   <p>Sign in or create an account to place your order.</p>
 
-  <form id="auth-form">
-    <label for="auth-email">Email address</label>
+<form id="auth-form">
+
+  <div id="auth-name-group" style="display:none;">
+    <label for="auth-name">Full name</label>
     <input
-      id="auth-email"
-      type="email"
-      required
-      autocomplete="email"
-      placeholder="you@example.com"
-      style="display:block;width:100%;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px;font-size:16px"
+      id="auth-name"
+      type="text"
+      autocomplete="name"
+      placeholder="Your full name"
+      style="display:block;width:100%;box-sizing:border-box;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px;font-size:16px"
     >
+  </div>
 
-    <label for="auth-password">Password</label>
+  <div id="auth-phone-group" style="display:none;">
+    <label for="auth-phone">Phone number</label>
     <input
-      id="auth-password"
-      type="password"
-      required
-      minlength="6"
-      autocomplete="current-password"
-      placeholder="At least 6 characters"
-      style="display:block;width:100%;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px;font-size:16px"
+      id="auth-phone"
+      type="tel"
+      autocomplete="tel"
+      placeholder="09XXXXXXXX"
+      style="display:block;width:100%;box-sizing:border-box;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px;font-size:16px"
     >
+  </div>
 
-     <button
-  id="toggle-password"
-  type="button"
-  style="padding:8px 14px;margin:0 0 16px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer"
-  aria-pressed="false"
->
-  Show password
-</button>
-    
-    <button
-      id="auth-submit"
-      type="submit"
-      style="width:100%;padding:13px;background:#e85d04;color:white;border:0;border-radius:9px;font-weight:bold;font-size:16px"
-    >Sign In</button>
-  </form>
+  <label for="auth-email">Email address</label>
+  <input
+    id="auth-email"
+    type="email"
+    autocomplete="email"
+    placeholder="you@example.com"
+    style="display:block;width:100%;box-sizing:border-box;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px;font-size:16px"
+  >
 
+  <label for="auth-password">Password</label>
+  <input
+    id="auth-password"
+    type="password"
+    minlength="6"
+    autocomplete="current-password"
+    placeholder="At least 6 characters"
+    style="display:block;width:100%;box-sizing:border-box;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px;font-size:16px"
+  >
+
+  <button
+    id="toggle-password"
+    type="button"
+    style="padding:8px 14px;margin:0 0 16px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer"
+    aria-pressed="false"
+  >
+    Show password
+  </button>
+
+  <button
+    id="auth-submit"
+    type="submit"
+    style="width:100%;padding:13px;background:#e85d04;color:white;border:0;border-radius:9px;font-weight:bold;font-size:16px"
+  >Sign In</button>
+
+</form>
+  
   <button
     id="auth-toggle"
     type="button"
