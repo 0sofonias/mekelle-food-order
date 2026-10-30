@@ -2177,9 +2177,13 @@ confirmMapButton.textContent = "Confirm Location";
 confirmMapButton.className = "cart-checkout";
 confirmMapButton.disabled = true;
 confirmMapButton.style.display = "none";
-cancelMapButton.style.display = "none";
-  
+
 const cancelMapButton = document.createElement("button");
+cancelMapButton.type = "button";
+cancelMapButton.textContent = "Cancel Editing";
+cancelMapButton.className = "cart-checkout";
+cancelMapButton.disabled = true;
+cancelMapButton.style.display = "none";
 cancelMapButton.type = "button";
 cancelMapButton.textContent = "Cancel Editing";
 cancelMapButton.className = "cart-checkout";
@@ -2188,7 +2192,8 @@ cancelMapButton.disabled = true;
 // SHARE MAP VARIABLES WITH THE GPS BUTTON
 let deliveryMap = null;
 let locationMarker = null;
-
+let mapPinEditing = false;
+  
 // SAVE THE CUSTOMER'S SELECTED COORDINATES
 let customerLatitude = null;
 let customerLongitude = null;
@@ -2218,8 +2223,6 @@ mapScript.onload = () => {
     attribution: "&copy; OpenStreetMap contributors",
     maxZoom: 19
   }).addTo(deliveryMap);
-
-  let mapPinEditing = false;
 
 deliveryMap.on("click", (event) => {
   if (!mapPinEditing) return;
