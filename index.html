@@ -2165,6 +2165,24 @@ locationButton.style.marginBottom = "12px";
 const locationMessage = document.createElement("p");
 locationMessage.setAttribute("role", "status");
 
+// MANUAL MAP PIN CONTROLS
+const editMapButton = document.createElement("button");
+editMapButton.type = "button";
+editMapButton.textContent = "📍 Edit Map Pin";
+editMapButton.className = "cart-checkout";
+
+const confirmMapButton = document.createElement("button");
+confirmMapButton.type = "button";
+confirmMapButton.textContent = "Confirm Location";
+confirmMapButton.className = "cart-checkout";
+confirmMapButton.disabled = true;
+
+const cancelMapButton = document.createElement("button");
+cancelMapButton.type = "button";
+cancelMapButton.textContent = "Cancel Editing";
+cancelMapButton.className = "cart-checkout";
+cancelMapButton.disabled = true;
+  
 // SHARE MAP VARIABLES WITH THE GPS BUTTON
 let deliveryMap = null;
 let locationMarker = null;
@@ -2199,31 +2217,31 @@ mapScript.onload = () => {
     maxZoom: 19
   }).addTo(deliveryMap);
 
-  deliveryMap.on("click", (event) => {
-    const latitude = event.latlng.lat;
-    const longitude = event.latlng.lng;
-    customerLatitude = latitude;
-    customerLongitude = longitude;
+  let mapPinEditing = false;
 
-    if (locationMarker) {
-      locationMarker.setLatLng(event.latlng);
-    } else {
-      locationMarker = L.marker(event.latlng).addTo(deliveryMap);
-    }
+deliveryMap.on("click", (event) => {
+  if (!mapPinEditing) return;
 
-    address.value =
-      "Map location: " +
-      latitude.toFixed(6) + ", " +
-      longitude.toFixed(6);
+  const latitude = event.latlng.lat;
+  const longitude = event.latlng.lng;
 
-    selectedLocation.textContent =
-      "Selected location: " +
-      latitude.toFixed(5) + ", " +
-      longitude.toFixed(5);
+  customerLatitude = latitude;
+  customerLongitude = longitude;
 
-    locationMessage.textContent =
-      "Map location selected. Please add your area or a nearby landmark to the address field.";
-  });
+  if (locationMarker) {
+    locationMarker.setLatLng(event.latlng);
+  } else {
+    locationMarker = L.marker(event.latlng).addTo(deliveryMap);
+  }
+
+  selectedLocation.textContent =
+    "New location selected: " +
+    latitude.toFixed(5) + ", " +
+    longitude.toFixed(5);
+
+  locationMessage.textContent =
+    "Location adjusted. Tap Confirm Location to save it.";
+});
 
   setTimeout(() => deliveryMap.invalidateSize(), 300);
 };
@@ -2240,6 +2258,96 @@ mapScript.addEventListener("load", () => {
       deliveryMap.invalidateSize();
     }
   }, 300);
+});
+
+// STORE THE LAST CONFIRMED LOCATION
+let confirmedLatitude = null;
+let confirmedLongitude = null;
+
+// ENABLE MANUAL MAP PIN EDITING
+editMapButton.addEventListener("click", () => {
+  if (!deliveryMap) return;
+
+  mapPinEditing = true;
+
+  confirmMapButton.disabled = false;
+  cancelMapButton.disabled = false;
+  editMapButton.disabled = true;
+
+  locationMessage.textContent =
+    "Editing enabled. Tap the map to choose a new delivery location.";
+});
+
+// CONFIRM THE NEW MAP LOCATION
+confirmMapButton.addEventListener("click", () => {
+  if (
+    !mapPinEditing ||
+    !Number.isFinite(customerLatitude) ||
+    !Number.isFinite(customerLongitude)
+  ) {
+    locationMessage.textContent =
+      "Please select a location on the map first.";
+    return;
+  }
+
+  confirmedLatitude = customerLatitude;
+  confirmedLongitude = customerLongitude;
+
+  mapPinEditing = false;
+
+  confirmMapButton.disabled = true;
+  cancelMapButton.disabled = true;
+  editMapButton.disabled = false;
+
+  locationMessage.textContent =
+    "Delivery location confirmed. Add your neighbourhood or landmark to the address.";
+});
+
+// CANCEL MAP PIN EDITING
+cancelMapButton.addEventListener("click", () => {
+  mapPinEditing = false;
+
+  customerLatitude = confirmedLatitude;
+  customerLongitude = confirmedLongitude;
+
+  if (
+    confirmedLatitude !== null &&
+    confirmedLongitude !== null
+  ) {
+    const previousPosition = [
+      confirmedLatitude,
+      confirmedLongitude
+    ];
+
+    if (locationMarker) {
+      locationMarker.setLatLng(previousPosition);
+    }
+
+    deliveryMap.setView(previousPosition, 17);
+
+    selectedLocation.textContent =
+      "Confirmed location: " +
+      confirmedLatitude.toFixed(5) + ", " +
+      confirmedLongitude.toFixed(5);
+  } else {
+    customerLatitude = null;
+    customerLongitude = null;
+
+    if (locationMarker) {
+      deliveryMap.removeLayer(locationMarker);
+      locationMarker = null;
+    }
+
+    selectedLocation.textContent =
+      "No delivery location selected.";
+  }
+
+  confirmMapButton.disabled = true;
+  cancelMapButton.disabled = true;
+  editMapButton.disabled = false;
+
+  locationMessage.textContent =
+    "Map editing cancelled. Your previous confirmed location is restored.";
 });
   
 locationButton.addEventListener("click", () => {
@@ -2260,8 +2368,10 @@ navigator.geolocation.getCurrentPosition(
   const longitude = position.coords.longitude;
   console.log("GPS coordinates received:", latitude, longitude);
   console.log("GPS accuracy in metres:", position.coords.accuracy);
-    customerLatitude = latitude;
+  customerLatitude = latitude;
   customerLongitude = longitude;
+  confirmedLatitude = latitude;
+  confirmedLongitude = longitude;
     
   const customerPosition = [latitude, longitude];
 
@@ -2351,6 +2461,9 @@ navigator.geolocation.getCurrentPosition(
   phoneLabel,
   phoneInput,
   locationButton,
+  editMapButton,
+  confirmMapButton,
+  cancelMapButton,
   locationMessage,
   submit,
   back
@@ -2361,6 +2474,10 @@ navigator.geolocation.getCurrentPosition(
     event.preventDefault();
 
     const deliveryAddress = address.value.trim();
+    if (mapPinEditing) {
+  alert("Please confirm or cancel your map location before placing your order.");
+  return;
+}
     const customerPhone = phoneInput.value.trim();
 
 if (!/^[0-9+\-\s()]{7,20}$/.test(customerPhone)) {
