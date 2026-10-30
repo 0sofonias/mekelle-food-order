@@ -2265,6 +2265,7 @@ mapScript.addEventListener("load", () => {
 // STORE THE LAST CONFIRMED LOCATION
 let confirmedLatitude = null;
 let confirmedLongitude = null;
+let confirmedAddress = "";
 
 // ENABLE MANUAL MAP PIN EDITING
 editMapButton.addEventListener("click", () => {
@@ -2296,7 +2297,8 @@ confirmMapButton.addEventListener("click", () => {
 
   confirmedLatitude = customerLatitude;
   confirmedLongitude = customerLongitude;
-
+  confirmedAddress = address.value;
+  
   mapPinEditing = false;
   confirmMapButton.style.display = "none";
   cancelMapButton.style.display = "none";
@@ -2315,6 +2317,7 @@ cancelMapButton.addEventListener("click", () => {
 
   customerLatitude = confirmedLatitude;
   customerLongitude = confirmedLongitude;
+  address.value = confirmedAddress;
 
   if (
     confirmedLatitude !== null &&
@@ -2491,10 +2494,16 @@ if (!/^[0-9+\-\s()]{7,20}$/.test(customerPhone)) {
   phoneInput.focus();
   return;
 }
-    if (!deliveryAddress) {
-      alert("Please enter your delivery address.");
-      return;
-    }
+ if (
+  !deliveryAddress &&
+  (
+    confirmedLatitude === null ||
+    confirmedLongitude === null
+  )
+) {
+  alert("Please select your GPS location or enter a delivery address.");
+  return;
+}
 
     if (!cart.length) {
       alert("Your cart is empty.");
