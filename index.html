@@ -1421,6 +1421,7 @@ background: #c74700;
     >
   </div>
 
+ <div id="auth-email-group">
   <label for="auth-email">Email address</label>
   <input
     id="auth-email"
@@ -1429,6 +1430,19 @@ background: #c74700;
     placeholder="you@example.com"
     style="display:block;width:100%;box-sizing:border-box;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px;font-size:16px"
   >
+</div>
+
+  <div id="auth-otp-group" style="display:none;">
+  <label for="auth-otp">SMS verification code</label>
+  <input
+    id="auth-otp"
+    type="text"
+    inputmode="numeric"
+    autocomplete="one-time-code"
+    placeholder="Enter the code sent to your phone"
+    style="display:block;width:100%;box-sizing:border-box;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px;font-size:16px"
+  >
+</div>
 
   <label for="auth-password">Password</label>
   <input
