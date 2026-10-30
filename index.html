@@ -2803,6 +2803,9 @@ const authPhone = document.getElementById("auth-phone");
 const authNameGroup = document.getElementById("auth-name-group");
 const authPhoneGroup = document.getElementById("auth-phone-group");
 const authMethod = document.getElementById("auth-method");
+const authOtp = document.getElementById("auth-otp");
+const authOtpGroup = document.getElementById("auth-otp-group");
+const authEmailGroup = document.getElementById("auth-email-group");
 const authPassword = document.getElementById("auth-password");
 const authSubmit = document.getElementById("auth-submit");
 const authToggle = document.getElementById("auth-toggle");
@@ -2810,24 +2813,60 @@ const authMessage = document.getElementById("auth-message");
 const authPanel = document.getElementById("auth-panel");
 
 // FIX ACCOUNT MODE TOGGLE
+
+function updateAuthFields() {
+  const isSignup = authMode === "signup";
+  const isPhone = authMethod.value === "phone";
+
+  authNameGroup.style.display =
+    isSignup ? "block" : "none";
+
+  authPhoneGroup.style.display =
+    isSignup ? "block" : "none";
+
+  authEmailGroup.style.display =
+    isPhone ? "none" : "block";
+
+  authOtpGroup.style.display = "none";
+
+  authName.required = isSignup;
+  authPhone.required = isSignup;
+  authEmail.required = !isPhone;
+  authPassword.required = !isPhone;
+
+  authPassword.autocomplete =
+    isSignup ? "new-password" : "current-password";
+
+  passwordToggle.style.display =
+    isPhone ? "none" : "inline-block";
+
+  authSubmit.textContent =
+    isSignup
+      ? (isPhone ? "Send SMS Code" : "Create Account")
+      : "Sign In";
+}
+
 authToggle.onclick = function (event) {
   event.preventDefault();
 
   authMode = authMode === "signin" ? "signup" : "signin";
-
-  authSubmit.textContent =
-    authMode === "signin" ? "Sign In" : "Create Account";
 
   authToggle.textContent =
     authMode === "signin"
       ? "Need an account? Create one"
       : "Already have an account? Sign in";
 
-  authPassword.autocomplete =
-    authMode === "signin" ? "current-password" : "new-password";
-
   authMessage.textContent = "";
+
+  updateAuthFields();
 };
+
+authMethod.addEventListener("change", () => {
+  authMessage.textContent = "";
+  updateAuthFields();
+});
+
+updateAuthFields();
   
 // Sign in or create an account
 authForm.addEventListener("submit", async (event) => {
