@@ -2206,45 +2206,53 @@ mapScript.src =
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
 
 mapScript.onload = () => {
-  if (!document.getElementById("delivery-location-map")) {
-    return;
-  }
+  const waitForMapContainer = () => {
+    const mapElement = document.getElementById("delivery-location-map");
 
-  deliveryMap = L.map("delivery-location-map").setView(
-  [13.4967, 39.4753],
-  13
-);
+    if (deliveryMap) return;
+    if (!mapElement || !mapElement.isConnected) {
+      setTimeout(waitForMapContainer, 100);
+      return;
+    }
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "&copy; OpenStreetMap contributors",
-    maxZoom: 19
-  }).addTo(deliveryMap);
+    deliveryMap = L.map(mapElement).setView(
+      [13.4967, 39.4753],
+      13
+    );
 
-deliveryMap.on("click", (event) => {
-  if (!mapPinEditing) return;
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors",
+      maxZoom: 19
+    }).addTo(deliveryMap);
 
-  const latitude = event.latlng.lat;
-  const longitude = event.latlng.lng;
+    deliveryMap.on("click", (event) => {
+      if (!mapPinEditing) return;
 
-  customerLatitude = latitude;
-  customerLongitude = longitude;
+      const latitude = event.latlng.lat;
+      const longitude = event.latlng.lng;
 
-  if (locationMarker) {
-    locationMarker.setLatLng(event.latlng);
-  } else {
-    locationMarker = L.marker(event.latlng).addTo(deliveryMap);
-  }
+      customerLatitude = latitude;
+      customerLongitude = longitude;
 
-  selectedLocation.textContent =
-    "New location selected: " +
-    latitude.toFixed(5) + ", " +
-    longitude.toFixed(5);
+      if (locationMarker) {
+        locationMarker.setLatLng(event.latlng);
+      } else {
+        locationMarker = L.marker(event.latlng).addTo(deliveryMap);
+      }
 
-  locationMessage.textContent =
-    "Location adjusted. Tap Confirm Location to save it.";
-});
+      selectedLocation.textContent =
+        "New location selected: " +
+        latitude.toFixed(5) + ", " +
+        longitude.toFixed(5);
 
-  setTimeout(() => deliveryMap.invalidateSize(), 300);
+      locationMessage.textContent =
+        "Location adjusted. Tap Confirm Location to save it.";
+    });
+
+    setTimeout(() => deliveryMap.invalidateSize(), 300);
+  };
+
+  waitForMapContainer();
 };
 
 mapScript.onerror = () => {
