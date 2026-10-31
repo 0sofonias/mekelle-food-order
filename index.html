@@ -5106,11 +5106,24 @@ document.head.appendChild(style);
 
       setMessage("Loading your restaurant orders...");
 
-      const { data: restaurants, error: restaurantError } =
-        await client()
-          .from("restaurants")
-          .select("id, name")
-          .eq("owner_id", authData.user.id);
+      const { data: profile, error: profileError } =
+  await client()
+    .from("profiles")
+    .select("role")
+    .eq("id", authData.user.id)
+    .single();
+
+if (profileError) throw profileError;
+
+if (profile?.role !== "admin") {
+  throw new Error("Only administrators can access delivery dispatch.");
+}
+
+const { data: restaurants, error: restaurantError } =
+  await client()
+    .from("restaurants")
+    .select("id, name")
+    .eq("is_approved", true);
 
       if (restaurantError) throw restaurantError;
 
