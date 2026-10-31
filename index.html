@@ -5492,9 +5492,9 @@ async function applyRoleVisibility(user) {
     restaurantButton.hidden = !isRestaurant;
   }
 
-  if (riderAssignmentPanel) {
-    riderAssignmentPanel.hidden = !isRestaurant;
-  }
+ if (riderAssignmentPanel) {
+  riderAssignmentPanel.hidden = !isAdmin;
+}
 
   // Rider interface.
   if (riderPanel) {
