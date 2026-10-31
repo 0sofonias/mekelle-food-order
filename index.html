@@ -2431,10 +2431,10 @@ mapScript.onerror = () => {
 document.body.appendChild(mapScript);
 mapScript.addEventListener("load", () => {
   setTimeout(() => {
-    if (deliveryMap) {
-      deliveryMap.invalidateSize();
-    }
-  }, 300);
+  if (deliveryMap && mapElement.isConnected) {
+    deliveryMap.invalidateSize();
+  }
+}, 500);
 });
 
 // STORE THE LAST CONFIRMED LOCATION
