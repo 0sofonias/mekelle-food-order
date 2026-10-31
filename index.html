@@ -2129,7 +2129,7 @@ quantity.style.fontWeight = "bold";
 }
 
 // SHOW DELIVERY ADDRESS FORM
-function showDeliveryForm() {
+async function showDeliveryForm() {
   const summary = document.getElementById("cart-summary");
 
   if (!cart.length) {
@@ -2144,6 +2144,28 @@ function showDeliveryForm() {
 
   const form = document.createElement("form");
 
+  // LOAD LOGGED-IN CUSTOMER PROFILE
+const { data: currentUserData, error: currentUserError } =
+  await supabaseClient.auth.getUser();
+
+if (currentUserError || !currentUserData.user) {
+  alert("Please sign in again before ordering.");
+  return;
+}
+
+const { data: customerProfile, error: profileError } =
+  await supabaseClient
+    .from("profiles")
+    .select("full_name, phone, address")
+    .eq("id", currentUserData.user.id)
+    .maybeSingle();
+
+if (profileError) {
+  console.error("Profile loading failed:", profileError);
+  alert("Could not load your account details. Please try again.");
+  return;
+}
+  
   const label = document.createElement("label");
   label.textContent = "Delivery address in Mekelle";
 
@@ -2165,6 +2187,52 @@ function showDeliveryForm() {
   address.style.fontSize = "16px";
 
   label.appendChild(address);
+
+  // SENDER DETAILS
+const senderTitle = document.createElement("h4");
+senderTitle.textContent = "Sender Details";
+
+function createCheckoutInput(labelText, value, placeholder) {
+  const wrapper = document.createElement("label");
+  wrapper.style.display = "block";
+  wrapper.style.marginBottom = "12px";
+  wrapper.textContent = labelText;
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.value = value || "";
+  input.placeholder = placeholder;
+  input.required = true;
+  input.style.cssText =
+    "display:block;width:100%;box-sizing:border-box;padding:12px;margin-top:6px;border:1px solid #ccc;border-radius:8px;font-size:16px;";
+
+  wrapper.appendChild(input);
+  return { wrapper, input };
+}
+
+const senderNameField = createCheckoutInput(
+  "Your Name",
+  customerProfile?.full_name === "New Customer"
+    ? ""
+    : customerProfile?.full_name,
+  "Enter your full name"
+);
+
+const senderPhoneField = createCheckoutInput(
+  "Your Phone Number",
+  customerProfile?.phone,
+  "e.g. 0912345678"
+);
+
+const senderAddressField = createCheckoutInput(
+  "Your City / Address",
+  customerProfile?.address,
+  "Enter your city or address"
+);
+
+senderPhoneField.input.type = "tel";
+senderPhoneField.input.autocomplete = "tel";
+  
 
   // DELIVERY LOCATION MAP
 const mapLabel = document.createElement("p");
