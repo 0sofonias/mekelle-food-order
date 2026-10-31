@@ -5135,6 +5135,11 @@ document.head.appendChild(style);
             id,
             restaurant_id,
             delivery_address,
+            sender_name,
+            sender_phone,
+            sender_address,
+            recipient_name,
+            recipient_phone,
             total_amount,
             payment_status,
             order_status,
@@ -5185,6 +5190,16 @@ document.head.appendChild(style);
           "p",
           "Delivery address: " + (order.delivery_address || "Not provided")
         );
+                // SENDER DETAILS
+        addText(card, "h4", "📤 Sender Details");
+        addText(card, "p", "Name: " + (order.sender_name || "Not provided"));
+        addText(card, "p", "Phone: " + (order.sender_phone || "Not provided"));
+        addText(card, "p", "Address: " + (order.sender_address || "Not provided"));
+
+        // RECIPIENT DETAILS
+        addText(card, "h4", "📥 Recipient Details");
+        addText(card, "p", "Name: " + (order.recipient_name || "Not provided"));
+        addText(card, "p", "Phone: " + (order.recipient_phone || "Not provided"));
         addText(
           card,
           "p",
