@@ -2296,20 +2296,32 @@ recipientChoice.addEventListener("change", () => {
 
   recipientNameInput.required = orderingForSomeoneElse;
 });
-  
-  // CUSTOMER PHONE NUMBER
-const phoneLabel = document.createElement("label");
-phoneLabel.textContent = "Your Phone Number";
-phoneLabel.style.display = "block";
-phoneLabel.style.marginBottom = "6px";
 
-const phoneInput = document.createElement("input");
-phoneInput.type = "tel";
-phoneInput.placeholder = "e.g. 0912345678";
-phoneInput.autocomplete = "tel";
-phoneInput.required = true;
-phoneInput.style.cssText =
-  "width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;";
+// RECIPIENT PHONE NUMBER
+const recipientPhoneLabel = document.createElement("label");
+recipientPhoneLabel.textContent = "Recipient's Phone Number";
+recipientPhoneLabel.style.cssText =
+  "display:none;margin-bottom:6px;";
+
+const recipientPhoneInput = document.createElement("input");
+recipientPhoneInput.type = "tel";
+recipientPhoneInput.placeholder = "Enter recipient's phone number";
+recipientPhoneInput.autocomplete = "tel";
+recipientPhoneInput.style.cssText =
+  "display:none;width:100%;box-sizing:border-box;padding:12px;margin-bottom:12px;border:1px solid #ccc;border-radius:8px;font-size:16px;";
+
+recipientChoice.addEventListener("change", () => {
+  const someoneElse =
+    recipientChoice.value === "someone_else";
+
+  recipientPhoneLabel.style.display =
+    someoneElse ? "block" : "none";
+
+  recipientPhoneInput.style.display =
+    someoneElse ? "block" : "none";
+
+  recipientPhoneInput.required = someoneElse;
+});
   
   // USE GPS TO GET THE CUSTOMER'S DELIVERY LOCATION
 const locationButton = document.createElement("button");
@@ -2625,8 +2637,32 @@ navigator.geolocation.getCurrentPosition(
   });
 
   form.append(
+  senderTitle,
+  senderNameField.wrapper,
+  senderPhoneField.wrapper,
+  senderAddressField.wrapper,
+
   label,
   mapLabel,
+  mapHelp,
+  mapContainer,
+  selectedLocation,
+
+  recipientTitle,
+  recipientChoice,
+  recipientNameLabel,
+  recipientNameInput,
+  recipientPhoneLabel,
+  recipientPhoneInput,
+
+  locationButton,
+  editMapButton,
+  confirmMapButton,
+  cancelMapButton,
+  locationMessage,
+  submit,
+  back
+);
   mapHelp,
   mapContainer,
   selectedLocation,
@@ -2651,18 +2687,35 @@ summary.append(heading, form);
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const deliveryAddress = address.value.trim();
+    const deliveryAddress =
+  address.value.trim() ||
+  (
+    Number.isFinite(confirmedLatitude) &&
+    Number.isFinite(confirmedLongitude)
+      ? "GPS location: " +
+        confirmedLatitude.toFixed(6) + ", " +
+        confirmedLongitude.toFixed(6)
+      : ""
+  );
     if (mapPinEditing) {
   alert("Please confirm or cancel your map location before placing your order.");
   return;
 }
-    const customerPhone = phoneInput.value.trim();
+    const senderName = senderNameField.input.value.trim();
+const senderPhone = senderPhoneField.input.value.trim();
+const senderAddress = senderAddressField.input.value.trim();
 
 const recipientType = recipientChoice.value;
+
 const recipientName =
   recipientType === "someone_else"
     ? recipientNameInput.value.trim()
-    : null;
+    : senderName;
+
+const recipientPhone =
+  recipientType === "someone_else"
+    ? recipientPhoneInput.value.trim()
+    : senderPhone;
 
 if (recipientType === "someone_else" && !recipientName) {
   alert("Please enter the recipient's name.");
@@ -2670,19 +2723,37 @@ if (recipientType === "someone_else" && !recipientName) {
   return;
 }
     
-if (!/^[0-9+\-\s()]{7,20}$/.test(customerPhone)) {
-  alert("Please enter a valid phone number.");
-  phoneInput.focus();
+if (!senderName || senderName.length < 2) {
+  alert("Please enter your name.");
+  senderNameField.input.focus();
+  return;
+}
+
+if (!/^[0-9+\-\s()]{7,20}$/.test(senderPhone)) {
+  alert("Please enter a valid sender phone number.");
+  senderPhoneField.input.focus();
+  return;
+}
+
+if (!senderAddress || senderAddress.length < 2) {
+  alert("Please enter your city or address.");
+  senderAddressField.input.focus();
+  return;
+}
+
+if (!/^[0-9+\-\s()]{7,20}$/.test(recipientPhone)) {
+  alert("Please enter a valid recipient phone number.");
+  recipientPhoneInput.focus();
   return;
 }
  if (
-  !deliveryAddress &&
+  deliveryAddress.length < 5 &&
   (
     confirmedLatitude === null ||
     confirmedLongitude === null
   )
 ) {
-  alert("Please select your GPS location or enter a delivery address.");
+  alert("Please select your delivery location on the map or enter a valid delivery address.");
   return;
 }
 
@@ -2730,7 +2801,12 @@ if (!sessionCheck.session) {
     p_restaurant_id: restaurantId,
     p_delivery_address: deliveryAddress,
     p_items: orderItems,
-    p_customer_phone: customerPhone
+    p_sender_name: senderName,
+    p_sender_phone: senderPhone,
+    p_sender_address: senderAddress,
+    p_recipient_type: recipientType,
+    p_recipient_name: recipientName,
+    p_recipient_phone: recipientPhone
   }
 );
 
