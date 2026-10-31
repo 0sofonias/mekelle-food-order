@@ -2558,6 +2558,13 @@ navigator.geolocation.getCurrentPosition(
   confirmedLongitude = longitude;
     
   const customerPosition = [latitude, longitude];
+  if (!deliveryMap) {
+  locationButton.disabled = false;
+  locationButton.textContent = "📍 Use My Location";
+  locationMessage.textContent =
+    "The map is not ready yet. Please wait a moment and try again.";
+  return;
+}
 
   deliveryMap.setView(customerPosition, 17);
 
@@ -2662,26 +2669,8 @@ navigator.geolocation.getCurrentPosition(
   locationMessage,
   submit,
   back
-);
-  mapHelp,
-  mapContainer,
-  selectedLocation,
-
-  recipientTitle,
-  recipientChoice,
-  recipientNameLabel,
-  recipientNameInput,
-
-  phoneLabel,
-  phoneInput,
-  locationButton,
-  editMapButton,
-  confirmMapButton,
-  cancelMapButton,
-  locationMessage,
-  submit,
-  back
-);
+); 
+  
 summary.append(heading, form);
 
   form.addEventListener("submit", async (event) => {
@@ -2729,9 +2718,15 @@ if (!senderName || senderName.length < 2) {
   return;
 }
 
-if (!/^[0-9+\-\s()]{7,20}$/.test(senderPhone)) {
-  alert("Please enter a valid sender phone number.");
-  senderPhoneField.input.focus();
+if (!/^[0-9+\-\s()]{7,20}$/.test(recipientPhone)) {
+  alert("Please enter a valid recipient phone number.");
+
+  if (recipientType === "someone_else") {
+    recipientPhoneInput.focus();
+  } else {
+    senderPhoneField.input.focus();
+  }
+
   return;
 }
 
