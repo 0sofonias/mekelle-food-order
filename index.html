@@ -2917,16 +2917,17 @@ authForm.addEventListener("submit", async (event) => {
 
       const { data, error } =
         await supabaseClient.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              full_name: fullName,
-              phone: phone
-            }
-          }
-        });
-
+  email,
+  password,
+  options: {
+    data: {
+      full_name: fullName,
+      phone: phone
+    },
+    emailRedirectTo:
+      "https://mekelle-food-order.sophniasebuy.workers.dev"
+  }
+});
       if (error) throw error;
 
       authMessage.textContent = data.session
