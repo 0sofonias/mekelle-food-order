@@ -1463,11 +1463,9 @@ async function loadAdminOrders() {
 
 async function loadAdminPricingSettings() {
   try {
-    const { data, error } = await supabaseClient
-      .from("platform_settings")
-      .select("*")
-      .eq("id", true)
-      .single();
+    const { data, error } = await supabaseClient.rpc(
+  "get_admin_platform_pricing"
+);
 
     if (error) throw error;
 
