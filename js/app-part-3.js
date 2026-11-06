@@ -1153,20 +1153,17 @@ async function loadAdminDashboardStats() {
     const { data: orders, error: ordersError } =
       await supabaseClient
         .from("orders")
-        .select("id, total_amount, is_test_order");
+        .select("id, total_amount, is_test_order")
+        .eq("is_test_order", false);
 
     if (ordersError) throw ordersError;
 
-    const realOrders = (orders || []).filter(
-      order => order.is_test_order !== true
-    );
+    const totalOrders = (orders || []).length;
 
-    const totalOrders = realOrders.length;
-
-    const totalSales = realOrders.reduce(
-      (sum, order) => sum + (Number(order.total_amount) || 0),
-      0
-    );
+const totalSales = (orders || []).reduce(
+  (sum, order) => sum + (Number(order.total_amount) || 0),
+  0
+);
 
     if (ordersElement) {
       ordersElement.textContent = totalOrders.toLocaleString();
