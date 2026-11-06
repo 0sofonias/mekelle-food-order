@@ -398,6 +398,7 @@ async function loadRestaurantDashboard() {
             "id, delivery_address, food_total, delivery_fee, service_fee, total_amount, payment_status, order_status, created_at"
           )
           .eq("restaurant_id", restaurant.id)
+          .eq("is_test_order", false)
           .order("created_at", { ascending: false });
 
       if (ordersError) throw ordersError;
