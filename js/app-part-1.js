@@ -1215,6 +1215,16 @@ if (!sessionCheck.session) {
   );
 }
 
+  console.log("ORDER TEST DEBUG:", {
+  userId: sessionCheck.session.user.id,
+  parameterCount: 9,
+  parameters: {
+    p_restaurant_id: restaurantId,
+    p_sender_name: senderName,
+    p_recipient_type: recipientType
+  }
+});     
+
     const { data, error } = await supabaseClient.rpc(
   "create_food_order",
   {
