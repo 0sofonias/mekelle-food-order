@@ -1235,6 +1235,8 @@ if (!sessionCheck.session) {
       }
 
       const orderId = Array.isArray(data) ? data[0] : data;
+
+      window.latestTestOrderId = orderId; 
       
       // SAVE THE CUSTOMER'S MAP LOCATION WITH THE ORDER
 if (
