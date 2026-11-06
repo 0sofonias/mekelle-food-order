@@ -108,6 +108,100 @@
 
   </div>
 
+    <!-- PRICING & COMMISSION SETTINGS -->
+  <section style="
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:28px;
+  ">
+
+    <h2>⚙️ Pricing & Commission Settings</h2>
+
+    <p style="color:#666;margin-bottom:20px;">
+      Manage platform commissions and delivery pricing.
+      Changes will apply to new orders.
+    </p>
+
+    <div style="
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+      gap:16px;
+    ">
+
+      <div>
+        <label>Restaurant Commission (%)</label>
+        <input id="admin-restaurant-commission"
+          type="number" min="0" max="100" step="0.1"
+          value="10"
+          style="width:100%;padding:12px;margin-top:6px;">
+      </div>
+
+      <div>
+        <label>Customer App Fee (%)</label>
+        <input id="admin-app-fee"
+          type="number" min="0" max="100" step="0.1"
+          value="15"
+          style="width:100%;padding:12px;margin-top:6px;">
+      </div>
+
+      <div>
+        <label>Rider Commission (%)</label>
+        <input id="admin-rider-commission"
+          type="number" min="0" max="100" step="0.1"
+          value="10"
+          style="width:100%;padding:12px;margin-top:6px;">
+      </div>
+
+      <div>
+        <label>Base Delivery Fee (ETB)</label>
+        <input id="admin-base-delivery-fee"
+          type="number" min="0" step="0.01"
+          value="50"
+          style="width:100%;padding:12px;margin-top:6px;">
+      </div>
+
+      <div>
+        <label>Base Delivery Distance (km)</label>
+        <input id="admin-base-delivery-distance"
+          type="number" min="0.01" step="0.01"
+          value="1"
+          style="width:100%;padding:12px;margin-top:6px;">
+      </div>
+
+      <div>
+        <label>Extra Delivery Fee per km (ETB)</label>
+        <input id="admin-extra-delivery-fee"
+          type="number" min="0" step="0.01"
+          value="40"
+          style="width:100%;padding:12px;margin-top:6px;">
+      </div>
+
+    </div>
+
+    <button id="save-pricing-settings"
+      type="button"
+      style="
+        background:#e85d04;
+        color:white;
+        border:none;
+        padding:14px 24px;
+        border-radius:10px;
+        font-weight:bold;
+        margin-top:22px;
+        cursor:pointer;
+      ">
+      💾 Save Pricing Changes
+    </button>
+
+    <p id="pricing-save-message"
+      style="margin-top:12px;font-weight:600;"
+      aria-live="polite"></p>
+
+  </section>
+  <!-- END PRICING & COMMISSION SETTINGS -->
+  
   <!-- ORDER MANAGEMENT -->
   <div style="
     background:white;
