@@ -912,16 +912,18 @@ const { data: restaurants, error: restaurantError } =
 
 // TEMPORARY DEVELOPMENT TEST PAYMENT BUTTON
 (function setupTestPaymentButton() {
-  const testOrderId =
-  "8cbaa0f6-637f-4481-a833-70594b850b4a";
+  const authorizedTesterIds = [
+    "c71641dd-9de8-457a-861b-0571e655b4aa",
+    "713ab2a5-3721-49cb-8bb1-11e3584f1cb5",
+    "33d3dc64-e69f-44c4-a726-dd56a67b271d",
+    "873268b1-ebcd-4aa5-be9f-55ae4a708b1e"
+  ];
 
-  const authorizedTesterId =
-  "c71641dd-9de8-457a-861b-0571e655b4aa";
-  
   const button = document.createElement("button");
 
   button.type = "button";
   button.textContent = "Simulate Successful Payment";
+
   button.style.cssText = `
     display: block;
     margin: 20px auto;
@@ -936,6 +938,13 @@ const { data: restaurants, error: restaurantError } =
   `;
 
   button.addEventListener("click", async function () {
+    const testOrderId = window.latestTestOrderId;
+
+    if (!testOrderId) {
+      alert("Please place a new test order first.");
+      return;
+    }
+
     button.disabled = true;
     button.textContent = "Processing test payment...";
 
@@ -945,9 +954,13 @@ const { data: restaurants, error: restaurantError } =
         error: authError
       } = await supabaseClient.auth.getUser();
 
-      if (authError || !user || user.id !== authorizedTesterId) {
+      if (
+        authError ||
+        !user ||
+        !authorizedTesterIds.includes(user.id)
+      ) {
         throw new Error(
-          "Sign in with your authorized testing account."
+          "Sign in with one of your authorized testing accounts."
         );
       }
 
@@ -965,6 +978,7 @@ const { data: restaurants, error: restaurantError } =
       );
 
       button.textContent = "Test Payment Completed";
+
     } catch (error) {
       alert("Test payment failed: " + error.message);
       button.disabled = false;
@@ -973,7 +987,7 @@ const { data: restaurants, error: restaurantError } =
   });
 
   document.body.appendChild(button);
-})();  
+})();
 
 // START ROLE-BASED DASHBOARD CONTROL
 async function applyRoleVisibility(user) {
