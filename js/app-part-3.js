@@ -1459,6 +1459,175 @@ async function loadAdminOrders() {
 
 // END ADMIN ORDERS MANAGEMENT
 
+// START ADMIN PRICING SETTINGS
+
+async function loadAdminPricingSettings() {
+  try {
+    const { data, error } = await supabaseClient
+      .from("platform_settings")
+      .select("*")
+      .eq("id", true)
+      .single();
+
+    if (error) throw error;
+
+    document.getElementById("admin-restaurant-commission").value =
+      data.restaurant_commission_rate;
+
+    document.getElementById("admin-service-fee").value =
+      data.service_fee_rate;
+
+    document.getElementById("admin-rider-commission").value =
+      data.rider_commission_rate;
+
+    document.getElementById("admin-base-delivery-fee").value =
+      data.base_delivery_fee;
+
+    document.getElementById("admin-base-delivery-distance").value =
+      data.base_delivery_distance_km;
+
+    document.getElementById("admin-extra-delivery-fee").value =
+      data.extra_delivery_fee;
+
+    updateAdminTotalAppFee();
+
+  } catch (error) {
+    console.error("Pricing settings failed to load:", error);
+  }
+}
+
+function updateAdminTotalAppFee() {
+  const restaurantRate = Number(
+    document.getElementById("admin-restaurant-commission").value
+  );
+
+  const serviceRate = Number(
+    document.getElementById("admin-service-fee").value
+  );
+
+  document.getElementById("admin-total-app-fee").textContent =
+    (restaurantRate + serviceRate).toFixed(2) + "%";
+}
+
+async function saveAdminPricingSettings() {
+  const message = document.getElementById("pricing-save-message");
+  const button = document.getElementById("save-pricing-settings");
+
+  const restaurantRate = Number(
+    document.getElementById("admin-restaurant-commission").value
+  );
+
+  const serviceRate = Number(
+    document.getElementById("admin-service-fee").value
+  );
+
+  const riderRate = Number(
+    document.getElementById("admin-rider-commission").value
+  );
+
+  const baseFee = Number(
+    document.getElementById("admin-base-delivery-fee").value
+  );
+
+  const baseDistance = Number(
+    document.getElementById("admin-base-delivery-distance").value
+  );
+
+  const extraFee = Number(
+    document.getElementById("admin-extra-delivery-fee").value
+  );
+
+  const values = [
+    restaurantRate,
+    serviceRate,
+    riderRate,
+    baseFee,
+    baseDistance,
+    extraFee
+  ];
+
+  if (
+    values.some(value => !Number.isFinite(value)) ||
+    [restaurantRate, serviceRate, riderRate].some(
+      value => value < 0 || value > 100
+    ) ||
+    baseFee < 0 ||
+    baseDistance <= 0 ||
+    extraFee < 0
+  ) {
+    message.textContent = "Please enter valid pricing values.";
+    message.style.color = "#b91c1c";
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Saving...";
+
+  try {
+    const { data, error } = await supabaseClient.rpc(
+      "update_platform_pricing",
+      {
+        p_restaurant_commission_rate: restaurantRate,
+        p_service_fee_rate: serviceRate,
+        p_rider_commission_rate: riderRate,
+        p_base_delivery_fee: baseFee,
+        p_base_delivery_distance_km: baseDistance,
+        p_extra_delivery_fee: extraFee
+      }
+    );
+
+    if (error) throw error;
+
+    message.textContent =
+      data?.message || "Pricing changes saved successfully.";
+
+    message.style.color = "#15803d";
+
+    updateAdminTotalAppFee();
+
+  } catch (error) {
+    console.error("Pricing save failed:", error);
+
+    message.textContent =
+      error.message || "Unable to save pricing settings.";
+
+    message.style.color = "#b91c1c";
+
+  } finally {
+    button.disabled = false;
+    button.textContent = "💾 Save Pricing Changes";
+  }
+}
+
+// Connect pricing controls
+(function setupAdminPricingControls() {
+  const restaurantInput =
+    document.getElementById("admin-restaurant-commission");
+
+  const serviceInput =
+    document.getElementById("admin-service-fee");
+
+  const saveButton =
+    document.getElementById("save-pricing-settings");
+
+  if (!restaurantInput || !serviceInput || !saveButton) {
+    console.error("Admin pricing controls not found.");
+    return;
+  }
+
+  if (saveButton.dataset.pricingAttached === "true") return;
+
+  restaurantInput.addEventListener("input", updateAdminTotalAppFee);
+  serviceInput.addEventListener("input", updateAdminTotalAppFee);
+  saveButton.addEventListener("click", saveAdminPricingSettings);
+
+  saveButton.dataset.pricingAttached = "true";
+
+  updateAdminTotalAppFee();
+})();
+
+// END ADMIN PRICING SETTINGS
+
 // KEEP DASHBOARDS SEPARATED
 (function enforceDashboardSeparation() {
   let lastUserId = null;
@@ -1509,6 +1678,7 @@ async function loadAdminOrders() {
       if (role === "admin") {
       await loadAdminDashboardStats();
       await loadAdminOrders();
+      await loadAdminPricingSettings();
      }
       
     } catch (error) {
