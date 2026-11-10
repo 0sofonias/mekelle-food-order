@@ -720,9 +720,14 @@ expandMapButton.addEventListener("click", () => {
     mapIsExpanded = false;
   }
 
-  setTimeout(() => {
-    if (deliveryMap) deliveryMap.invalidateSize();
-  }, 350);
+setTimeout(() => {
+  if (deliveryMap) {
+    deliveryMap.invalidateSize({
+      pan: false,
+      animate: false
+    });
+  }
+}, 350);
 });
    
 const selectedLocation = document.createElement("p");
