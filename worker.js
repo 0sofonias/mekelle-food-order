@@ -3,6 +3,13 @@ const VEHICLE_PROFILES = {
   motor: "driving-car"
 };
 
+function calculateDeliveryFee(distanceKm) {
+  if (distanceKm <= 0.5) return 50;
+  if (distanceKm <= 1) return 80;
+
+  return Number((80 + (distanceKm - 1) * 40).toFixed(2));
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
@@ -51,14 +58,14 @@ export default {
       const body = await request.json();
       const { start, end, vehicle_type } = body;
 
-const profile = VEHICLE_PROFILES[vehicle_type];
+      const profile = VEHICLE_PROFILES[vehicle_type];
 
-if (!profile) {
-  return Response.json(
-    { error: "Vehicle type must be bicycle or motor." },
-    { status: 400, headers }
-  );
-}
+      if (!profile) {
+        return Response.json(
+          { error: "Vehicle type must be bicycle or motor." },
+          { status: 400, headers }
+        );
+      }
 
       const validPoint = point =>
         Array.isArray(point) &&
@@ -76,65 +83,68 @@ if (!profile) {
         );
       }
 
-      let route = null;
+      const response = await fetch(
+        `https://api.openrouteservice.org/v2/directions/${profile}/geojson`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": env.HEIGIT_API_KEY,
+            "Content-Type": "application/json",
+            "Accept": "application/geo+json"
+          },
+          body: JSON.stringify({
+            coordinates: [start, end],
+            instructions: false
+          }),
+          signal: AbortSignal.timeout(12000)
+        }
+      );
 
-try {
-  const response = await fetch(
-    `https://api.heigit.org/openrouteservice/v2/directions/${profile}`,
-    {
-      method: "POST",
-      headers: {
-        "Authorization": env.HEIGIT_API_KEY,
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify({
-        coordinates: [start, end],
-        instructions: false
-      }),
-      signal: AbortSignal.timeout(12000)
-    }
-  );
+      if (!response.ok) {
+        console.error("Routing service status:", response.status);
 
-  if (response.ok) {
-    const data = await response.json();
-    const distance = data.routes?.[0]?.summary?.distance;
+        return Response.json(
+          { error: "The routing service could not calculate this route." },
+          { status: 502, headers }
+        );
+      }
 
-    if (Number.isFinite(distance) && distance > 0) {
-      route = { profile, distance };
-    }
-  }
-} catch {
-  // Route calculation failed.
-}
+      const data = await response.json();
 
-if (!route) {
-  return Response.json(
-    {
-      error: "Unable to calculate a route for the selected vehicle. Please try again."
-    },
-    { status: 502, headers }
-  );
-}
+      const feature = data.features?.[0];
+      const distance = feature?.properties?.summary?.distance;
+      const geometry = feature?.geometry;
 
-const distanceKm = route.distance / 1000;
+      if (
+        !Number.isFinite(distance) ||
+        distance <= 0 ||
+        geometry?.type !== "LineString" ||
+        !Array.isArray(geometry.coordinates) ||
+        geometry.coordinates.length < 2
+      ) {
+        return Response.json(
+          { error: "The routing service returned an invalid route." },
+          { status: 502, headers }
+        );
+      }
 
-const deliveryFee =
-  distanceKm < 1
-    ? 50
-    : 50 + Math.ceil(distanceKm - 1) * 30;
+      const distanceKm = distance / 1000;
 
-return Response.json({
-  distance_km: Number(distanceKm.toFixed(3)),
-  delivery_fee: deliveryFee,
-  selected_profile: route.profile,
-  vehicle_type
+      return Response.json({
+        success: true,
+        distance_km: Number(distanceKm.toFixed(3)),
+        delivery_fee: calculateDeliveryFee(distanceKm),
+        selected_profile: profile,
+        vehicle_type,
+        route_geometry: geometry
       }, { headers });
 
-    } catch {
+    } catch (error) {
+      console.error("Route calculation failed:", error);
+
       return Response.json(
         { error: "Unable to calculate the delivery route." },
-        { status: 400, headers }
+        { status: 502, headers }
       );
     }
   }
