@@ -697,6 +697,20 @@ expandedEditPinButton.style.cssText =
 "position:absolute;top:75px;left:12px;z-index:1000;width:44px;height:44px;background:white;border:1px solid #ccc;border-radius:10px;font-size:22px;cursor:pointer;display:none;";
 mapContainer.appendChild(expandedEditPinButton);
 
+// SAVE LOCATION BUTTON ON EXPANDED MAP
+const expandedSaveLocationButton = document.createElement("button");
+expandedSaveLocationButton.type = "button";
+expandedSaveLocationButton.textContent = "✓ Save Location";
+expandedSaveLocationButton.style.cssText =
+  "position:absolute;bottom:25px;left:50%;transform:translateX(-50%);z-index:1000;padding:14px 24px;background:#16a34a;color:white;border:0;border-radius:12px;font-size:16px;font-weight:bold;display:none;cursor:pointer;";
+
+mapContainer.appendChild(expandedSaveLocationButton);
+
+expandedSaveLocationButton.addEventListener("click", () => {
+  confirmMapButton.click();
+  expandedSaveLocationButton.style.display = "none";
+});
+
 expandedEditPinButton.addEventListener("click", () => {
   if (editMapButton.disabled) return;
   editMapButton.click();
