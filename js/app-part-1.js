@@ -682,6 +682,25 @@ selectedLocation.textContent =
 selectedLocation.style.cssText =
   "font-size: 14px; margin-bottom: 16px;";
 
+// ROUTE INFORMATION
+const routeInfo = document.createElement("div");
+routeInfo.style.cssText =
+  "padding:12px;margin-bottom:14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;";
+
+const routeStatus = document.createElement("p");
+routeStatus.textContent =
+  "Select and confirm your delivery location to calculate the bicycle route.";
+routeStatus.style.cssText =
+  "font-size:14px;margin:0 0 8px;";
+
+const routeDistance = document.createElement("p");
+routeDistance.textContent = "Route distance: Not calculated";
+
+const routeFee = document.createElement("p");
+routeFee.textContent = "Delivery fee: Not calculated";
+
+routeInfo.append(routeStatus, routeDistance, routeFee);
+   
 // WHO IS RECEIVING THE ORDER?
 const recipientTitle = document.createElement("p");
 recipientTitle.textContent = "Who is receiving this order?";
@@ -786,6 +805,90 @@ let mapPinEditing = false;
 // SAVE THE CUSTOMER'S SELECTED COORDINATES
 let customerLatitude = null;
 let customerLongitude = null;
+
+   // BICYCLE ROUTE CALCULATION
+let routeLayer = null;
+
+async function calculateAndDisplayRoute(latitude, longitude) {
+  routeStatus.textContent = "Calculating bicycle route...";
+  routeDistance.textContent = "Route distance: Calculating...";
+  routeFee.textContent = "Delivery fee: Calculating...";
+
+  try {
+    const { data: restaurant, error } = await supabaseClient
+      .from("restaurants")
+      .select("latitude, longitude")
+      .eq("id", cart[0].restaurantId)
+      .single();
+
+    if (
+      error ||
+      !restaurant ||
+      !Number.isFinite(Number(restaurant.latitude)) ||
+      !Number.isFinite(Number(restaurant.longitude))
+    ) {
+      throw new Error("Restaurant location is unavailable.");
+    }
+
+    const response = await fetch(
+      "https://mekelle-food-order.sophniasebuy.workers.dev/api/route",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          start: [
+            Number(restaurant.longitude),
+            Number(restaurant.latitude)
+          ],
+          end: [longitude, latitude],
+          vehicle_type: "bicycle"
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Route calculation failed.");
+    }
+
+    routeDistance.textContent =
+      "Route distance: " + data.distance_km + " km";
+
+    routeFee.textContent =
+      "Delivery fee: " + data.delivery_fee + " ETB";
+
+    routeStatus.textContent =
+      "Bicycle route calculated successfully.";
+
+    if (routeLayer) {
+      deliveryMap.removeLayer(routeLayer);
+    }
+
+    routeLayer = L.geoJSON(data.route_geometry, {
+      style: {
+        color: "#e85d04",
+        weight: 6,
+        opacity: 0.85
+      }
+    }).addTo(deliveryMap);
+
+    deliveryMap.fitBounds(routeLayer.getBounds(), {
+      padding: [30, 30]
+    });
+
+  } catch (error) {
+    console.error("Bicycle route error:", error);
+
+    routeStatus.textContent =
+      error.message || "Unable to calculate bicycle route.";
+
+    routeDistance.textContent = "Route distance: Not available";
+    routeFee.textContent = "Delivery fee: Not available";
+  }
+}
   
 // LOAD THE INTERACTIVE DELIVERY MAP
 const mapLibrary = document.createElement("link");
@@ -1078,7 +1181,8 @@ navigator.geolocation.getCurrentPosition(
   mapLabel,
   mapHelp,
   mapContainer,
-  selectedLocation,
+  selectedLocation, 
+  routeInfo,
 
   recipientTitle,
   recipientChoice,
