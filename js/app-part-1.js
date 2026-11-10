@@ -693,8 +693,7 @@ expandedEditPinButton.textContent = "📍";
 expandedEditPinButton.title = "Edit delivery pin";
 expandedEditPinButton.setAttribute("aria-label", "Edit delivery pin");
 expandedEditPinButton.style.cssText =
-  "position:absolute;top:12px;left:12px;z-index:1000;width:44px;height:44px;background:white;border:1px solid #ccc;border-radius:10px;font-size:22px;cursor:pointer;display:none;";
-
+"position:absolute;top:75px;left:12px;z-index:1000;width:44px;height:44px;background:white;border:1px solid #ccc;border-radius:10px;font-size:22px;cursor:pointer;display:none;";
 mapContainer.appendChild(expandedEditPinButton);
 
 expandedEditPinButton.addEventListener("click", () => {
