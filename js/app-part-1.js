@@ -987,7 +987,7 @@ editMapButton.addEventListener("click", () => {
 });
 
 // CONFIRM THE NEW MAP LOCATION
-confirmMapButton.addEventListener("click", () => {
+confirmMapButton.addEventListener("click", async () => {
   if (
     !mapPinEditing ||
     !Number.isFinite(customerLatitude) ||
@@ -1012,6 +1012,10 @@ confirmMapButton.addEventListener("click", () => {
 
   locationMessage.textContent =
     "Delivery location confirmed. Add your neighbourhood or landmark to the address.";
+   await calculateAndDisplayRoute(
+  confirmedLatitude,
+  confirmedLongitude
+);
 });
 
 // CANCEL MAP PIN EDITING
