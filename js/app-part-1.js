@@ -686,6 +686,22 @@ expandMapButton.style.cssText =
 
 mapContainer.appendChild(expandMapButton);
 
+   // EDIT PIN ICON ON EXPANDED MAP
+const expandedEditPinButton = document.createElement("button");
+expandedEditPinButton.type = "button";
+expandedEditPinButton.textContent = "📍";
+expandedEditPinButton.title = "Edit delivery pin";
+expandedEditPinButton.setAttribute("aria-label", "Edit delivery pin");
+expandedEditPinButton.style.cssText =
+  "position:absolute;top:12px;left:12px;z-index:1000;width:44px;height:44px;background:white;border:1px solid #ccc;border-radius:10px;font-size:22px;cursor:pointer;display:none;";
+
+mapContainer.appendChild(expandedEditPinButton);
+
+expandedEditPinButton.addEventListener("click", () => {
+  if (editMapButton.disabled) return;
+  editMapButton.click();
+});
+
 let mapIsExpanded = false;
 let originalMapStyle = mapContainer.style.cssText;
 
@@ -695,10 +711,12 @@ expandMapButton.addEventListener("click", () => {
       ";position:fixed;top:0;left:0;width:100vw;height:100dvh;z-index:99999;margin:0;border-radius:0;background:white;";
 
     expandMapButton.textContent = "✕ Close Map";
+    expandedEditPinButton.style.display = "block";
     mapIsExpanded = true;
   } else {
     mapContainer.style.cssText = originalMapStyle;
     expandMapButton.textContent = "⛶ Expand Map";
+    expandedEditPinButton.style.display = "none";
     mapIsExpanded = false;
   }
 
