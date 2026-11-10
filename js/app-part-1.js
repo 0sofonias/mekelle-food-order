@@ -3,6 +3,7 @@
    menu, cart, checkout / delivery form.
    Must load FIRST (after the Supabase library, before part 2 and 3).
    ===================================================================== */
+
 // SUPABASE CONNECTION — KEEP THESE VALUES UNCHANGED
 const SUPABASE_URL = "https://vkrnonhmyeblmpkgkllo.supabase.co";
 const SUPABASE_KEY = "sb_publishable_KaJTzLho3184lRCIPDQc8A_JcCZ3JBb";
