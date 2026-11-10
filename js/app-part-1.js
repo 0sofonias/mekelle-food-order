@@ -856,6 +856,7 @@ let customerLongitude = null;
 
    // BICYCLE ROUTE CALCULATION
 let routeLayer = null;
+let routeGlowLayer = null;
 
 async function calculateAndDisplayRoute(latitude, longitude) {
   routeStatus.textContent = "Calculating bicycle route...";
@@ -911,17 +912,36 @@ async function calculateAndDisplayRoute(latitude, longitude) {
     routeStatus.textContent =
       "Bicycle route calculated successfully.";
 
-    if (routeLayer) {
-      deliveryMap.removeLayer(routeLayer);
-    }
+// REMOVE PREVIOUS ROUTE LAYERS
+if (routeLayer) {
+  deliveryMap.removeLayer(routeLayer);
+}
 
-    routeLayer = L.geoJSON(data.route_geometry, {
-      style: {
-        color: "#e85d04",
-        weight: 6,
-        opacity: 0.85
-      }
-    }).addTo(deliveryMap);
+if (routeGlowLayer) {
+  deliveryMap.removeLayer(routeGlowLayer);
+}
+
+// OUTER NEON GLOW
+routeGlowLayer = L.geoJSON(data.route_geometry, {
+  style: {
+    color: "#ff6a00",
+    weight: 18,
+    opacity: 0.35,
+    lineCap: "round",
+    lineJoin: "round"
+  }
+}).addTo(deliveryMap);
+
+// BRIGHT ORANGE ROUTE CORE
+routeLayer = L.geoJSON(data.route_geometry, {
+  style: {
+    color: "#ff9d00",
+    weight: 6,
+    opacity: 1,
+    lineCap: "round",
+    lineJoin: "round"
+  }
+}).addTo(deliveryMap);
 
     deliveryMap.fitBounds(routeLayer.getBounds(), {
       padding: [30, 30]
