@@ -675,7 +675,38 @@ const mapContainer = document.createElement("div");
 mapContainer.id = "delivery-location-map";
 mapContainer.style.cssText =
   "width: 100%; height: 300px; border-radius: 10px; border: 1px solid #ccc; margin-bottom: 10px; background: #eee;";
+// EXPANDABLE DELIVERY MAP
+mapContainer.style.position = "relative";
 
+const expandMapButton = document.createElement("button");
+expandMapButton.type = "button";
+expandMapButton.textContent = "⛶ Expand Map";
+expandMapButton.style.cssText =
+  "position:absolute;top:12px;right:12px;z-index:1000;padding:10px 14px;background:white;color:#222;border:1px solid #ccc;border-radius:8px;font-weight:bold;cursor:pointer;";
+
+mapContainer.appendChild(expandMapButton);
+
+let mapIsExpanded = false;
+let originalMapStyle = mapContainer.style.cssText;
+
+expandMapButton.addEventListener("click", () => {
+  if (!mapIsExpanded) {
+    mapContainer.style.cssText +=
+      ";position:fixed;top:0;left:0;width:100vw;height:100dvh;z-index:99999;margin:0;border-radius:0;background:white;";
+
+    expandMapButton.textContent = "✕ Close Map";
+    mapIsExpanded = true;
+  } else {
+    mapContainer.style.cssText = originalMapStyle;
+    expandMapButton.textContent = "⛶ Expand Map";
+    mapIsExpanded = false;
+  }
+
+  setTimeout(() => {
+    if (deliveryMap) deliveryMap.invalidateSize();
+  }, 350);
+});
+   
 const selectedLocation = document.createElement("p");
 selectedLocation.textContent =
   "No map location selected yet.";
