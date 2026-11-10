@@ -1081,6 +1081,8 @@ editMapButton.addEventListener("click", () => {
   mapPinEditing = true;
   confirmMapButton.style.display = "block";
   cancelMapButton.style.display = "block";
+  expandedSaveLocationButton.style.display =
+  mapIsExpanded ? "block" : "none";
   
   confirmMapButton.disabled = false;
   cancelMapButton.disabled = false;
@@ -1109,6 +1111,7 @@ confirmMapButton.addEventListener("click", async () => {
   mapPinEditing = false;
   confirmMapButton.style.display = "none";
   cancelMapButton.style.display = "none";
+  expandedSaveLocationButton.style.display = "none";
   
   confirmMapButton.disabled = true;
   cancelMapButton.disabled = true;
@@ -1467,15 +1470,15 @@ if (!sessionCheck.session) {
       
       // SAVE THE CUSTOMER'S MAP LOCATION WITH THE ORDER
 if (
-  Number.isFinite(customerLatitude) &&
-  Number.isFinite(customerLongitude)
+  Number.isFinite(confirmedLatitude) &&
+  Number.isFinite(confirmedLongitude)
 ) {
   const { error: locationSaveError } = await supabaseClient.rpc(
     "save_order_location",
     {
       p_order_id: orderId,
-      p_latitude: customerLatitude,
-      p_longitude: customerLongitude
+      p_latitude: confirmedLatitude,
+      p_longitude: confirmedLongitude
     }
   );
 
