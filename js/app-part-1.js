@@ -970,6 +970,10 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19
 }).addTo(deliveryMap);
 
+     // FUTURISTIC DARK MAP EFFECT
+deliveryMap.getPane("tilePane").style.filter =
+  "invert(1) hue-rotate(180deg) brightness(0.75) contrast(1.15) saturate(1.5)";
+
     deliveryMap.on("click", (event) => {
       if (!mapPinEditing) return;
 
