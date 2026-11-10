@@ -965,14 +965,14 @@ mapScript.onload = () => {
     );
 
     // MODERN GAME-INSPIRED MAP STYLE
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "&copy; OpenStreetMap contributors",
-  maxZoom: 19
-}).addTo(deliveryMap);
-
-     // FUTURISTIC DARK MAP EFFECT
-deliveryMap.getPane("tilePane").style.filter =
-  "invert(1) hue-rotate(180deg) brightness(0.75) contrast(1.15) saturate(1.5)";
+// SATELLITE MAP VIEW
+L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {
+    attribution: "Tiles &copy; Esri",
+    maxZoom: 19
+  }
+).addTo(deliveryMap);
 
     deliveryMap.on("click", (event) => {
       if (!mapPinEditing) return;
@@ -986,7 +986,25 @@ deliveryMap.getPane("tilePane").style.filter =
       if (locationMarker) {
         locationMarker.setLatLng(event.latlng);
       } else {
-        locationMarker = L.marker(event.latlng).addTo(deliveryMap);
+        const customerIcon = L.divIcon({
+  className: "customer-neon-marker",
+  html: `
+    <div style="
+      width:24px;
+      height:24px;
+      background:#00b7ff;
+      border:4px solid white;
+      border-radius:50%;
+      box-shadow:0 0 12px #00b7ff, 0 0 25px #00b7ff;
+    "></div>
+  `,
+  iconSize: [32, 32],
+  iconAnchor: [16, 16]
+});
+
+locationMarker = L.marker(event.latlng, {
+  icon: customerIcon
+}).addTo(deliveryMap);
       }
 
       selectedLocation.textContent =
