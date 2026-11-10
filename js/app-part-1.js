@@ -957,13 +957,6 @@ mapScript.onerror = () => {
 };
 
 document.body.appendChild(mapScript);
-mapScript.addEventListener("load", () => {
-  setTimeout(() => {
-  if (deliveryMap && mapElement.isConnected) {
-    deliveryMap.invalidateSize();
-  }
-}, 500);
-});
 
 // STORE THE LAST CONFIRMED LOCATION
 let confirmedLatitude = null;
@@ -1120,6 +1113,11 @@ navigator.geolocation.getCurrentPosition(
     "Your location is shown on the map. Please add your neighbourhood or a nearby landmark to the address field.";
 
   setTimeout(() => deliveryMap.invalidateSize(), 200);
+ // CALCULATE BICYCLE ROUTE FROM GPS LOCATION
+calculateAndDisplayRoute(
+  confirmedLatitude,
+  confirmedLongitude
+); 
 
   locationButton.disabled = false;
   locationButton.textContent = "📍 Update My Location";
