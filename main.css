@@ -1165,3 +1165,87 @@ background: #c74700;
   background: #e85d04;
   color: #fff;
 }
+
+/* Customer service selection screen */
+#mfo-service-home {
+  padding: 28px 16px;
+  text-align: center;
+}
+
+#mfo-service-home h2 {
+  color: #333;
+  font-size: 25px;
+  margin-bottom: 8px;
+}
+
+#mfo-service-home > p {
+  color: #777;
+  margin-bottom: 25px;
+}
+
+.mfo-service-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 850px;
+  margin: 0 auto;
+}
+
+.mfo-service-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 190px;
+  padding: 20px 14px;
+  border: 1px solid #f2d8c5;
+  border-radius: 18px;
+  background: #fff;
+  color: #333;
+  text-align: center;
+}
+
+button.mfo-service-card {
+  cursor: pointer;
+  font: inherit;
+}
+
+#mfo-food-service {
+  border: 2px solid #e85d04;
+  background: #fff5ec;
+}
+
+.mfo-service-card > span {
+  font-size: 38px;
+}
+
+.mfo-service-card strong {
+  font-size: 17px;
+}
+
+.mfo-service-card small {
+  color: #777;
+  line-height: 1.4;
+}
+
+.mfo-service-card b {
+  color: #e85d04;
+  font-size: 13px;
+}
+
+.mfo-service-card.coming-soon {
+  background: #f8f8f8;
+  opacity: 0.75;
+}
+
+@media (max-width: 480px) {
+  .mfo-service-grid {
+    gap: 12px;
+  }
+
+  .mfo-service-card {
+    min-height: 175px;
+    padding: 15px 10px;
+  }
+}
