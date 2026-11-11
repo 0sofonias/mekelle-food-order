@@ -1128,3 +1128,40 @@ background: #c74700;
     font-size: 21px;
   }
 }
+
+/* Mekelle Food Order — role navigation */
+#mfo-app-navigation {
+  width: 100%;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 10px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+#mfo-navigation-items {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  max-width: 1100px;
+  margin: 0 auto;
+  overflow-x: auto;
+}
+
+#mfo-app-navigation button {
+  border: 0;
+  background: #fff3e8;
+  color: #c74700;
+  padding: 11px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+#mfo-app-navigation button.active {
+  background: #e85d04;
+  color: #fff;
+}
