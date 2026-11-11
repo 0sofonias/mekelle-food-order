@@ -1148,6 +1148,37 @@ async function applyRoleVisibility(user) {
       button.type = "button";
       button.textContent = tab;
 
+             button.addEventListener("click", () => {
+        if (!isCustomer) return;
+
+        const hero = document.querySelector(".mfo-hero");
+        const search = document.getElementById("search");
+        const categories = document.querySelector(".categories");
+        const account = document.getElementById("mfo-customer-account");
+        const restaurantHeading = document.querySelector("#restaurants")?.previousElementSibling;
+        const restaurantList = document.getElementById("restaurants");
+        const cartBar = document.querySelector(".cart-bar");
+
+        const isAccount = tab === "Account";
+        const isOrders = tab === "Orders";
+
+        if (hero) hero.hidden = isAccount || isOrders;
+        if (search) search.hidden = isAccount || isOrders;
+        if (categories) categories.hidden = isAccount || isOrders;
+        if (restaurantHeading) restaurantHeading.hidden = isAccount || isOrders;
+        if (restaurantList) restaurantList.hidden = isAccount || isOrders;
+        if (cartBar) cartBar.hidden = isAccount || isOrders;
+        if (account) account.hidden = !isAccount;
+
+        if (ordersPanel) {
+          ordersPanel.hidden = !isOrders;
+        }
+
+        navigationItems.querySelectorAll("button").forEach(item => {
+          item.classList.toggle("active", item === button);
+        });
+      });
+
       if (index === 0) {
         button.classList.add("active");
       }
@@ -1162,8 +1193,8 @@ async function applyRoleVisibility(user) {
   if (main) main.hidden = !isCustomer;
 
   if (ordersPanel) {
-    ordersPanel.hidden = !isCustomer;
-  }
+  ordersPanel.hidden = true;
+}
 
   if (myOrdersButton) {
     myOrdersButton.hidden = !isCustomer;
