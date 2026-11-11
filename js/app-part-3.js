@@ -1158,16 +1158,24 @@ async function applyRoleVisibility(user) {
         const restaurantHeading = document.querySelector("#restaurants")?.previousElementSibling;
         const restaurantList = document.getElementById("restaurants");
         const cartBar = document.querySelector(".cart-bar");
+        const serviceHome = document.getElementById("mfo-service-home");
+        const isServiceHome = tab === "Home";
+        const isFood = tab === "Restaurants";
+
+        if (serviceHome) {
+        serviceHome.hidden = !isServiceHome;
+        }     
 
         const isAccount = tab === "Account";
         const isOrders = tab === "Orders";
+        const showFood = isFood;
 
-        if (hero) hero.hidden = isAccount || isOrders;
-        if (search) search.hidden = isAccount || isOrders;
-        if (categories) categories.hidden = isAccount || isOrders;
-        if (restaurantHeading) restaurantHeading.hidden = isAccount || isOrders;
-        if (restaurantList) restaurantList.hidden = isAccount || isOrders;
-        if (cartBar) cartBar.hidden = isAccount || isOrders;
+        if (hero) hero.hidden = !showFood;
+        if (search) search.hidden = !showFood;
+        if (categories) categories.hidden = !showFood;
+        if (restaurantHeading) restaurantHeading.hidden = !showFood;
+        if (restaurantList) restaurantList.hidden = !showFood;
+        if (cartBar) cartBar.hidden = !showFood;
         if (account) account.hidden = !isAccount;
 
         if (ordersPanel) {
@@ -1185,12 +1193,45 @@ async function applyRoleVisibility(user) {
 
       navigationItems.appendChild(button);
     });
+         const foodService = document.getElementById("mfo-food-service");
+
+    if (foodService) {
+      foodService.onclick = () => {
+        const restaurantsTab = Array.from(
+          navigationItems.querySelectorAll("button")
+        ).find(button => button.textContent === "Restaurants");
+
+        if (restaurantsTab) {
+          restaurantsTab.click();
+        }
+      };
+    }
   }
 
   if (authPanel) authPanel.hidden = true;
      
   // Customer interface.
   if (main) main.hidden = !isCustomer;
+
+  const serviceHome = document.getElementById("mfo-service-home");
+
+  if (serviceHome) {
+    serviceHome.hidden = !isCustomer;
+  }
+
+  const hero = document.querySelector(".mfo-hero");
+  const search = document.getElementById("search");
+  const categories = document.querySelector(".categories");
+  const restaurantHeading = document.querySelector("#restaurants")?.previousElementSibling;
+  const restaurantList = document.getElementById("restaurants");
+  const cartBar = document.querySelector(".cart-bar");
+
+  if (hero) hero.hidden = true;
+  if (search) search.hidden = true;
+  if (categories) categories.hidden = true;
+  if (restaurantHeading) restaurantHeading.hidden = true;
+  if (restaurantList) restaurantList.hidden = true;
+  if (cartBar) cartBar.hidden = true; 
 
   if (ordersPanel) {
   ordersPanel.hidden = true;
