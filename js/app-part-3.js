@@ -1019,6 +1019,10 @@ async function applyRoleVisibility(user) {
     document.getElementById("restaurant-dashboard-button");
 
   function hideAllProtectedPanels() {
+   const navigation = document.getElementById("mfo-app-navigation");
+   const navigationItems = document.getElementById("mfo-navigation-items");
+    if (navigation) navigation.hidden = true;
+    if (navigationItems) navigationItems.innerHTML = ""; 
     if (main) main.hidden = true;
     if (restaurantPanel) restaurantPanel.hidden = true;
     if (adminPanel) adminPanel.hidden = true;
