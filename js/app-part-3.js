@@ -1078,6 +1078,17 @@ async function applyRoleVisibility(user) {
     "delivery-worker"
   ].includes(role);
 
+     const isRider = [
+    "rider",
+    "delivery",
+    "delivery_worker",
+    "delivery-worker"
+  ].includes(role);
+
+  // Reject unsupported roles.
+  if (!isAdmin && !isCustomer && !isRestaurant && !isRider) {
+    if (authPanel) authPanel.hidden = true;
+
   // Reject unsupported roles.
   if (!isAdmin && !isCustomer && !isRestaurant && !isRider) {
     if (authPanel) authPanel.hidden = true;
@@ -1091,8 +1102,58 @@ async function applyRoleVisibility(user) {
     return;
   }
 
-  if (authPanel) authPanel.hidden = true;
+  const isRider = [
+    "rider",
+    "delivery",
+    "delivery_worker",
+    "delivery-worker"
+  ].includes(role);
 
+    // Reject unsupported roles.
+  if (!isAdmin && !isCustomer && !isRestaurant && !isRider) {
+    if (authPanel) authPanel.hidden = true;
+    hideAllProtectedPanels();
+    console.error("Unsupported account role:", role);
+    alert("This account has no supported dashboard role.");
+    return;
+  }
+
+  // Build navigation for the verified account role.
+  const navigation = document.getElementById("mfo-app-navigation");
+  const navigationItems = document.getElementById("mfo-navigation-items");
+
+  if (navigation && navigationItems) {
+    navigation.hidden = false;
+    navigationItems.innerHTML = "";
+
+    const navigationByRole = {
+      customer: ["Home", "Restaurants", "Orders", "Account"],
+      buyer: ["Home", "Restaurants", "Orders", "Account"],
+      restaurant_owner: ["Overview", "Menu", "Orders", "Earnings", "Account"],
+      rider: ["Overview", "Deliveries", "History", "Earnings", "Account"],
+      delivery: ["Overview", "Deliveries", "History", "Earnings", "Account"],
+      delivery_worker: ["Overview", "Deliveries", "History", "Earnings", "Account"],
+      "delivery-worker": ["Overview", "Deliveries", "History", "Earnings", "Account"],
+      admin: ["Overview", "Orders", "Restaurants", "Riders", "Pricing", "Reports"]
+    };
+
+    const roleTabs = navigationByRole[role] || [];
+
+    roleTabs.forEach((tab, index) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = tab;
+
+      if (index === 0) {
+        button.classList.add("active");
+      }
+
+      navigationItems.appendChild(button);
+    });
+  }
+
+  if (authPanel) authPanel.hidden = true;
+     
   // Customer interface.
   if (main) main.hidden = !isCustomer;
 
