@@ -1125,6 +1125,9 @@ async function applyRoleVisibility(user) {
         if (!isCustomer) return;
 
         const hero = document.querySelector(".mfo-hero");
+        const promoHeading = document.querySelector(".mfo-section-title");
+        const promoServices = document.querySelector(".mfo-services");
+        const promoNotice = document.getElementById("mfo-service-notice");
         const search = document.getElementById("search");
         const categories = document.querySelector(".categories");
         const account = document.getElementById("mfo-customer-account");
@@ -1144,6 +1147,9 @@ async function applyRoleVisibility(user) {
         const showFood = isFood;
 
         if (hero) hero.hidden = !showFood;
+        if (promoHeading) promoHeading.hidden = !showFood;
+        if (promoServices) promoServices.hidden = !showFood;
+        if (promoNotice) promoNotice.hidden = !showFood;
         if (search) search.hidden = !showFood;
         if (categories) categories.hidden = !showFood;
         if (restaurantHeading) restaurantHeading.hidden = !showFood;
@@ -1193,6 +1199,9 @@ async function applyRoleVisibility(user) {
   }
 
   const hero = document.querySelector(".mfo-hero");
+  const promoHeading = document.querySelector(".mfo-section-title");
+  const promoServices = document.querySelector(".mfo-services");
+  const promoNotice = document.getElementById("mfo-service-notice");
   const search = document.getElementById("search");
   const categories = document.querySelector(".categories");
   const restaurantHeading = document.querySelector("#restaurants")?.previousElementSibling;
@@ -1200,6 +1209,9 @@ async function applyRoleVisibility(user) {
   const cartBar = document.querySelector(".cart-bar");
 
   if (hero) hero.hidden = true;
+  if (promoHeading) promoHeading.hidden = true;
+  if (promoServices) promoServices.hidden = true;
+  if (promoNotice) promoNotice.hidden = true;
   if (search) search.hidden = true;
   if (categories) categories.hidden = true;
   if (restaurantHeading) restaurantHeading.hidden = true;
