@@ -1075,23 +1075,12 @@ async function applyRoleVisibility(user) {
     const isRestaurant =
     role === "restaurant_owner";
 
-  const isRider = [
+    const isRider = [
     "rider",
     "delivery",
     "delivery_worker",
     "delivery-worker"
   ].includes(role);
-
-     const isRider = [
-    "rider",
-    "delivery",
-    "delivery_worker",
-    "delivery-worker"
-  ].includes(role);
-
-  // Reject unsupported roles.
-  if (!isAdmin && !isCustomer && !isRestaurant && !isRider) {
-    if (authPanel) authPanel.hidden = true;
 
   // Reject unsupported roles.
   if (!isAdmin && !isCustomer && !isRestaurant && !isRider) {
@@ -1105,24 +1094,8 @@ async function applyRoleVisibility(user) {
 
     return;
   }
-
-  const isRider = [
-    "rider",
-    "delivery",
-    "delivery_worker",
-    "delivery-worker"
-  ].includes(role);
-
-    // Reject unsupported roles.
-  if (!isAdmin && !isCustomer && !isRestaurant && !isRider) {
-    if (authPanel) authPanel.hidden = true;
-    hideAllProtectedPanels();
-    console.error("Unsupported account role:", role);
-    alert("This account has no supported dashboard role.");
-    return;
-  }
-
-  // Build navigation for the verified account role.
+   
+     // Build navigation for the verified account role.
   const navigation = document.getElementById("mfo-app-navigation");
   const navigationItems = document.getElementById("mfo-navigation-items");
 
