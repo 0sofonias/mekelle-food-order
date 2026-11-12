@@ -212,8 +212,7 @@ async function updateAuthPanel() {
     return;
   }
 
-  authPanel.style.display =
-    data.session ? "none" : "block";
+    authPanel.hidden = !!data.session;
 }
 
 updateAuthPanel();
