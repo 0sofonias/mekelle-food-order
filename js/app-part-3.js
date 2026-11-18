@@ -1215,6 +1215,45 @@ async function applyRoleVisibility(user) {
                 : "";
           }
 
+                  } else if (isRestaurant) {
+
+          const restaurantPanel =
+            document.getElementById("restaurant-dashboard-panel");
+
+          const restaurantMessage =
+            document.getElementById("restaurant-dashboard-message");
+
+          if (tab === "Orders") {
+
+            if (typeof loadRestaurantDashboard === "function") {
+              loadRestaurantDashboard();
+
+            } else if (restaurantMessage) {
+              restaurantMessage.textContent =
+                "Restaurant orders system is not available.";
+            }
+
+          } else {
+
+            if (restaurantPanel) {
+              restaurantPanel.hidden = false;
+            }
+
+            if (restaurantMessage) {
+              restaurantMessage.textContent =
+                tab + " section is coming soon.";
+            }
+          }
+
+          if (restaurantPanel) {
+            restaurantPanel.style.scrollMarginTop = "90px";
+
+            restaurantPanel.scrollIntoView({
+              behavior: "smooth",
+              block: "start"
+            });
+          }
+           
         } // END CUSTOMER AND ADMIN NAVIGATION
 
         navigationItems.querySelectorAll("button").forEach(item => {
