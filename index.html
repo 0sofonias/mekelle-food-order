@@ -551,6 +551,70 @@
   <section id="mfo-customer-account" hidden>
   <h2>My Account</h2>
   <p>Manage your customer account here.</p>
+
+  <hr style="margin:25px 0;">
+
+  <div id="mfo-restaurant-application">
+    <h2>Become a Restaurant Partner</h2>
+
+    <p>
+      Register your restaurant with Mekelle Food Order
+      and start receiving online orders.
+    </p>
+
+    <form id="mfo-restaurant-application-form">
+
+      <label for="mfo-restaurant-name">
+        Restaurant Name
+      </label>
+      <input
+        id="mfo-restaurant-name"
+        type="text"
+        required
+        maxlength="100"
+        placeholder="Enter restaurant name"
+      >
+
+      <label for="mfo-restaurant-description">
+        Restaurant Description
+      </label>
+      <textarea
+        id="mfo-restaurant-description"
+        maxlength="500"
+        placeholder="Describe your restaurant"
+      ></textarea>
+
+      <label for="mfo-restaurant-address">
+        Restaurant Address
+      </label>
+      <input
+        id="mfo-restaurant-address"
+        type="text"
+        required
+        placeholder="Enter restaurant location"
+      >
+
+      <label for="mfo-restaurant-phone">
+        Restaurant Phone
+      </label>
+      <input
+        id="mfo-restaurant-phone"
+        type="tel"
+        placeholder="Enter restaurant phone number"
+      >
+
+      <button type="submit">
+        Submit Restaurant Application
+      </button>
+
+      <p
+        id="mfo-restaurant-application-message"
+        role="status"
+        aria-live="polite"
+      ></p>
+
+    </form>
+  </div>
 </section>
 
   <div class="cart-bar">
