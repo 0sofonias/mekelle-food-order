@@ -1483,3 +1483,111 @@ loadOrders();
     });
   }
 })();
+
+// START RESTAURANT APPLICATION SUBMISSION
+
+(function setupRestaurantApplication() {
+  const form = document.getElementById(
+    "mfo-restaurant-application-form"
+  );
+
+  if (!form || form.dataset.handlerAttached === "true") {
+    return;
+  }
+
+  form.dataset.handlerAttached = "true";
+
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const message = document.getElementById(
+      "mfo-restaurant-application-message"
+    );
+
+    const submitButton = form.querySelector(
+      'button[type="submit"]'
+    );
+
+    const name = document.getElementById(
+      "mfo-restaurant-name"
+    ).value.trim();
+
+    const description = document.getElementById(
+      "mfo-restaurant-description"
+    ).value.trim();
+
+    const address = document.getElementById(
+      "mfo-restaurant-address"
+    ).value.trim();
+
+    const phone = document.getElementById(
+      "mfo-restaurant-phone"
+    ).value.trim();
+
+    try {
+      submitButton.disabled = true;
+      message.textContent = "Submitting your application...";
+
+      const { data: authData, error: authError } =
+        await supabaseClient.auth.getUser();
+
+      if (authError) throw authError;
+
+      const user = authData.user;
+
+      if (!user) {
+        throw new Error("Please sign in before applying.");
+      }
+
+      // Check whether this account already has a restaurant.
+      const { data: existing, error: checkError } =
+        await supabaseClient
+          .from("restaurants")
+          .select("id, is_approved")
+          .eq("owner_id", user.id)
+          .limit(1);
+
+      if (checkError) throw checkError;
+
+      if (existing && existing.length > 0) {
+        message.textContent = existing[0].is_approved
+          ? "Your restaurant is already registered and approved."
+          : "You already have an application awaiting review.";
+
+        submitButton.disabled = true;
+        return;
+      }
+
+      // Submit the application as NOT approved.
+      const { error: insertError } = await supabaseClient
+        .from("restaurants")
+        .insert({
+          owner_id: user.id,
+          name: name,
+          description: description || null,
+          address: address,
+          phone: phone || null,
+          is_approved: false,
+          is_open: false
+        });
+
+      if (insertError) throw insertError;
+
+      message.textContent =
+        "Application submitted successfully! Your restaurant is awaiting admin review.";
+
+      form.reset();
+      submitButton.disabled = true;
+
+    } catch (error) {
+      console.error("Restaurant application error:", error);
+
+      message.textContent =
+        error.message || "Something went wrong. Please try again.";
+
+      submitButton.disabled = false;
+    }
+  });
+})();
+
+// END RESTAURANT APPLICATION SUBMISSION
