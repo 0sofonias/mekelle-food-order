@@ -317,9 +317,13 @@ document.head.appendChild(style);
     <div id="mfo-rider-orders"></div>
   `;
 
-  document.body.appendChild(panel);
+    const footer = document.querySelector("footer");
 
-  const message = document.getElementById("mfo-rider-message");
+  if (footer) {
+    document.body.insertBefore(panel, footer);
+  } else {
+    document.body.appendChild(panel);
+  }
   const ordersContainer = document.getElementById("mfo-rider-orders");
   const refreshButton = document.getElementById("mfo-rider-refresh");
   const locationButton = document.getElementById("mfo-rider-location");
