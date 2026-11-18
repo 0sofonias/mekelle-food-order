@@ -586,11 +586,14 @@ if (window.supabaseClient) {
     window.setTimeout(loadDeliveries, 500);
   });
 
-  window.addEventListener("mfo-rider-dashboard-open", function () {
+    window.addEventListener("mfo-rider-dashboard-open", function () {
     loadDeliveries();
   });
 }
-})();  
+
+loadDeliveries();
+
+})();
 
 // =====================================================
 // MEKELLE FOOD ORDER — RESTAURANT RIDER ASSIGNMENT
