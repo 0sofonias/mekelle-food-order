@@ -1161,7 +1161,53 @@ async function applyRoleVisibility(user) {
         ordersPanel.hidden = !isOrders;
         }
 
-        } // END CUSTOMER NAVIGATION
+                } else if (isAdmin) {
+
+          // Admin dashboard sections.
+          const adminSections = {
+            "Overview": "admin-overview",
+            "Orders": "admin-orders-section",
+            "Restaurants": "admin-restaurants-section",
+            "Riders": "admin-riders-section",
+            "Pricing": "admin-pricing-section"
+          };
+
+          // Hide all admin sections first.
+          Object.values(adminSections).forEach(id => {
+            const section = document.getElementById(id);
+            if (section) section.hidden = true;
+          });
+
+          // Show the selected section.
+          const selectedId = adminSections[tab];
+
+          if (selectedId) {
+            const selectedSection =
+              document.getElementById(selectedId);
+
+            if (selectedSection) {
+              selectedSection.hidden = false;
+            }
+          }
+
+          // Show rider assignment tools only on Riders.
+          if (riderAssignmentPanel) {
+            riderAssignmentPanel.hidden = tab !== "Riders";
+          }
+
+          // Reports is not built yet.
+          const adminMessage = document.getElementById(
+            "admin-dashboard-message"
+          );
+
+          if (adminMessage) {
+            adminMessage.textContent =
+              tab === "Reports"
+                ? "Reports dashboard is not available yet."
+                : "";
+          }
+
+        } // END CUSTOMER AND ADMIN NAVIGATION
 
         navigationItems.querySelectorAll("button").forEach(item => {
           item.classList.toggle("active", item === button);
