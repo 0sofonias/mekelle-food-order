@@ -1253,6 +1253,40 @@ async function applyRoleVisibility(user) {
               block: "start"
             });
           }
+
+            } else if (isRider) {
+
+        const riderPanel =
+          document.getElementById("mfo-rider-dashboard");
+
+        const riderMessage =
+          document.getElementById("mfo-rider-message");
+
+        if (riderPanel) {
+          riderPanel.hidden = false;
+        }
+
+        if (tab === "Deliveries") {
+          const refreshButton =
+            document.getElementById("mfo-rider-refresh");
+
+          if (refreshButton) {
+            refreshButton.click();
+          }
+
+        } else if (riderMessage) {
+          riderMessage.textContent =
+            tab + " section is coming soon.";
+        }
+
+        if (riderPanel) {
+          riderPanel.style.scrollMarginTop = "90px";
+
+          riderPanel.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+        } 
            
         } // END CUSTOMER AND ADMIN NAVIGATION
 
