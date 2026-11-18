@@ -1186,8 +1186,16 @@ async function applyRoleVisibility(user) {
               document.getElementById(selectedId);
 
             if (selectedSection) {
-              selectedSection.hidden = false;
-            }
+  selectedSection.hidden = false;
+
+  // Move directly to the selected dashboard section.
+  selectedSection.style.scrollMarginTop = "90px";
+
+  selectedSection.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
           }
 
           // Show rider assignment tools only on Riders.
