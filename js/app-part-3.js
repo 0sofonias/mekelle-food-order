@@ -1122,7 +1122,7 @@ async function applyRoleVisibility(user) {
       button.textContent = tab;
 
              button.addEventListener("click", () => {
-        if (!isCustomer) return;
+        if (isCustomer) {
 
         const hero = document.querySelector(".mfo-hero");
         const promoHeading = document.querySelector(".mfo-section-title");
@@ -1158,8 +1158,10 @@ async function applyRoleVisibility(user) {
         if (account) account.hidden = !isAccount;
 
         if (ordersPanel) {
-          ordersPanel.hidden = !isOrders;
+        ordersPanel.hidden = !isOrders;
         }
+
+        } // END CUSTOMER NAVIGATION
 
         navigationItems.querySelectorAll("button").forEach(item => {
           item.classList.toggle("active", item === button);
