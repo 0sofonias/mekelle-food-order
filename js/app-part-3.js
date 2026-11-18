@@ -1348,6 +1348,200 @@ const totalSales = (orders || []).reduce(
 
 // END ADMIN DASHBOARD STATISTICS
 
+// START ADMIN RESTAURANT APPLICATIONS
+
+async function loadAdminRestaurantApplications() {
+  const container = document.getElementById(
+    "admin-restaurants-list"
+  );
+
+  if (!container) return;
+
+  container.textContent = "Loading restaurant applications...";
+
+  try {
+    // Confirm that the current user is an administrator.
+    const { data: authData, error: authError } =
+      await supabaseClient.auth.getUser();
+
+    if (authError) throw authError;
+
+    if (!authData.user) {
+      throw new Error("Please sign in.");
+    }
+
+    const { data: profile, error: profileError } =
+      await supabaseClient
+        .from("profiles")
+        .select("role")
+        .eq("id", authData.user.id)
+        .single();
+
+    if (profileError) throw profileError;
+
+    if (profile.role !== "admin") {
+      throw new Error("Administrator access required.");
+    }
+
+    // Get applications waiting for review.
+    const { data: applications, error } =
+      await supabaseClient
+        .from("restaurants")
+        .select(
+          "id, name, description, address, phone, created_at"
+        )
+        .eq("application_status", "pending")
+        .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    // Clear the previous content.
+    container.replaceChildren();
+
+    const heading = document.createElement("h3");
+    heading.textContent =
+      "Pending Applications (" + applications.length + ")";
+
+    container.appendChild(heading);
+
+    // Refresh button.
+    const refreshButton = document.createElement("button");
+    refreshButton.textContent = "Refresh Applications";
+
+    refreshButton.addEventListener("click", function () {
+      loadAdminRestaurantApplications();
+    });
+
+    container.appendChild(refreshButton);
+
+    if (applications.length === 0) {
+      const emptyMessage = document.createElement("p");
+      emptyMessage.textContent =
+        "There are no pending restaurant applications.";
+
+      container.appendChild(emptyMessage);
+      return;
+    }
+
+    applications.forEach(function (restaurant) {
+      const card = document.createElement("div");
+
+      card.style.cssText =
+        "background:#fff7ed;padding:16px;margin:15px 0;" +
+        "border-radius:12px;border:1px solid #e85d04;";
+
+      const name = document.createElement("h3");
+      name.textContent = restaurant.name;
+
+      const description = document.createElement("p");
+      description.textContent =
+        restaurant.description || "No description provided.";
+
+      const address = document.createElement("p");
+      address.textContent =
+        "Address: " + restaurant.address;
+
+      const phone = document.createElement("p");
+      phone.textContent =
+        "Phone: " + (restaurant.phone || "Not provided");
+
+      const date = document.createElement("p");
+      date.textContent =
+        "Applied: " +
+        new Date(restaurant.created_at).toLocaleString();
+
+      const status = document.createElement("p");
+      status.textContent = "Status: Pending review";
+
+      const approveButton = document.createElement("button");
+      approveButton.textContent = "Approve";
+      approveButton.style.marginRight = "10px";
+
+      const rejectButton = document.createElement("button");
+      rejectButton.textContent = "Reject";
+
+      async function reviewApplication(decision) {
+        const confirmed = window.confirm(
+          "Are you sure you want to " +
+          decision +
+          " this restaurant application?"
+        );
+
+        if (!confirmed) return;
+
+        approveButton.disabled = true;
+        rejectButton.disabled = true;
+
+        try {
+          const { error: reviewError } =
+            await supabaseClient.rpc(
+              "review_restaurant_application",
+              {
+                p_restaurant_id: restaurant.id,
+                p_decision: decision
+              }
+            );
+
+          if (reviewError) throw reviewError;
+
+          status.textContent =
+            "Application " + decision + " successfully.";
+
+          await loadAdminRestaurantApplications();
+
+          if (typeof loadAdminDashboardStats === "function") {
+            await loadAdminDashboardStats();
+          }
+
+        } catch (reviewError) {
+          console.error(
+            "Restaurant review error:",
+            reviewError
+          );
+
+          alert(
+            reviewError.message ||
+            "Could not review this application."
+          );
+
+          approveButton.disabled = false;
+          rejectButton.disabled = false;
+        }
+      }
+
+      approveButton.addEventListener("click", function () {
+        reviewApplication("approved");
+      });
+
+      rejectButton.addEventListener("click", function () {
+        reviewApplication("rejected");
+      });
+
+      card.appendChild(name);
+      card.appendChild(description);
+      card.appendChild(address);
+      card.appendChild(phone);
+      card.appendChild(date);
+      card.appendChild(status);
+      card.appendChild(approveButton);
+      card.appendChild(rejectButton);
+
+      container.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error(
+      "Loading restaurant applications failed:",
+      error
+    );
+
+    container.textContent =
+      "Could not load applications: " + error.message;
+  }
+}
+
+// END ADMIN RESTAURANT APPLICATIONS
+
 // START ADMIN ORDERS MANAGEMENT
 
 async function loadAdminOrders() {
@@ -1797,16 +1991,22 @@ async function saveAdminPricingSettings() {
       // Load statistics only for the admin account.
       if (role === "admin") {
       await loadAdminDashboardStats();
+      if (role === "admin") {
+      await loadAdminDashboardStats();
+      await loadAdminRestaurantApplications();
       await loadAdminOrders();
       await loadAdminPricingSettings();
-     }
-      
-    } catch (error) {
+      }
+      await loadAdminOrders();
+      await loadAdminPricingSettings();
+      }
+
+      } catch (error) {
       console.error("Dashboard refresh failed:", error);
-    } finally {
+      } finally {
       refreshInProgress = false;
-    }
-  }
+     }
+     }
 
   if (window.supabaseClient) {
     window.supabaseClient.auth.onAuthStateChange(() => {
