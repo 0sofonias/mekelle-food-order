@@ -581,13 +581,15 @@ document.head.appendChild(style);
   refreshButton.addEventListener("click", loadDeliveries);
   locationButton.addEventListener("click", shareLocation);
 
-  if (window.supabaseClient) {
-    window.supabaseClient.auth.onAuthStateChange(function () {
-      window.setTimeout(loadDeliveries, 0);
-    });
-  }
+if (window.supabaseClient) {
+  window.supabaseClient.auth.onAuthStateChange(function () {
+    window.setTimeout(loadDeliveries, 500);
+  });
 
-  loadDeliveries();
+  window.addEventListener("mfo-rider-dashboard-open", function () {
+    loadDeliveries();
+  });
+}
 })();  
 
 // =====================================================
