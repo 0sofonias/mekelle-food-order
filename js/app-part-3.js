@@ -327,6 +327,7 @@ document.head.appendChild(style);
   const ordersContainer = document.getElementById("mfo-rider-orders");
   const refreshButton = document.getElementById("mfo-rider-refresh");
   const locationButton = document.getElementById("mfo-rider-location");
+  const message = document.getElementById("mfo-rider-message");
 
   function say(text) {
     message.textContent = text;
