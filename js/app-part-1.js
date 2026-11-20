@@ -750,24 +750,81 @@ selectedLocation.textContent =
 selectedLocation.style.cssText =
   "font-size: 14px; margin-bottom: 16px;";
 
-// ROUTE INFORMATION
+// MANUAL DELIVERY DISTANCE AND FEE
 const routeInfo = document.createElement("div");
+
 routeInfo.style.cssText =
   "padding:12px;margin-bottom:14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;";
 
 const routeStatus = document.createElement("p");
 routeStatus.textContent =
-  "Select and confirm your delivery location to calculate the bicycle route.";
-routeStatus.style.cssText =
-  "font-size:14px;margin:0 0 8px;";
+  "Delivery distance will be entered manually for now.";
+
+const distanceLabel = document.createElement("label");
+distanceLabel.textContent = "Delivery distance (km)";
+distanceLabel.style.cssText =
+  "display:block;font-weight:bold;margin-top:12px;";
+
+const manualDistanceInput = document.createElement("input");
+manualDistanceInput.type = "number";
+manualDistanceInput.min = "0.1";
+manualDistanceInput.max = "50";
+manualDistanceInput.step = "0.1";
+manualDistanceInput.placeholder = "Enter delivery distance";
+manualDistanceInput.style.cssText =
+  "width:100%;box-sizing:border-box;padding:12px;margin-top:8px;border:1px solid #ccc;border-radius:8px;font-size:16px;";
 
 const routeDistance = document.createElement("p");
-routeDistance.textContent = "Route distance: Not calculated";
+routeDistance.textContent = "Delivery distance: Not entered";
 
 const routeFee = document.createElement("p");
 routeFee.textContent = "Delivery fee: Not calculated";
 
-routeInfo.append(routeStatus, routeDistance, routeFee);
+function calculateManualDeliveryFee(distanceKm) {
+  const baseFee = 50;
+  const baseDistance = 0.8;
+  const extraFeePerKm = 40;
+
+  if (distanceKm <= baseDistance) {
+    return baseFee;
+  }
+
+  return Number(
+    (baseFee + (distanceKm - baseDistance) * extraFeePerKm).toFixed(2)
+  );
+}
+
+manualDistanceInput.addEventListener("input", () => {
+  const distanceKm = Number(manualDistanceInput.value);
+
+  if (
+    !manualDistanceInput.value ||
+    !Number.isFinite(distanceKm) ||
+    distanceKm <= 0 ||
+    distanceKm > 50
+  ) {
+    routeDistance.textContent = "Delivery distance: Not entered";
+    routeFee.textContent = "Delivery fee: Not calculated";
+    return;
+  }
+
+  const fee = calculateManualDeliveryFee(distanceKm);
+
+  routeDistance.textContent =
+    "Delivery distance: " + distanceKm.toFixed(1) + " km";
+
+  routeFee.textContent =
+    "Delivery fee: " + fee.toFixed(2) + " ETB";
+});
+
+distanceLabel.appendChild(manualDistanceInput);
+
+routeInfo.append(
+  routeStatus,
+  distanceLabel,
+  routeDistance,
+  routeFee
+);
    
 // WHO IS RECEIVING THE ORDER?
 const recipientTitle = document.createElement("p");
