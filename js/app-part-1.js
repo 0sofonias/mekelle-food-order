@@ -799,16 +799,20 @@ let manualDeliveryFee = null;
 manualDistanceInput.addEventListener("input", () => {
   const distanceKm = Number(manualDistanceInput.value);
 
-  if (
-    !manualDistanceInput.value ||
-    !Number.isFinite(distanceKm) ||
-    distanceKm <= 0 ||
-    distanceKm > 50
-  ) {
-    routeDistance.textContent = "Delivery distance: Not entered";
-    routeFee.textContent = "Delivery fee: Not calculated";
-    return;
-  }
+if (
+  !manualDistanceInput.value ||
+  !Number.isFinite(distanceKm) ||
+  distanceKm <= 0 ||
+  distanceKm > 50
+) {
+  routeDistance.textContent = "Delivery distance: Not entered";
+  routeFee.textContent = "Delivery fee: Not calculated";
+
+  manualDeliveryDistanceKm = null;
+  manualDeliveryFee = null;
+
+  return;
+}
 
   const fee = calculateManualDeliveryFee(distanceKm);
   manualDeliveryDistanceKm = distanceKm;
