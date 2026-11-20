@@ -794,6 +794,8 @@ function calculateManualDeliveryFee(distanceKm) {
   );
 }
 
+let manualDeliveryDistanceKm = null;
+let manualDeliveryFee = null;
 manualDistanceInput.addEventListener("input", () => {
   const distanceKm = Number(manualDistanceInput.value);
 
@@ -809,6 +811,8 @@ manualDistanceInput.addEventListener("input", () => {
   }
 
   const fee = calculateManualDeliveryFee(distanceKm);
+  manualDeliveryDistanceKm = distanceKm;
+  manualDeliveryFee = fee;
 
   routeDistance.textContent =
     "Delivery distance: " + distanceKm.toFixed(1) + " km";
