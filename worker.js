@@ -91,7 +91,7 @@ export default {
       }
 
       const response = await fetch(
-        `https://api.openrouteservice.org/v2/directions/${profile}/geojson`,
+        `https://api.heigit.org/openrouteservice/v2/directions/${profile}/geojson`,
         {
           method: "POST",
           headers: {
