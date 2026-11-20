@@ -1365,6 +1365,15 @@ if (!/^[0-9+\-\s()]{7,20}$/.test(recipientPhone)) {
       return;
     }
 
+     if (
+  manualDeliveryDistanceKm === null ||
+  manualDeliveryFee === null
+) {
+  alert("Please enter a valid delivery distance before placing your order.");
+  manualDistanceInput.focus();
+  return;
+}
+     
     submit.disabled = true;
     submit.textContent = "Placing Order...";
 
