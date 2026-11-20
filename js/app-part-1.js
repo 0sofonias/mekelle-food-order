@@ -930,110 +930,6 @@ let mapPinEditing = false;
 // SAVE THE CUSTOMER'S SELECTED COORDINATES
 let customerLatitude = null;
 let customerLongitude = null;
-
-   // BICYCLE ROUTE CALCULATION
-let routeLayer = null;
-let routeGlowLayer = null;
-
-async function calculateAndDisplayRoute(latitude, longitude) {
-  routeStatus.textContent = "Calculating bicycle route...";
-  routeDistance.textContent = "Route distance: Calculating...";
-  routeFee.textContent = "Delivery fee: Calculating...";
-
-  try {
-    const { data: restaurant, error } = await supabaseClient
-      .from("restaurants")
-      .select("latitude, longitude")
-      .eq("id", cart[0].restaurantId)
-      .single();
-
-    if (
-      error ||
-      !restaurant ||
-      !Number.isFinite(Number(restaurant.latitude)) ||
-      !Number.isFinite(Number(restaurant.longitude))
-    ) {
-      throw new Error("Restaurant location is unavailable.");
-    }
-
-    const response = await fetch(
-      "https://mekelle-food-order.sophniasebuy.workers.dev/api/route",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          start: [
-            Number(restaurant.longitude),
-            Number(restaurant.latitude)
-          ],
-          end: [longitude, latitude],
-          vehicle_type: "bicycle"
-        })
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok || !data.success) {
-      throw new Error(data.error || "Route calculation failed.");
-    }
-
-    routeDistance.textContent =
-      "Route distance: " + data.distance_km + " km";
-
-    routeFee.textContent =
-      "Delivery fee: " + data.delivery_fee + " ETB";
-
-    routeStatus.textContent =
-      "Bicycle route calculated successfully.";
-
-// REMOVE PREVIOUS ROUTE LAYERS
-if (routeLayer) {
-  deliveryMap.removeLayer(routeLayer);
-}
-
-if (routeGlowLayer) {
-  deliveryMap.removeLayer(routeGlowLayer);
-}
-
-// OUTER NEON GLOW
-routeGlowLayer = L.geoJSON(data.route_geometry, {
-  style: {
-    color: "#ff6a00",
-    weight: 18,
-    opacity: 0.35,
-    lineCap: "round",
-    lineJoin: "round"
-  }
-}).addTo(deliveryMap);
-
-// BRIGHT ORANGE ROUTE CORE
-routeLayer = L.geoJSON(data.route_geometry, {
-  style: {
-    color: "#ff9d00",
-    weight: 6,
-    opacity: 1,
-    lineCap: "round",
-    lineJoin: "round"
-  }
-}).addTo(deliveryMap);
-
-    deliveryMap.fitBounds(routeLayer.getBounds(), {
-      padding: [30, 30]
-    });
-
-  } catch (error) {
-    console.error("Bicycle route error:", error);
-
-    routeStatus.textContent =
-      error.message || "Unable to calculate bicycle route.";
-
-    routeDistance.textContent = "Route distance: Not available";
-    routeFee.textContent = "Delivery fee: Not available";
-  }
-}
   
 // LOAD THE INTERACTIVE DELIVERY MAP
 const mapLibrary = document.createElement("link");
@@ -1176,10 +1072,6 @@ confirmMapButton.addEventListener("click", async () => {
 
   locationMessage.textContent =
     "Delivery location confirmed. Add your neighbourhood or landmark to the address.";
-   await calculateAndDisplayRoute(
-  confirmedLatitude,
-  confirmedLongitude
-);
 });
 
 // CANCEL MAP PIN EDITING
@@ -1284,11 +1176,6 @@ navigator.geolocation.getCurrentPosition(
     "Your location is shown on the map. Please add your neighbourhood or a nearby landmark to the address field.";
 
   setTimeout(() => deliveryMap.invalidateSize(), 200);
- // CALCULATE BICYCLE ROUTE FROM GPS LOCATION
-calculateAndDisplayRoute(
-  confirmedLatitude,
-  confirmedLongitude
-); 
 
   locationButton.disabled = false;
   locationButton.textContent = "📍 Update My Location";
