@@ -108,13 +108,20 @@ export default {
       );
 
       if (!response.ok) {
-        console.error("Routing service status:", response.status);
+  const errorDetails = await response.text();
 
-        return Response.json(
-          { error: "The routing service could not calculate this route." },
-          { status: 502, headers }
-        );
-      }
+  console.error("Routing service status:", response.status);
+  console.error("Routing service details:", errorDetails);
+
+  return Response.json(
+    {
+      error: "The routing service could not calculate this route.",
+      provider_status: response.status,
+      provider_details: errorDetails
+    },
+    { status: 502, headers }
+  );
+}
 
       const data = await response.json();
 
