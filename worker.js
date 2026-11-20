@@ -4,10 +4,17 @@ const VEHICLE_PROFILES = {
 };
 
 function calculateDeliveryFee(distanceKm) {
-  if (distanceKm <= 0.5) return 50;
-  if (distanceKm <= 1) return 80;
+  const baseFee = 50;
+  const baseDistance = 0.8;
+  const extraFeePerKm = 40;
 
-  return Number((80 + (distanceKm - 1) * 40).toFixed(2));
+  if (distanceKm <= baseDistance) {
+    return baseFee;
+  }
+
+  return Number(
+    (baseFee + (distanceKm - baseDistance) * extraFeePerKm).toFixed(2)
+  );
 }
 
 export default {
