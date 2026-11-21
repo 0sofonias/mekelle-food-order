@@ -1132,6 +1132,7 @@ confirmMapButton.addEventListener("click", async () => {
   confirmedLatitude = customerLatitude;
   confirmedLongitude = customerLongitude;
   confirmedAddress = address.value;
+  updateDeliveryEstimate();
   
   mapPinEditing = false;
   confirmMapButton.style.display = "none";
@@ -1192,6 +1193,7 @@ cancelMapButton.addEventListener("click", () => {
 
   locationMessage.textContent =
     "Map editing cancelled. Your previous confirmed location is restored.";
+   updateDeliveryEstimate();
 });
   
 locationButton.addEventListener("click", () => {
@@ -1216,6 +1218,7 @@ navigator.geolocation.getCurrentPosition(
   customerLongitude = longitude;
   confirmedLatitude = latitude;
   confirmedLongitude = longitude;
+  updateDeliveryEstimate();
     
   const customerPosition = [latitude, longitude];
   if (!deliveryMap) {
