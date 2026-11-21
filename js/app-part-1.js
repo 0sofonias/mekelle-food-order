@@ -1365,12 +1365,11 @@ if (!/^[0-9+\-\s()]{7,20}$/.test(recipientPhone)) {
       return;
     }
 
-     if (
-  manualDeliveryDistanceKm === null ||
-  manualDeliveryFee === null
+    if (
+  !Number.isFinite(confirmedLatitude) ||
+  !Number.isFinite(confirmedLongitude)
 ) {
-  alert("Please enter a valid delivery distance before placing your order.");
-  manualDistanceInput.focus();
+  alert("Please select and confirm your delivery location on the map.");
   return;
 }
      
