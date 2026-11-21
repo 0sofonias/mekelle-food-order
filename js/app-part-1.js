@@ -981,10 +981,23 @@ grandTotalValue.textContent = "Not available";
       );
     }
 
-    const baseFee = 50;
-    const baseDistance = 0.8;
-    const extraFeePerKm = 40;
+     const { data: pricing, error: pricingError } = await supabaseClient
+  .from("platform_settings")
+  .select(
+    "service_fee_rate, base_delivery_fee, base_delivery_distance_km, extra_delivery_fee"
+  )
+  .eq("id", true)
+  .single();
 
+if (pricingError || !pricing) {
+  throw new Error("Unable to load delivery pricing settings.");
+}
+
+const baseFee = Number(pricing.base_delivery_fee);
+const baseDistance = Number(pricing.base_delivery_distance_km);
+const extraFeePerKm = Number(pricing.extra_delivery_fee);
+const serviceFeeRate = Number(pricing.service_fee_rate) / 100;
+     
     const deliveryFee =
       estimatedDistance <= baseDistance
         ? baseFee
@@ -1003,8 +1016,11 @@ const currentFoodSubtotal = cart.reduce(
 );
 
 const currentServiceFee = Number(
-  (currentFoodSubtotal * 0.03).toFixed(2)
+  (currentFoodSubtotal * serviceFeeRate).toFixed(2)
 );
+
+serviceFeeValue.textContent =
+  currentServiceFee.toLocaleString() + " ETB";     
 
 const currentGrandTotal = Number(
   (currentFoodSubtotal + currentServiceFee + deliveryFee).toFixed(2)
