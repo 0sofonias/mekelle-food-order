@@ -546,9 +546,14 @@ quantity.style.fontWeight = "bold";
   checkoutButton.className = "cart-checkout";
   checkoutButton.textContent = "Continue to Checkout";
 
-  checkoutButton.addEventListener("click", () => {
-  showDeliveryForm();
-  });
+  checkoutButton.addEventListener("click", async () => {
+  try {
+    await showDeliveryForm();
+  } catch (error) {
+    console.error("Checkout screen failed:", error);
+    alert("Unable to open checkout: " + error.message);
+  }
+});
   
   summaryContainer.className = "cart-total";
   summaryContainer.append(restaurant, totalHeading, checkoutButton);
