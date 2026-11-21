@@ -620,6 +620,7 @@ foodSubtotalLabel.textContent = "Food subtotal";
 foodSubtotalLabel.style.color = "#333333";
 
 const foodSubtotalValue = document.createElement("span");
+foodSubtotalValue.style.color = "#222222";
 foodSubtotalValue.textContent =
   foodSubtotal.toLocaleString() + " ETB";
 
@@ -636,6 +637,7 @@ deliveryFeeLabel.textContent = "Delivery fee";
 deliveryFeeLabel.style.color = "#333333";
 
 const deliveryFeeValue = document.createElement("strong");
+deliveryFeeValue.style.color = "#222222";
 deliveryFeeValue.textContent = "Calculating...";
 
 deliveryFeeRow.append(deliveryFeeLabel, deliveryFeeValue);
@@ -649,10 +651,11 @@ serviceFeeRow.style.cssText =
   "display:flex;justify-content:space-between;padding:10px 0;font-size:14px;";
 
 const serviceFeeLabel = document.createElement("span");
-serviceFeeLabel.textContent = "Service fee (3%)";
+serviceFeeLabel.textContent = "Service fee";
 serviceFeeLabel.style.color = "#333333";
 
 const serviceFeeValue = document.createElement("strong");
+serviceFeeValue.style.color = "#222222";
 serviceFeeValue.textContent =
   serviceFee.toLocaleString() + " ETB";
 
