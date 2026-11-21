@@ -990,7 +990,10 @@ grandTotalValue.textContent = "Not available";
   .single();
 
 if (pricingError || !pricing) {
-  throw new Error("Unable to load delivery pricing settings.");
+  console.error("Pricing settings query failed:", pricingError);
+  throw new Error(
+    pricingError?.message || "Pricing settings were not found."
+  );
 }
 
 const baseFee = Number(pricing.base_delivery_fee);
