@@ -565,11 +565,35 @@ async function showDeliveryForm() {
 
   summary.replaceChildren();
 
-  const heading = document.createElement("h3");
-  heading.textContent = "Delivery Details";
+  const heading = document.createElement("h2");
+heading.textContent = "Checkout";
+heading.style.cssText =
+  "font-size:24px;font-weight:800;color:#222;margin:4px 0 16px;";
 
   const form = document.createElement("form");
 
+   form.style.cssText =
+  "display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box;padding:16px;background:#ffffff;border-radius:16px;";
+
+// RESTAURANT INFORMATION
+const restaurantCard = document.createElement("div");
+
+restaurantCard.style.cssText =
+  "padding:14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;margin-bottom:8px;";
+
+const restaurantName = document.createElement("h3");
+restaurantName.textContent = cart[0].restaurantName;
+restaurantName.style.cssText =
+  "font-size:18px;font-weight:700;margin:0;color:#222;";
+
+const restaurantSubtitle = document.createElement("p");
+restaurantSubtitle.textContent = "Your selected restaurant";
+restaurantSubtitle.style.cssText =
+  "font-size:13px;color:#777;margin:5px 0 0;";
+
+restaurantCard.append(restaurantName, restaurantSubtitle);
+form.appendChild(restaurantCard);
+   
   // LOAD LOGGED-IN CUSTOMER PROFILE
 const { data: currentUserData, error: currentUserError } =
   await supabaseClient.auth.getUser();
