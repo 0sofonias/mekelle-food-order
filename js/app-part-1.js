@@ -750,7 +750,8 @@ selectedLocation.textContent =
 selectedLocation.style.cssText =
   "font-size: 14px; margin-bottom: 16px;";
 
-// MANUAL DELIVERY DISTANCE AND FEE
+// AUTOMATIC DELIVERY DISTANCE AND FEE
+
 const routeInfo = document.createElement("div");
 
 routeInfo.style.cssText =
@@ -758,78 +759,141 @@ routeInfo.style.cssText =
 
 const routeStatus = document.createElement("p");
 routeStatus.textContent =
-  "Delivery distance will be entered manually for now.";
-
-const distanceLabel = document.createElement("label");
-distanceLabel.textContent = "Delivery distance (km)";
-distanceLabel.style.cssText =
-  "display:block;font-weight:bold;margin-top:12px;";
-
-const manualDistanceInput = document.createElement("input");
-manualDistanceInput.type = "number";
-manualDistanceInput.min = "0.1";
-manualDistanceInput.max = "50";
-manualDistanceInput.step = "0.1";
-manualDistanceInput.placeholder = "Enter delivery distance";
-manualDistanceInput.style.cssText =
-  "width:100%;box-sizing:border-box;padding:12px;margin-top:8px;border:1px solid #ccc;border-radius:8px;font-size:16px;";
+  "Select your delivery location to calculate the estimated distance.";
 
 const routeDistance = document.createElement("p");
-routeDistance.textContent = "Delivery distance: Not entered";
+routeDistance.textContent =
+  "Delivery distance: Waiting for location";
 
 const routeFee = document.createElement("p");
-routeFee.textContent = "Delivery fee: Not calculated";
+routeFee.textContent =
+  "Delivery fee: Waiting for location";
 
-function calculateManualDeliveryFee(distanceKm) {
-  const baseFee = 50;
-  const baseDistance = 0.8;
-  const extraFeePerKm = 40;
+async function updateDeliveryEstimate() {
 
-  if (distanceKm <= baseDistance) {
-    return baseFee;
-  }
-
-  return Number(
-    (baseFee + (distanceKm - baseDistance) * extraFeePerKm).toFixed(2)
-  );
-}
-
-let manualDeliveryDistanceKm = null;
-let manualDeliveryFee = null;
-manualDistanceInput.addEventListener("input", () => {
-  const distanceKm = Number(manualDistanceInput.value);
-
-if (
-  !manualDistanceInput.value ||
-  !Number.isFinite(distanceKm) ||
-  distanceKm <= 0 ||
-  distanceKm > 50
-) {
-  routeDistance.textContent = "Delivery distance: Not entered";
-  routeFee.textContent = "Delivery fee: Not calculated";
-
-  manualDeliveryDistanceKm = null;
-  manualDeliveryFee = null;
-
-  return;
-}
-
-  const fee = calculateManualDeliveryFee(distanceKm);
-  manualDeliveryDistanceKm = distanceKm;
-  manualDeliveryFee = fee;
+  routeStatus.textContent = "Calculating delivery estimate...";
 
   routeDistance.textContent =
-    "Delivery distance: " + distanceKm.toFixed(1) + " km";
+    "Delivery distance: Calculating...";
 
   routeFee.textContent =
-    "Delivery fee: " + fee.toFixed(2) + " ETB";
-});
+    "Delivery fee: Calculating...";
 
-distanceLabel.appendChild(manualDistanceInput);
+  if (
+    !Number.isFinite(confirmedLatitude) ||
+    !Number.isFinite(confirmedLongitude) ||
+    !cart.length
+  ) {
+    routeStatus.textContent =
+      "Select your delivery location to calculate the estimate.";
+
+    routeDistance.textContent =
+      "Delivery distance: Not available";
+
+    routeFee.textContent =
+      "Delivery fee: Not calculated";
+
+    return;
+  }
+
+  try {
+
+    const restaurantId = cart[0].restaurantId;
+
+    const { data: restaurant, error } = await supabaseClient
+      .from("restaurants")
+      .select("latitude, longitude")
+      .eq("id", restaurantId)
+      .single();
+
+    if (error) throw error;
+
+    if (
+      !restaurant ||
+      !Number.isFinite(Number(restaurant.latitude)) ||
+      !Number.isFinite(Number(restaurant.longitude))
+    ) {
+      throw new Error("Restaurant location is unavailable.");
+    }
+
+    const toRadians = degrees =>
+      degrees * Math.PI / 180;
+
+    const lat1 = toRadians(Number(restaurant.latitude));
+    const lon1 = toRadians(Number(restaurant.longitude));
+
+    const lat2 = toRadians(confirmedLatitude);
+    const lon2 = toRadians(confirmedLongitude);
+
+    const latDifference = lat2 - lat1;
+    const lonDifference = lon2 - lon1;
+
+    const a =
+      Math.sin(latDifference / 2) ** 2 +
+      Math.cos(lat1) *
+      Math.cos(lat2) *
+      Math.sin(lonDifference / 2) ** 2;
+
+    const straightDistance =
+      2 * 6371 * Math.asin(Math.sqrt(Math.min(1, a)));
+
+    const estimatedDistance = Number(
+      (straightDistance * 1.4).toFixed(2)
+    );
+
+    if (
+      !Number.isFinite(estimatedDistance) ||
+      estimatedDistance <= 0 ||
+      estimatedDistance > 50
+    ) {
+      throw new Error(
+        "Your location is outside the current delivery range."
+      );
+    }
+
+    const baseFee = 50;
+    const baseDistance = 0.8;
+    const extraFeePerKm = 40;
+
+    const deliveryFee =
+      estimatedDistance <= baseDistance
+        ? baseFee
+        : Number(
+            (
+              baseFee +
+              (estimatedDistance - baseDistance) *
+              extraFeePerKm
+            ).toFixed(2)
+          );
+
+    routeStatus.textContent =
+      "Estimated delivery cost calculated.";
+
+    routeDistance.textContent =
+      "Estimated delivery distance: " +
+      estimatedDistance.toFixed(2) + " km";
+
+    routeFee.textContent =
+      "Estimated delivery fee: " +
+      deliveryFee.toFixed(2) + " ETB";
+
+  } catch (error) {
+
+    console.error("Delivery estimate failed:", error);
+
+    routeStatus.textContent =
+      error.message || "Unable to calculate delivery estimate.";
+
+    routeDistance.textContent =
+      "Delivery distance: Unavailable";
+
+    routeFee.textContent =
+      "Delivery fee: Unavailable";
+  }
+}
 
 routeInfo.append(
   routeStatus,
-  distanceLabel,
   routeDistance,
   routeFee
 );
