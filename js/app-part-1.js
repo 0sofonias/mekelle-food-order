@@ -617,7 +617,9 @@ if (profileError) {
 }
   
   const label = document.createElement("label");
-  label.textContent = "Delivery address in Mekelle";
+label.textContent = "Delivery Address";
+label.style.cssText =
+  "display:block;font-size:15px;font-weight:700;color:#333;margin:12px 0 4px;";
 
   const address = document.createElement("textarea");
   address.required = false;
@@ -639,8 +641,10 @@ if (profileError) {
   label.appendChild(address);
 
   // SENDER DETAILS
-const senderTitle = document.createElement("h4");
-senderTitle.textContent = "Sender Details";
+const senderTitle = document.createElement("h3");
+senderTitle.textContent = "Your Details";
+senderTitle.style.cssText =
+  "font-size:18px;font-weight:700;color:#222;margin:16px 0 4px;padding-bottom:10px;border-bottom:1px solid #eee;";
 
 function createCheckoutInput(labelText, value, placeholder) {
   const wrapper = document.createElement("label");
@@ -685,22 +689,22 @@ senderPhoneField.input.autocomplete = "tel";
   
 
   // DELIVERY LOCATION MAP
-const mapLabel = document.createElement("p");
-mapLabel.textContent = "📍 Select Your Delivery Location";
+const mapLabel = document.createElement("h3");
+mapLabel.textContent = "📍 Delivery Location";
 mapLabel.style.cssText =
-  "font-weight: bold; margin: 12px 0 8px;";
-
+  "font-size:18px;font-weight:700;color:#222;margin:20px 0 6px;";
+   
 const mapHelp = document.createElement("p");
 mapHelp.textContent =
-  "Use the map to find your location. You can also enter your address above.";
+  "Choose your exact delivery location by moving the map pin or using your current GPS location.";
 mapHelp.style.cssText =
   "font-size: 14px; color: #666; margin-bottom: 10px;";
 
 const mapContainer = document.createElement("div");
 mapContainer.id = "delivery-location-map";
 mapContainer.style.cssText =
-  "width: 100%; height: 300px; border-radius: 10px; border: 1px solid #ccc; margin-bottom: 10px; background: #eee;";
-// EXPANDABLE DELIVERY MAP
+  "width:100%;height:300px;border-radius:14px;border:1px solid #e5e7eb;margin-bottom:10px;background:#eee;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.05);";
+   // EXPANDABLE DELIVERY MAP
 mapContainer.style.position = "relative";
 
 const expandMapButton = document.createElement("button");
@@ -769,18 +773,16 @@ setTimeout(() => {
 });
    
 const selectedLocation = document.createElement("p");
-selectedLocation.textContent =
-  "No map location selected yet.";
 selectedLocation.style.cssText =
-  "font-size: 14px; margin-bottom: 16px;";
+  "font-size:14px;color:#444;padding:12px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;margin:8px 0 12px;";
 
 // AUTOMATIC DELIVERY DISTANCE AND FEE
 
 const routeInfo = document.createElement("div");
 
 routeInfo.style.cssText =
-  "padding:12px;margin-bottom:14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;";
-
+  "padding:16px;margin:12px 0;background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.04);";
+   
 const routeStatus = document.createElement("p");
 routeStatus.textContent =
   "Select your delivery location to calculate the estimated distance.";
@@ -793,6 +795,12 @@ const routeFee = document.createElement("p");
 routeFee.textContent =
   "Delivery fee: Waiting for location";
 
+routeDistance.style.cssText =
+  "font-size:14px;color:#555;margin:8px 0;";
+
+routeFee.style.cssText =
+  "font-size:18px;font-weight:800;color:#e85d04;margin:10px 0 0;";
+   
 async function updateDeliveryEstimate() {
 
   routeStatus.textContent = "Calculating delivery estimate...";
