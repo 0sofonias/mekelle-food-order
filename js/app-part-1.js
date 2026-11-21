@@ -1337,7 +1337,9 @@ navigator.geolocation.getCurrentPosition(
   
 summary.append(heading, form);
 
-  form.addEventListener("submit", async (event) => {
+updateDeliveryEstimate();
+
+form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const deliveryAddress =
