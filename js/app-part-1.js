@@ -990,6 +990,26 @@ async function updateDeliveryEstimate() {
             ).toFixed(2)
           );
 
+     // UPDATE CHECKOUT PRICE BREAKDOWN
+const currentFoodSubtotal = cart.reduce(
+  (sum, item) => sum + Number(item.price) * item.quantity,
+  0
+);
+
+const currentServiceFee = Number(
+  (currentFoodSubtotal * 0.03).toFixed(2)
+);
+
+const currentGrandTotal = Number(
+  (currentFoodSubtotal + currentServiceFee + deliveryFee).toFixed(2)
+);
+
+deliveryFeeValue.textContent =
+  deliveryFee.toLocaleString() + " ETB";
+
+grandTotalValue.textContent =
+  currentGrandTotal.toLocaleString() + " ETB";
+
     routeStatus.textContent =
       "Estimated delivery cost calculated.";
 
