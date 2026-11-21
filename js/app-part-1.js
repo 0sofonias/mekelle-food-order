@@ -610,7 +610,7 @@ const foodSubtotalRow = document.createElement("div");
 foodSubtotalRow.style.cssText =
   "display:flex;justify-content:space-between;padding-top:14px;font-size:16px;font-weight:800;color:#222;";
 
-const foodSubtotalLabel = document.createElement("span");
+foodSubtotalLabel.style.color = "#333333";
 foodSubtotalLabel.textContent = "Food subtotal";
 
 const foodSubtotalValue = document.createElement("span");
