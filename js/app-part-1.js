@@ -1406,8 +1406,8 @@ if (!sessionCheck.session) {
   }
 });     
 
-    const { data, error } = await supabaseClient.rpc(
-  "create_food_order",
+const { data, error } = await supabaseClient.rpc(
+  "create_food_order_with_distance",
   {
     p_restaurant_id: restaurantId,
     p_delivery_address: deliveryAddress,
@@ -1417,7 +1417,8 @@ if (!sessionCheck.session) {
     p_sender_address: senderAddress,
     p_recipient_type: recipientType,
     p_recipient_name: recipientName,
-    p_recipient_phone: recipientPhone
+    p_recipient_phone: recipientPhone,
+    p_delivery_distance_km: manualDeliveryDistanceKm
   }
 );
 
