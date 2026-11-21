@@ -920,6 +920,9 @@ async function updateDeliveryEstimate() {
     routeFee.textContent =
       "Delivery fee: Not calculated";
 
+     deliveryFeeValue.textContent = "Not available";
+grandTotalValue.textContent = "Not available";
+
     return;
   }
 
