@@ -570,6 +570,56 @@ heading.textContent = "Checkout";
 heading.style.cssText =
   "font-size:24px;font-weight:800;color:#222;margin:4px 0 16px;";
 
+// CHECKOUT ORDER SUMMARY
+const orderSummary = document.createElement("div");
+
+orderSummary.style.cssText =
+  "padding:16px;background:#fff;border:1px solid #eee;border-radius:14px;margin-bottom:12px;";
+
+const orderSummaryTitle = document.createElement("h3");
+orderSummaryTitle.textContent = "Your Order";
+orderSummaryTitle.style.cssText =
+  "font-size:18px;font-weight:800;color:#222;margin:0 0 14px;";
+
+orderSummary.appendChild(orderSummaryTitle);
+
+cart.forEach(item => {
+  const itemRow = document.createElement("div");
+
+  itemRow.style.cssText =
+    "display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #eee;font-size:14px;";
+
+  const itemName = document.createElement("span");
+  itemName.textContent =
+    item.name + " × " + item.quantity;
+
+  const itemPrice = document.createElement("strong");
+  itemPrice.textContent =
+    (Number(item.price) * item.quantity).toLocaleString() + " ETB";
+
+  itemRow.append(itemName, itemPrice);
+  orderSummary.appendChild(itemRow);
+});
+
+const foodSubtotal = cart.reduce(
+  (sum, item) => sum + Number(item.price) * item.quantity,
+  0
+);
+
+const foodSubtotalRow = document.createElement("div");
+foodSubtotalRow.style.cssText =
+  "display:flex;justify-content:space-between;padding-top:14px;font-size:16px;font-weight:800;color:#222;";
+
+const foodSubtotalLabel = document.createElement("span");
+foodSubtotalLabel.textContent = "Food subtotal";
+
+const foodSubtotalValue = document.createElement("span");
+foodSubtotalValue.textContent =
+  foodSubtotal.toLocaleString() + " ETB";
+
+foodSubtotalRow.append(foodSubtotalLabel, foodSubtotalValue);
+orderSummary.appendChild(foodSubtotalRow);
+   
   const form = document.createElement("form");
 
    form.style.cssText =
