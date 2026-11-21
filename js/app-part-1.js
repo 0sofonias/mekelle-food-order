@@ -1429,31 +1429,6 @@ const { data, error } = await supabaseClient.rpc(
       const orderId = Array.isArray(data) ? data[0] : data;
 
       window.latestTestOrderId = orderId; 
-      
-      // SAVE THE CUSTOMER'S MAP LOCATION WITH THE ORDER
-if (
-  Number.isFinite(confirmedLatitude) &&
-  Number.isFinite(confirmedLongitude)
-) {
-  const { error: locationSaveError } = await supabaseClient.rpc(
-    "save_order_location",
-    {
-      p_order_id: orderId,
-      p_latitude: confirmedLatitude,
-      p_longitude: confirmedLongitude
-    }
-  );
-
-  if (locationSaveError) {
-    console.error(
-      "Order created, but location saving failed:",
-      locationSaveError
-    );
-  }
-}
-      
-      cart = [];
-      updateCartDisplay();
 
       const summary = document.getElementById("cart-summary");
       const itemsContainer = document.getElementById("cart-items");
