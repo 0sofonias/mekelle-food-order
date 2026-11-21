@@ -633,6 +633,7 @@ deliveryFeeRow.style.cssText =
 
 const deliveryFeeLabel = document.createElement("span");
 deliveryFeeLabel.textContent = "Delivery fee";
+deliveryFeeLabel.style.color = "#333333";
 
 const deliveryFeeValue = document.createElement("strong");
 deliveryFeeValue.textContent = "Calculating...";
@@ -649,6 +650,7 @@ serviceFeeRow.style.cssText =
 
 const serviceFeeLabel = document.createElement("span");
 serviceFeeLabel.textContent = "Service fee (3%)";
+serviceFeeLabel.style.color = "#333333";
 
 const serviceFeeValue = document.createElement("strong");
 serviceFeeValue.textContent =
