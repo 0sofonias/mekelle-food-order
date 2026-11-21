@@ -617,8 +617,50 @@ const foodSubtotalValue = document.createElement("span");
 foodSubtotalValue.textContent =
   foodSubtotal.toLocaleString() + " ETB";
 
-foodSubtotalRow.append(foodSubtotalLabel, foodSubtotalValue);
-orderSummary.appendChild(foodSubtotalRow);
+// DELIVERY FEE ROW
+const deliveryFeeRow = document.createElement("div");
+deliveryFeeRow.style.cssText =
+  "display:flex;justify-content:space-between;padding:10px 0;font-size:14px;";
+
+const deliveryFeeLabel = document.createElement("span");
+deliveryFeeLabel.textContent = "Delivery fee";
+
+const deliveryFeeValue = document.createElement("strong");
+deliveryFeeValue.textContent = "Calculating...";
+
+deliveryFeeRow.append(deliveryFeeLabel, deliveryFeeValue);
+orderSummary.appendChild(deliveryFeeRow);
+
+// SERVICE FEE ROW
+const serviceFee = Number((foodSubtotal * 0.03).toFixed(2));
+
+const serviceFeeRow = document.createElement("div");
+serviceFeeRow.style.cssText =
+  "display:flex;justify-content:space-between;padding:10px 0;font-size:14px;";
+
+const serviceFeeLabel = document.createElement("span");
+serviceFeeLabel.textContent = "Service fee (3%)";
+
+const serviceFeeValue = document.createElement("strong");
+serviceFeeValue.textContent =
+  serviceFee.toLocaleString() + " ETB";
+
+serviceFeeRow.append(serviceFeeLabel, serviceFeeValue);
+orderSummary.appendChild(serviceFeeRow);
+
+// GRAND TOTAL ROW
+const grandTotalRow = document.createElement("div");
+grandTotalRow.style.cssText =
+  "display:flex;justify-content:space-between;padding-top:14px;margin-top:8px;border-top:1px solid #eee;font-size:18px;font-weight:800;color:#e85d04;";
+
+const grandTotalLabel = document.createElement("span");
+grandTotalLabel.textContent = "Total";
+
+const grandTotalValue = document.createElement("span");
+grandTotalValue.textContent = "Calculating...";
+
+grandTotalRow.append(grandTotalLabel, grandTotalValue);
+orderSummary.appendChild(grandTotalRow);
    
   const form = document.createElement("form");
 
