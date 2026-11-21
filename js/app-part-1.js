@@ -617,6 +617,9 @@ const foodSubtotalValue = document.createElement("span");
 foodSubtotalValue.textContent =
   foodSubtotal.toLocaleString() + " ETB";
 
+   foodSubtotalRow.append(foodSubtotalLabel, foodSubtotalValue);
+orderSummary.appendChild(foodSubtotalRow);
+
 // DELIVERY FEE ROW
 const deliveryFeeRow = document.createElement("div");
 deliveryFeeRow.style.cssText =
