@@ -1418,6 +1418,7 @@ navigator.geolocation.getCurrentPosition(
 ); 
   
 summary.append(heading);
+summary.append(orderSummary);
 summary.append(form);
 
 updateDeliveryEstimate();
