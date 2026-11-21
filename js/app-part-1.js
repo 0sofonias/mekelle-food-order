@@ -595,13 +595,15 @@ cart.forEach(item => {
     "display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #eee;font-size:14px;";
 
   const itemName = document.createElement("span");
-  itemName.textContent =
-    item.name + " × " + item.quantity;
+itemName.textContent =
+  item.name + " × " + item.quantity;
+itemName.style.color = "#333333";
 
-  const itemPrice = document.createElement("strong");
-  itemPrice.textContent =
-    (Number(item.price) * item.quantity).toLocaleString() + " ETB";
-
+const itemPrice = document.createElement("strong");
+itemPrice.textContent =
+  (Number(item.price) * item.quantity).toLocaleString() + " ETB";
+itemPrice.style.color = "#222222";
+   
   itemRow.append(itemName, itemPrice);
   orderSummary.appendChild(itemRow);
 });
