@@ -1842,8 +1842,10 @@ const closeButton = document.createElement("button");
 closeButton.className = "cart-checkout";
 closeButton.textContent = "Continue Browsing";
 closeButton.style.cssText = "width:100%;margin-top:10px;";
-closeButton.addEventListener("click", closeCart);
-
+closeButton.addEventListener("click", () => {
+  receiptScreen.remove();
+  closeCart();
+});
 // FULL-SCREEN RECEIPT PAGE
 const receiptScreen = document.createElement("div");
 
