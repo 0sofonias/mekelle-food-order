@@ -1689,32 +1689,168 @@ const { data, error } = await supabaseClient.rpc(
       itemsContainer.replaceChildren();
       summary.replaceChildren();
 
-      const success = document.createElement("h3");
+// ORDER CONFIRMATION
+const success = document.createElement("h3");
 success.textContent = "Order Placed Successfully!";
-success.style.cssText = "color: #166534; background: #dcfce7; padding: 16px; border-radius: 8px; margin: 16px 0; display: block; visibility: visible; opacity: 1;";
+success.style.cssText =
+  "color:#166534;background:#dcfce7;padding:16px;border-radius:10px;margin:16px 0;";
 
-const message = document.createElement("p");
-message.textContent =
-"Your order has been saved. Payment is still pending.";
-message.style.cssText = "color: #1f2937; background: #f9fafb; padding: 12px; border-radius: 6px; display: block; visibility: visible; opacity: 1;";
+const receipt = document.createElement("div");
+receipt.style.cssText =
+  "background:#fff;padding:20px;border:1px solid #e5e7eb;border-radius:14px;margin:16px 0;color:#222;";
 
-const reference = document.createElement("p");
-reference.textContent = "Order reference: " + orderId;
-reference.style.cssText = "color: #1f2937; background: #f3f4f6; padding: 12px; border-radius: 6px; overflow-wrap: anywhere; display: block; visibility: visible; opacity: 1;";
+const receiptTitle = document.createElement("h2");
+receiptTitle.textContent = "ORDER RECEIPT";
+receiptTitle.style.cssText =
+  "text-align:center;font-size:22px;margin:0 0 16px;color:#222;";
+
+const receiptReference = document.createElement("p");
+receiptReference.textContent = "Order reference: " + orderId;
+receiptReference.style.cssText =
+  "font-size:12px;overflow-wrap:anywhere;color:#555;";
+
+const receiptDate = document.createElement("p");
+receiptDate.textContent =
+  "Date: " + new Date().toLocaleString();
+
+const receiptDivider = document.createElement("hr");
+
+receipt.append(
+  receiptTitle,
+  receiptReference,
+  receiptDate,
+  receiptDivider
+);
+
+// ORDERED ITEMS
+cart.forEach(item => {
+  const row = document.createElement("div");
+  row.style.cssText =
+    "display:flex;justify-content:space-between;gap:10px;padding:8px 0;color:#222;";
+
+  const name = document.createElement("span");
+  name.textContent = item.name + " × " + item.quantity;
+
+  const price = document.createElement("strong");
+  price.textContent =
+    (Number(item.price) * item.quantity).toLocaleString() + " ETB";
+
+  row.append(name, price);
+  receipt.appendChild(row);
+});
+
+receipt.appendChild(document.createElement("hr"));
+
+// PRICE BREAKDOWN
+function addReceiptRow(label, value, bold = false) {
+  const row = document.createElement("div");
+  row.style.cssText =
+    "display:flex;justify-content:space-between;gap:10px;padding:8px 0;color:#222;";
+
+  const left = document.createElement("span");
+  left.textContent = label;
+
+  const right = document.createElement(bold ? "strong" : "span");
+  right.textContent = value;
+
+  row.append(left, right);
+  receipt.appendChild(row);
+}
+
+addReceiptRow(
+  "Food subtotal",
+  foodSubtotal.toLocaleString() + " ETB"
+);
+
+addReceiptRow(
+  "Delivery fee",
+  deliveryFeeValue.textContent
+);
+
+addReceiptRow(
+  "Service fee",
+  serviceFeeValue.textContent
+);
+
+receipt.appendChild(document.createElement("hr"));
+
+addReceiptRow(
+  "TOTAL",
+  grandTotalValue.textContent,
+  true
+);
+
+const paymentStatus = document.createElement("p");
+paymentStatus.textContent = "Payment status: PENDING";
+paymentStatus.style.cssText =
+  "text-align:center;color:#b45309;font-weight:bold;margin-top:16px;";
+
+receipt.appendChild(paymentStatus);
+
+// SIMULATED PAYMENT BUTTON
+const simulateButton = document.createElement("button");
+simulateButton.className = "cart-checkout";
+simulateButton.textContent = "Simulate Successful Payment";
+simulateButton.style.cssText =
+  "width:100%;padding:14px;margin-top:12px;";
+
+simulateButton.addEventListener("click", async () => {
+  simulateButton.disabled = true;
+  simulateButton.textContent = "Processing test payment...";
+
+  try {
+    const { error: paymentError } =
+      await supabaseClient.rpc("simulate_test_payment", {
+        p_order_id: orderId
+      });
+
+    if (paymentError) {
+      throw paymentError;
+    }
+
+    paymentStatus.textContent = "Payment status: PAID (TEST)";
+    paymentStatus.style.color = "#15803d";
+
+    simulateButton.textContent = "Test Payment Successful";
+    simulateButton.disabled = true;
+
+  } catch (error) {
+    console.error("Simulated payment failed:", error);
+
+    alert(
+      "Test payment could not be completed:\n" +
+      (error.message || "Please try again.")
+    );
+
+    simulateButton.disabled = false;
+    simulateButton.textContent = "Simulate Successful Payment";
+  }
+});
+
+// RECEIPT ACTIONS
+const receiptButton = document.createElement("button");
+receiptButton.className = "cart-checkout";
+receiptButton.textContent = "Print / Save Receipt";
+receiptButton.style.cssText =
+  "width:100%;margin-top:10px;background:#444;";
+
+receiptButton.addEventListener("click", () => {
+  window.print();
+});
 
 const closeButton = document.createElement("button");
 closeButton.className = "cart-checkout";
 closeButton.textContent = "Continue Browsing";
-closeButton.style.cssText = "display: block; visibility: visible; opacity: 1; margin-top: 16px;";
+closeButton.style.cssText = "width:100%;margin-top:10px;";
 closeButton.addEventListener("click", closeCart);
 
 summary.append(
-success,
-message,
-reference,
-closeButton
+  success,
+  receipt,
+  simulateButton,
+  receiptButton,
+  closeButton
 );
-
     } catch (error) {
       console.error("Order creation failed:", error);
 
