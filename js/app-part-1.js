@@ -1696,9 +1696,18 @@ success.style.cssText =
   "color:#166534;background:#dcfce7;padding:16px;border-radius:10px;margin:16px 0;";
 
 const receipt = document.createElement("div");
-receipt.style.cssText =
-  "background:#fff;padding:20px;border:1px solid #e5e7eb;border-radius:14px;margin:16px 0;color:#222;";
 
+receipt.style.cssText = `
+  background: #ffffff;
+  padding: 26px 22px;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  margin: 16px 0;
+  color: #222222;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+  font-family: Arial, sans-serif;
+`;
+       
 const receiptTitle = document.createElement("h2");
 receiptTitle.textContent = "ORDER RECEIPT";
 receiptTitle.style.cssText =
