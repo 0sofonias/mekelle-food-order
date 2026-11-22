@@ -1844,13 +1844,40 @@ closeButton.textContent = "Continue Browsing";
 closeButton.style.cssText = "width:100%;margin-top:10px;";
 closeButton.addEventListener("click", closeCart);
 
-summary.append(
+// FULL-SCREEN RECEIPT PAGE
+const receiptScreen = document.createElement("div");
+
+receiptScreen.style.cssText = `
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  background: #f5f6f8;
+  z-index: 99999;
+  padding: 20px;
+  box-sizing: border-box;
+`;
+
+const receiptContent = document.createElement("div");
+
+receiptContent.style.cssText = `
+  max-width: 650px;
+  width: 100%;
+  margin: 20px auto;
+`;
+
+receiptContent.append(
   success,
   receipt,
   simulateButton,
   receiptButton,
   closeButton
 );
+
+receiptScreen.appendChild(receiptContent);
+document.body.appendChild(receiptScreen);
+       
     } catch (error) {
       console.error("Order creation failed:", error);
 
