@@ -1708,10 +1708,34 @@ receipt.style.cssText = `
   font-family: Arial, sans-serif;
 `;
        
-const receiptTitle = document.createElement("h2");
+const receiptBrand = document.createElement("h2");
+receiptBrand.textContent = "🍽️ Mekelle Food Order";
+receiptBrand.style.cssText = `
+  text-align: center;
+  font-size: 23px;
+  font-weight: 800;
+  color: #e85d04;
+  margin: 0 0 6px;
+`;
+
+const receiptSubtitle = document.createElement("p");
+receiptSubtitle.textContent = "Your food, your choice, delivered to you.";
+receiptSubtitle.style.cssText = `
+  text-align: center;
+  font-size: 13px;
+  color: #777777;
+  margin: 0 0 20px;
+`;
+
+const receiptTitle = document.createElement("h3");
 receiptTitle.textContent = "ORDER RECEIPT";
-receiptTitle.style.cssText =
-  "text-align:center;font-size:22px;margin:0 0 16px;color:#222;";
+receiptTitle.style.cssText = `
+  text-align: center;
+  font-size: 17px;
+  letter-spacing: 1.5px;
+  color: #333333;
+  margin: 0 0 16px;
+`;
 
 const receiptReference = document.createElement("p");
 receiptReference.textContent = "Order reference: " + orderId;
@@ -1725,6 +1749,8 @@ receiptDate.textContent =
 const receiptDivider = document.createElement("hr");
 
 receipt.append(
+  receiptBrand,
+  receiptSubtitle,
   receiptTitle,
   receiptReference,
   receiptDate,
@@ -1734,15 +1760,35 @@ receipt.append(
 // ORDERED ITEMS
 cart.forEach(item => {
   const row = document.createElement("div");
-  row.style.cssText =
-    "display:flex;justify-content:space-between;gap:10px;padding:8px 0;color:#222;";
-
+ row.style.cssText = bold ? `
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 12px;
+  margin-top: 8px;
+  background: #fff3e8;
+  border-radius: 10px;
+  color: #222222;
+  font-size: 17px;
+  font-weight: 800;
+` : `
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 0;
+  color: #444444;
+  font-size: 14px;
+`;
+   
   const name = document.createElement("span");
   name.textContent = item.name + " × " + item.quantity;
+  name.style.cssText = "flex:1;line-height:1.5;";
 
   const price = document.createElement("strong");
   price.textContent =
-    (Number(item.price) * item.quantity).toLocaleString() + " ETB";
+  (Number(item.price) * item.quantity).toLocaleString() + " ETB";
+price.style.cssText = "white-space:nowrap;color:#222;font-size:14px;";
 
   row.append(name, price);
   receipt.appendChild(row);
@@ -1753,14 +1799,27 @@ receipt.appendChild(document.createElement("hr"));
 // PRICE BREAKDOWN
 function addReceiptRow(label, value, bold = false) {
   const row = document.createElement("div");
-  row.style.cssText =
-    "display:flex;justify-content:space-between;gap:10px;padding:8px 0;color:#222;";
+ row.style.cssText = `
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  color: #333333;
+  border-bottom: 1px solid #f1f1f1;
+  font-size: 14px;
+`;
 
   const left = document.createElement("span");
   left.textContent = label;
 
   const right = document.createElement(bold ? "strong" : "span");
   right.textContent = value;
+
+if (bold) {
+  right.style.color = "#e85d04";
+  right.style.fontSize = "19px";
+}
 
   row.append(left, right);
   receipt.appendChild(row);
@@ -1789,11 +1848,22 @@ addReceiptRow(
   true
 );
 
-const paymentStatus = document.createElement("p");
-paymentStatus.textContent = "Payment status: PENDING";
-paymentStatus.style.cssText =
-  "text-align:center;color:#b45309;font-weight:bold;margin-top:16px;";
+const paymentStatus = document.createElement("div");
 
+paymentStatus.textContent = "🟠 PAYMENT PENDING";
+
+paymentStatus.style.cssText = `
+  text-align: center;
+  color: #b45309;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 10px;
+  padding: 13px;
+  font-size: 14px;
+  font-weight: 800;
+  margin-top: 18px;
+`;
+       
 receipt.appendChild(paymentStatus);
 
 // SIMULATED PAYMENT BUTTON
@@ -1817,8 +1887,10 @@ simulateButton.addEventListener("click", async () => {
       throw paymentError;
     }
 
-    paymentStatus.textContent = "Payment status: PAID (TEST)";
+    paymentStatus.textContent = "🟢 PAYMENT SUCCESSFUL (TEST)";
     paymentStatus.style.color = "#15803d";
+    paymentStatus.style.background = "#f0fdf4";
+    paymentStatus.style.borderColor = "#bbf7d0";
 
     simulateButton.textContent = "Test Payment Successful";
     simulateButton.disabled = true;
