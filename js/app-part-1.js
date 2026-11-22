@@ -1799,16 +1799,27 @@ receipt.appendChild(document.createElement("hr"));
 // PRICE BREAKDOWN
 function addReceiptRow(label, value, bold = false) {
   const row = document.createElement("div");
- row.style.cssText = `
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 0;
-  color: #333333;
-  border-bottom: 1px solid #f1f1f1;
-  font-size: 14px;
-`;
+
+  row.style.cssText = bold ? `
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 12px;
+    margin-top: 8px;
+    background: #fff3e8;
+    border-radius: 10px;
+    color: #222222;
+    font-size: 17px;
+    font-weight: 800;
+  ` : `
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 0;
+    color: #444444;
+    font-size: 14px;
+  `;
 
   const left = document.createElement("span");
   left.textContent = label;
@@ -1816,9 +1827,13 @@ function addReceiptRow(label, value, bold = false) {
   const right = document.createElement(bold ? "strong" : "span");
   right.textContent = value;
 
-if (bold) {
-  right.style.color = "#e85d04";
-  right.style.fontSize = "19px";
+  if (bold) {
+    right.style.color = "#e85d04";
+    right.style.fontSize = "19px";
+  }
+
+  row.append(left, right);
+  receipt.appendChild(row);
 }
 
   row.append(left, right);
