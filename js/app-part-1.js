@@ -1760,35 +1760,25 @@ receipt.append(
 // ORDERED ITEMS
 cart.forEach(item => {
   const row = document.createElement("div");
- row.style.cssText = bold ? `
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  padding: 18px 12px;
-  margin-top: 8px;
-  background: #fff3e8;
-  border-radius: 10px;
-  color: #222222;
-  font-size: 17px;
-  font-weight: 800;
-` : `
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 9px 0;
-  color: #444444;
-  font-size: 14px;
-`;
-   
+
+  row.style.cssText = `
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 0;
+    color: #444444;
+    font-size: 14px;
+  `;
+
   const name = document.createElement("span");
   name.textContent = item.name + " × " + item.quantity;
   name.style.cssText = "flex:1;line-height:1.5;";
 
   const price = document.createElement("strong");
   price.textContent =
-  (Number(item.price) * item.quantity).toLocaleString() + " ETB";
-price.style.cssText = "white-space:nowrap;color:#222;font-size:14px;";
+    (Number(item.price) * item.quantity).toLocaleString() + " ETB";
+  price.style.cssText =
+    "white-space:nowrap;color:#222;font-size:14px;";
 
   row.append(name, price);
   receipt.appendChild(row);
@@ -1831,10 +1821,6 @@ function addReceiptRow(label, value, bold = false) {
     right.style.color = "#e85d04";
     right.style.fontSize = "19px";
   }
-
-  row.append(left, right);
-  receipt.appendChild(row);
-}
 
   row.append(left, right);
   receipt.appendChild(row);
