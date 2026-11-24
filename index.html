@@ -640,6 +640,48 @@
   <h2>My Account</h2>
   <p>Manage your customer account here.</p>
 
+   <div id="mfo-customer-profile">
+  <h3>Personal Information</h3>
+
+  <form id="mfo-customer-profile-form">
+    <label for="mfo-profile-name">Full Name</label>
+    <input
+      id="mfo-profile-name"
+      type="text"
+      maxlength="100"
+      required
+      placeholder="Your full name"
+    >
+
+    <label for="mfo-profile-phone">Phone Number</label>
+    <input
+      id="mfo-profile-phone"
+      type="tel"
+      placeholder="09XXXXXXXX"
+    >
+
+    <label for="mfo-profile-address">Address</label>
+    <textarea
+      id="mfo-profile-address"
+      maxlength="300"
+      placeholder="Your delivery address"
+    ></textarea>
+
+    <label for="mfo-profile-email">Email Address</label>
+    <input
+      id="mfo-profile-email"
+      type="email"
+      readonly
+    >
+
+    <button type="submit" id="mfo-profile-save">
+      Save Changes
+    </button>
+
+    <p id="mfo-profile-message" role="status" aria-live="polite"></p>
+  </form>
+</div> 
+
   <hr style="margin:25px 0;">
 
   <div id="mfo-restaurant-application">
