@@ -2155,6 +2155,24 @@ async function saveAdminPricingSettings() {
 
   refreshRoleScreens();
 })();
-  
+
+// ADMIN ADD RIDER FORM
+const addRiderButton = document.getElementById("admin-add-rider-button");
+const addRiderForm = document.getElementById("admin-add-rider-form");
+const cancelRiderButton = document.getElementById("admin-cancel-rider-button");
+
+if (addRiderButton && addRiderForm) {
+  addRiderButton.addEventListener("click", () => {
+    addRiderForm.style.display = "block";
+  });
+}
+
+if (cancelRiderButton && addRiderForm) {
+  cancelRiderButton.addEventListener("click", () => {
+    addRiderForm.style.display = "none";
+  });
+}
+// END ADMIN ADD RIDER FORM
+
 // START APP
 loadRestaurants();
