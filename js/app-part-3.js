@@ -1166,6 +1166,9 @@ async function applyRoleVisibility(user) {
         if (restaurantList) restaurantList.hidden = !showFood;
         if (cartBar) cartBar.hidden = !showFood;
         if (account) account.hidden = !isAccount;
+        if (isAccount) {
+        window.dispatchEvent(new Event("mfo-customer-account-open"));
+        }
 
         if (ordersPanel) {
         ordersPanel.hidden = !isOrders;
