@@ -322,6 +322,94 @@
 
     <p>Monitor riders and their delivery activities.</p>
 
+    <button
+  id="admin-add-rider-button"
+  type="button"
+  style="
+    background:#e85d04;
+    color:white;
+    padding:13px 20px;
+    border:0;
+    border-radius:9px;
+    font-weight:bold;
+    cursor:pointer;
+    margin:12px 0;
+  "
+>
+  ➕ Add New Rider
+</button>
+
+<div
+  id="admin-add-rider-form"
+  style="
+    display:none;
+    background:#fff8f2;
+    padding:18px;
+    border-radius:12px;
+    margin:12px 0 20px;
+  "
+>
+  <h3>Register Delivery Rider</h3>
+
+  <label for="new-rider-name">Full Name</label>
+  <input
+    id="new-rider-name"
+    type="text"
+    placeholder="Rider's full name"
+  >
+
+  <label for="new-rider-phone">Phone Number</label>
+  <input
+    id="new-rider-phone"
+    type="tel"
+    placeholder="09XXXXXXXX"
+  >
+
+  <label for="new-rider-email">Email Address</label>
+  <input
+    id="new-rider-email"
+    type="email"
+    placeholder="rider@example.com"
+  >
+
+  <button
+    id="admin-save-rider-button"
+    type="button"
+    style="
+      background:#e85d04;
+      color:white;
+      padding:12px 18px;
+      border:0;
+      border-radius:8px;
+      font-weight:bold;
+      margin-top:14px;
+    "
+  >
+    Register Rider
+  </button>
+
+  <button
+    id="admin-cancel-rider-button"
+    type="button"
+    style="
+      background:#777;
+      color:white;
+      padding:12px 18px;
+      border:0;
+      border-radius:8px;
+      margin-top:14px;
+    "
+  >
+    Cancel
+  </button>
+
+  <p
+    id="admin-add-rider-message"
+    role="status"
+    aria-live="polite"
+  ></p>
+</div>
+
     <div id="admin-riders-list">
       Rider information will appear here.
     </div>
