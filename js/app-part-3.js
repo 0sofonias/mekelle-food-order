@@ -2185,5 +2185,90 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 // END ADMIN ADD RIDER FORM
 
+// CUSTOMER ACCOUNT: LOAD AND SAVE PROFILE
+(() => {
+  if (window.mfoCustomerAccountInitialized) return;
+  window.mfoCustomerAccountInitialized = true;
+
+  const form = document.getElementById("mfo-customer-profile-form");
+  if (!form) return;
+
+  const nameInput = document.getElementById("mfo-profile-name");
+  const phoneInput = document.getElementById("mfo-profile-phone");
+  const addressInput = document.getElementById("mfo-profile-address");
+  const emailInput = document.getElementById("mfo-profile-email");
+  const saveButton = document.getElementById("mfo-profile-save");
+  const message = document.getElementById("mfo-profile-message");
+
+  async function loadCustomerProfile() {
+    message.textContent = "Loading profile...";
+
+    const { data: authData, error: authError } =
+      await supabaseClient.auth.getUser();
+
+    if (authError || !authData.user) {
+      message.textContent = "Please sign in to view your profile.";
+      return;
+    }
+
+    const user = authData.user;
+    emailInput.value = user.email || "";
+
+    const { data, error } = await supabaseClient
+      .from("profiles")
+      .select("full_name, phone, address")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (error) {
+      message.textContent = "Could not load your profile.";
+      console.error("Profile loading error:", error);
+      return;
+    }
+
+    nameInput.value = data?.full_name || "";
+    phoneInput.value = data?.phone || "";
+    addressInput.value = data?.address || "";
+
+    message.textContent = "";
+  }
+
+  window.addEventListener("mfo-customer-account-open", loadCustomerProfile);
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    saveButton.disabled = true;
+    message.textContent = "Saving...";
+
+    const { data: authData, error: authError } =
+      await supabaseClient.auth.getUser();
+
+    if (authError || !authData.user) {
+      message.textContent = "Please sign in before saving.";
+      saveButton.disabled = false;
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from("profiles")
+      .update({
+        full_name: nameInput.value.trim(),
+        phone: phoneInput.value.trim(),
+        address: addressInput.value.trim()
+      })
+      .eq("id", authData.user.id);
+
+    if (error) {
+      message.textContent = "Could not save your profile.";
+      console.error("Profile saving error:", error);
+    } else {
+      message.textContent = "Profile saved successfully.";
+    }
+
+    saveButton.disabled = false;
+  });
+})();
+
 // START APP
 loadRestaurants();
