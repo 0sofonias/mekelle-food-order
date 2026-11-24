@@ -2260,9 +2260,10 @@ document.addEventListener("DOMContentLoaded", () => {
       .eq("id", authData.user.id);
 
     if (error) {
-      message.textContent = "Could not save your profile.";
-      console.error("Profile saving error:", error);
-    } else {
+  message.textContent = "Save failed: " + error.message;
+  console.error("Profile saving error:", error);
+}
+    else {
       message.textContent = "Profile saved successfully.";
     }
 
