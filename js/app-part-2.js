@@ -247,68 +247,148 @@ myOrdersPanel.hidden = true;
 });
 
 async function loadMyOrders() {
-myOrdersPanel.hidden = false;
-myOrdersList.replaceChildren();
-myOrdersMessage.textContent = "Loading your orders...";
+  myOrdersPanel.hidden = false;
+  myOrdersList.replaceChildren();
+  myOrdersMessage.textContent = "Loading your orders...";
 
-const { data: sessionData, error: sessionError } =
-await supabaseClient.auth.getSession();
+  try {
+    const { data: sessionData, error: sessionError } =
+      await supabaseClient.auth.getSession();
 
-if (sessionError || !sessionData.session) {
-myOrdersMessage.textContent = "Please sign in to view your orders.";
-return;
-}
+    if (sessionError) throw sessionError;
 
-const { data: orders, error } = await supabaseClient
-.from("orders")
-.select(
-"id, delivery_address, food_total, delivery_fee, service_fee, total_amount, payment_status, order_status, created_at"
-)
-.eq("customer_id", sessionData.session.user.id)
-.order("created_at", { ascending: false });
+    const user = sessionData.session?.user;
 
-if (error) {
-myOrdersMessage.textContent =
-"Could not load your orders: " + error.message;
-return;
-}
+    if (!user) {
+      myOrdersMessage.textContent =
+        "Please sign in to view your orders.";
+      return;
+    }
 
-myOrdersMessage.textContent = "";
+    const { data: orders, error } = await supabaseClient
+      .from("orders")
+      .select(`
+        id,
+        restaurant_id,
+        delivery_address,
+        food_total,
+        delivery_fee,
+        service_fee,
+        total_amount,
+        payment_status,
+        order_status,
+        created_at,
+        restaurants ( name ),
+        order_items (
+          item_name,
+          unit_price,
+          quantity,
+          line_total
+        )
+      `)
+      .eq("customer_id", user.id)
+      .eq("is_test_order", false)
+      .order("created_at", { ascending: false });
 
-if (!orders || orders.length === 0) {
-myOrdersMessage.textContent = "You have not placed any orders yet.";
-return;
-}
+    if (error) throw error;
 
-orders.forEach((order) => {
-const card = document.createElement("article");
-card.style.cssText =
-"background:#fff;padding:16px;margin:12px 0;border-radius:8px;border:1px solid #ddd;color:#222;overflow-wrap:anywhere;";
+    if (!orders || orders.length === 0) {
+      myOrdersMessage.textContent =
+        "You have not placed any orders yet.";
+      return;
+    }
 
-const title = document.createElement("h3");
-title.textContent = "Order " + order.id.slice(0, 8).toUpperCase();
+    myOrdersMessage.textContent = "";
 
-const total = document.createElement("p");
-total.textContent =
-  "Total: " + Number(order.total_amount).toLocaleString() + " ETB";
+    orders.forEach(order => {
+      const card = document.createElement("article");
+      card.style.cssText =
+        "background:#fff;padding:18px;margin:14px 0;border-radius:14px;border:1px solid #eee4dc;color:#222;overflow-wrap:anywhere;";
 
-const payment = document.createElement("p");
-payment.textContent = "Payment: " + order.payment_status;
+      const title = document.createElement("h3");
+      title.textContent =
+        order.restaurants?.name || "Restaurant";
 
-const status = document.createElement("p");
-status.textContent = "Order status: " + order.order_status;
+      const orderNumber = document.createElement("p");
+      orderNumber.textContent =
+        "Order #" + order.id.slice(0, 8).toUpperCase();
 
-const address = document.createElement("p");
-address.textContent = "Delivery address: " + order.delivery_address;
+      const date = document.createElement("p");
+      date.textContent =
+        "Placed: " + new Date(order.created_at).toLocaleString();
 
-const date = document.createElement("p");
-date.textContent =
-  "Placed: " + new Date(order.created_at).toLocaleString();
+      const itemsHeading = document.createElement("h4");
+      itemsHeading.textContent = "Your Items";
 
-card.append(title, total, payment, status, address, date);
-myOrdersList.appendChild(card);
+      const itemsList = document.createElement("div");
 
-});
+      (order.order_items || []).forEach(item => {
+        const itemRow = document.createElement("p");
+        itemRow.textContent =
+          `${item.item_name} × ${item.quantity} — ` +
+          `${Number(item.line_total).toFixed(2)} ETB`;
+
+        itemsList.appendChild(itemRow);
+      });
+
+      const divider = document.createElement("hr");
+
+      const foodTotal = document.createElement("p");
+      foodTotal.textContent =
+        "Food subtotal: " +
+        Number(order.food_total).toFixed(2) + " ETB";
+
+      const delivery = document.createElement("p");
+      delivery.textContent =
+        "Delivery fee: " +
+        Number(order.delivery_fee).toFixed(2) + " ETB";
+
+      const service = document.createElement("p");
+      service.textContent =
+        "Service charge: " +
+        Number(order.service_fee).toFixed(2) + " ETB";
+
+      const total = document.createElement("h3");
+      total.textContent =
+        "Total: " +
+        Number(order.total_amount).toFixed(2) + " ETB";
+
+      const payment = document.createElement("p");
+      payment.textContent =
+        "Payment: " + order.payment_status;
+
+      const status = document.createElement("p");
+      status.textContent =
+        "Order status: " + order.order_status;
+
+      const address = document.createElement("p");
+      address.textContent =
+        "Delivery address: " + order.delivery_address;
+
+      card.append(
+        title,
+        orderNumber,
+        date,
+        itemsHeading,
+        itemsList,
+        divider,
+        foodTotal,
+        delivery,
+        service,
+        total,
+        payment,
+        status,
+        address
+      );
+
+      myOrdersList.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error("Order history error:", error);
+    myOrdersMessage.textContent =
+      "Could not load your orders: " + error.message;
+  }
 }
 
 // RESTAURANT DASHBOARD
