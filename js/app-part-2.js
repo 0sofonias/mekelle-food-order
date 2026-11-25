@@ -247,7 +247,7 @@ myOrdersPanel.hidden = true;
 });
 
 async function loadMyOrders() {
-console.log("MY ORDERS FUNCTION STARTED");
+alert("MY ORDERS FUNCTION STARTED");
   myOrdersPanel.hidden = false;
   myOrdersList.replaceChildren();
   myOrdersMessage.textContent = "Loading your orders...";
