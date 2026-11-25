@@ -1172,6 +1172,10 @@ async function applyRoleVisibility(user) {
 
         if (ordersPanel) {
         ordersPanel.hidden = !isOrders;
+
+        if (isOrders) {
+        loadMyOrders();
+        }
         }
 
                 } else if (isAdmin) {
