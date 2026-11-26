@@ -5,8 +5,8 @@
    ===================================================================== */
 
 // SUPABASE CONNECTION — KEEP THESE VALUES UNCHANGED
-const SUPABASE_URL = "https://vkrnonhmyeblmpkgkllo.supabase.co";
-const SUPABASE_KEY = "sb_publishable_KaJTzLho3184lRCIPDQc8A_JcCZ3JBb";
+const SUPABASE_URL = "https://pripdqbrxzwdchnrkhcn.supabase.co";
+const SUPABASE_KEY = "sb_publishable_kyWEAyGDHiKXV3WaQtJ5SA_FVh8U9Xa";
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
